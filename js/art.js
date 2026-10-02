@@ -104,4 +104,4 @@ function floorPlan(){
 function photoFigure(key,cls=''){const p=PHOTOS[key];if(!p)return '';
  return `<figure class="photo ${cls}"><img src="img/${p.file}" alt="${p.caption}" loading="lazy" onerror="this.parentNode.remove()"><figcaption>${p.caption}</figcaption></figure>`;}
 function photoOr(key,fallback,cls=''){const p=PHOTOS[key];if(!p)return fallback;
- return `<span class="ph ${cls}">${fallback}<img src="img/${p.file}" alt="" loading="lazy" onload="this.parentNode.classList.add('has-photo')" onerror="this.remove()"></span>`;}
+ return `<span class="ph ${cls}">${fallback}<img src="img/${p.file}" alt="" loading="lazy" ${p.pos?`style="object-position:${p.pos}"`:''} onload="this.parentNode.classList.add('has-photo')" onerror="this.remove()"></span>`;}

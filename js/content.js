@@ -53,12 +53,12 @@ const ROOMS = [
     fact:'Testing chips on the wafer saves money: bad chips are never cut out or packaged.'},
    remember:['<b>Ohm’s law: I = V ÷ R</b> (current = voltage ÷ resistance).','Green zone = good chip.','Click every chip <b>outside</b> the green zone.'],
    note:'Chips are probe-tested on the wafer. I = V ÷ R: higher resistance gives lower current. Failing chips are inked.'},
-  {task:'dice',title:'Cut the wafer',photo:'dicingsaw',
+  {task:'dice',title:'Cut the wafer',photo:'wafer',
    learn:{points:['Next, a <b>dicing saw</b> cuts the wafer into separate chips.','It cuts along the thin gaps between chips, called <b>streets</b>.','Cutting through a chip would destroy it.'],
     fact:'Dicing blades are coated with tiny diamonds and can be thinner than a human hair.'},
    remember:['Click the <b>gaps</b> between chips.','Never cut through a chip.'],
    note:'Dicing saws cut along the streets between chips, never through a chip.'},
-  {task:'pick',title:'Pick the good chips',photo:'dicedwafer',
+  {task:'pick',title:'Pick the good chips',photo:'chiptray',
    learn:{points:['Only chips that passed the test go on to be packaged.','A <b>vacuum pick-up tool</b> lifts each good chip by suction.','Chips with a red ink dot stay behind.'],
     fact:'Using suction instead of fingers or metal tips means nothing scratches the chip.'},
    remember:['Pick chips <b>without</b> a red dot.','Red dot = failed the test.'],
@@ -107,10 +107,10 @@ const FINAL={learn:{points:['The truck is here, but the factory is throwing <b>a
 
 /* ---------- Room 1 ---------- */
 const GOWN_ORDER=['hairnet','hood','mask','coverall','boots','gloves'];
-const GARMENTS={hairnet:'Hair net',hood:'Hood',mask:'Face mask',coverall:'Coverall',boots:'Cleanroom boots',gloves:'Gloves',sweater:'Wool sweater',scarf:'Cotton scarf'};
+const GARMENTS={hairnet:'Hair net',hood:'Hood',mask:'Face mask',coverall:'Coverall',boots:'Boot covers',gloves:'Gloves',sweater:'Wool sweater',scarf:'Knitted scarf'};
 const GOWN_WHY={
  gloves:'Gloves go on last. Anything you touch while dressing would dirty them.',
- boots:'Coverall first: its legs tuck inside the boots.',
+ boots:'Coverall first: boot covers go over the coverall legs.',
  coverall:'Head and face first: the hood tucks into the coverall collar.',
  mask:'Hood first (your head), then the mask (your face).',
  hood:'Hair net first. It holds your hair in place under the hood.',
@@ -240,26 +240,28 @@ const STORY={
    so the game works with none, some or all of them. Fill in `credit` for every photo added
    (author, licence, source) — it is shown in Menu → Sources. */
 const PHOTOS={
- cleanroom:{file:'cleanroom.jpg',caption:'A real semiconductor cleanroom',credit:''},
- gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns',credit:''},
- airshower:{file:'airshower.jpg',caption:'An air shower at a cleanroom entrance',credit:''},
- yellowroom:{file:'yellowroom.jpg',caption:'A lithography bay under yellow safe-light',credit:''},
- wafer:{file:'wafer.jpg',caption:'A patterned silicon wafer',credit:''},
- wetbench:{file:'wetbench.jpg',caption:'A wet clean bench',credit:''},
- spincoater:{file:'spincoater.jpg',caption:'A spin coater',credit:''},
- maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner',credit:''},
- developer:{file:'developer.jpg',caption:'A develop station',credit:''},
- etcher:{file:'etcher.jpg',caption:'A plasma etcher',credit:''},
- stripper:{file:'stripper.jpg',caption:'A resist strip station',credit:''},
- prober:{file:'prober.jpg',caption:'A wafer prober testing chips',credit:''},
- dicingsaw:{file:'dicingsaw.jpg',caption:'A wafer dicing saw',credit:''},
- dicedwafer:{file:'dicedwafer.jpg',caption:'A diced wafer on tape',credit:''},
- caliper:{file:'caliper.jpg',caption:'A digital caliper',credit:''},
- microscope:{file:'microscope.jpg',caption:'An inspection microscope',credit:''},
- hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:''},hood:{file:'hood.jpg',caption:'Cleanroom hood',credit:''},
- mask:{file:'facemask.jpg',caption:'Face mask',credit:''},coverall:{file:'coverall.jpg',caption:'Cleanroom coverall',credit:''},
- boots:{file:'boots.jpg',caption:'Cleanroom boots',credit:''},gloves:{file:'gloves.jpg',caption:'Nitrile gloves',credit:''},
- sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:''},scarf:{file:'scarf.jpg',caption:'Cotton scarf',credit:''}
+ cleanroom:{file:'cleanroom.jpg',caption:'Workers in a real cleanroom',credit:'Aileen Devlin / Jefferson Lab, public domain, via Wikimedia Commons'},
+ gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns',credit:'Steve Jurvetson, CC BY 2.0, via Wikimedia Commons'},
+ airshower:{file:'airshower.jpg',caption:'An air shower at a cleanroom entrance',credit:'NASA, public domain, via Wikimedia Commons'},
+ yellowroom:{file:'yellowroom.jpg',caption:'A real cleanroom lit with yellow safe-light',credit:'NASA Glenn Research Center, public domain, via Wikimedia Commons'},
+ wetbench:{file:'wetbench.jpg',caption:'A wet bench for cleaning wafers',credit:'KristianMolhave, CC BY 2.5, via Wikimedia Commons'},
+ spincoater:{file:'spincoater.jpg',caption:'A spin coater',credit:'Junny97008, CC BY-SA 4.0, via Wikimedia Commons'},
+ maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner (SÜSS MA6)',credit:'James Friend, CC BY 3.0, via Wikimedia Commons'},
+ developer:{file:'developer.jpg',caption:'A resist coater and developer',credit:'Guillaume Paumier, CC BY-SA 3.0, via Wikimedia Commons'},
+ etcher:{file:'etcher.jpg',caption:'A reactive ion (plasma) etcher',credit:'AlabamaUSA, CC BY-SA 3.0, via Wikimedia Commons'},
+ stripper:{file:'stripper.jpg',caption:'An oxygen plasma cleaner, used to strip resist',credit:'Maxfisch, CC0, via Wikimedia Commons'},
+ prober:{file:'prober.jpg',caption:'A wafer prober, with a wafer loaded',credit:'Ixnayonthetimmay, CC BY-SA 3.0, via Wikimedia Commons'},
+ wafer:{file:'wafer.jpg',caption:'A real wafer full of chips, ready to be cut apart',credit:'Peellden, CC BY-SA 3.0, via Wikimedia Commons'},
+ chiptray:{file:'chiptray.jpg',caption:'Finished chips in a tray',credit:'BrokenSphere, CC BY-SA 3.0, via Wikimedia Commons'},
+ caliper:{file:'caliper.jpg',caption:'A digital caliper',credit:'Jacek Halicki, CC BY-SA 4.0, via Wikimedia Commons'},
+ hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:'David Ring, CC0, via Wikimedia Commons'},
+ hood:{file:'hood.jpg',caption:'Cleanroom hood and gown',credit:'Stan Zurek, CC BY-SA 3.0, via Wikimedia Commons',pos:'center 12%'},
+ mask:{file:'facemask.jpg',caption:'Face mask',credit:'AlexChirkin, CC0, via Wikimedia Commons'},
+ coverall:{file:'gowning.jpg',caption:'Cleanroom coveralls',credit:''},
+ boots:{file:'boots.jpg',caption:'Boot covers',credit:'Sergeev Pavel, CC BY-SA 3.0, via Wikimedia Commons'},
+ gloves:{file:'gloves.jpg',caption:'Nitrile cleanroom glove',credit:'BlueThunderTechnologies, CC BY-SA 4.0, via Wikimedia Commons'},
+ sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:'Andrew Toskin, CC BY 2.0, via Wikimedia Commons'},
+ scarf:{file:'scarf.jpg',caption:'Knitted scarf',credit:'AbbieCall, CC BY-SA 4.0, via Wikimedia Commons'}
 };
 const TOOL_PHOTO={clean:'wetbench',coat:'spincoater',expose:'maskaligner',develop:'developer',etch:'etcher',strip:'stripper'};
 
