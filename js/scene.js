@@ -173,6 +173,13 @@ window.FIG = (() => {
       ${t(20,95,'In class',14)}<rect x="130" y="79" width="${Math.round(360*304/4000)}" height="26" rx="4" fill="#f3c77b"/>${t(170,97,'304 h',13,'#f3c77b')}
       <path d="M130 120V14" stroke="#36565d"/>${t(130,145,'Bars drawn to scale: most of the learning happens at work, with a paid sponsor.',12,'#9fb9b6')}`,
       'Figure: apprenticeship training hours, to scale', '0 0 520 155'),
+    circuit: () => fig(`
+      <path d="M110 40H390V130H110Z" fill="none" stroke="#9fb3b6" stroke-width="3"/>
+      <rect x="96" y="66" width="28" height="38" fill="#0a1d23"/><path d="M98 76h24M104 86h12M98 96h24" stroke="#f3c77b" stroke-width="3"/>${t(70,90,'V',18,'#f3c77b','middle')}${t(70,108,'battery',11,'#9fb9b6','middle')}
+      <path d="M220 40l8-12 10 24 10-24 10 24 10-24 8 12" fill="#0a1d23" stroke="#66e3c4" stroke-width="3"/>${t(250,20,'R  (resistor, Ω)',13,'#66e3c4','middle')}
+      <circle cx="390" cy="85" r="20" fill="#0a1d23" stroke="#b9a6ff" stroke-width="3"/>${t(390,91,'A',16,'#b9a6ff','middle')}${t(450,90,'I  (current)',13,'#b9a6ff','middle')}
+      <path d="M250 130h-30m10-6-10 6 10 6" stroke="#b9a6ff" stroke-width="2" fill="none"/>${t(250,155,'current flows around the loop',12,'#9fb9b6','middle')}`,
+      'Figure: a simple test circuit with a battery (V), a resistor (R) and an ammeter measuring current (I)'),
     certificate: () => fig(`
       <rect x="130" y="12" width="260" height="146" rx="6" fill="#f4efe1" stroke="#c9b98a" stroke-width="3"/><rect x="140" y="22" width="240" height="126" fill="none" stroke="#d8cba3"/>
       ${t(260,50,'CERTIFICATE OF',12,'#6b5a33','middle')}${t(260,70,'APPRENTICESHIP',18,'#3a2f16','middle')}${t(260,92,'Micro Electronics Manufacturer · 630A',11,'#6b5a33','middle')}

@@ -281,3 +281,11 @@ dialog::backdrop{background:#01080cd9;backdrop-filter:blur(3px)}
 .fig figcaption{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.4}
 .modal-footer .btn{white-space:nowrap}
 .hero-caption .cast{width:100%;justify-content:space-between}
+.sample-card.elec p{font-size:17px;min-height:52px}
+.cinematic{position:absolute;inset:0;z-index:20;pointer-events:none;animation:cine 1.4s steps(1,end) both}
+.cinematic::before,.cinematic::after{content:"";position:absolute;left:0;right:0;height:13%;background:#020406;animation:bars 1.4s ease both}
+.cinematic::before{top:0;transform-origin:top}.cinematic::after{bottom:0;transform-origin:bottom}
+.cine-text{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:14px 26px;border:2px solid var(--teal);border-radius:10px;background:#04141bee;font:600 22px var(--mono);letter-spacing:3px;text-transform:uppercase;color:var(--teal);white-space:nowrap;box-shadow:0 0 40px #66e3c455;animation:cinetext 1.4s ease both}
+@keyframes bars{0%{transform:scaleY(0)}15%,80%{transform:scaleY(1)}100%{transform:scaleY(0)}}
+@keyframes cinetext{0%{opacity:0;letter-spacing:12px}15%,80%{opacity:1;letter-spacing:3px}100%{opacity:0}}
+@keyframes cine{0%{background:#ffffff55}10%{background:transparent}}

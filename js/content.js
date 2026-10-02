@@ -21,7 +21,7 @@ const ROOMS = [
  {name:'Staff terminal',short:'CHIP BASICS',code:'NOVA-7K4M',verb:'Match the parts'},
  {name:'Cleanroom entrance',short:'SPOT THE HAZARDS',code:'NOVA-2R8T',verb:'Check the cleanroom'},
  {name:'Materials archive',short:'PUT IT IN ORDER',code:'NOVA-5W9C',verb:'Rebuild the steps'},
- {name:'Inspection station',short:'PASS OR FAIL',code:'NOVA-8H3P',verb:'Inspect the samples'},
+ {name:'Inspection station',short:'QUALITY CHECK',code:'NOVA-8H3P',verb:'Inspect the samples'},
  {name:'Training office',short:'CAREER · QUALIFICATIONS',code:'NOVA-4D7X',verb:'Complete the trade fact sheet'},
  {name:'Career planner',short:'CAREER · PATHWAY',code:'NOVA-6Y2B',verb:'Plan the route into the trade'}
 ];
@@ -50,6 +50,11 @@ const MENTOR_POOL = [
  {t:'qual',q:'Do I need the certificate to work?',a:'No. Micro Electronics Manufacturer (trade code <strong>630A</strong>) is a <strong>non-compulsory</strong> trade. The certificate still proves your skills to employers.'},
  {t:'qual',q:'What safety training will I need?',a:'<strong>WHMIS</strong> training is required in Ontario if you work with hazardous products, and chip factories use plenty of chemicals. You also learn gowning and equipment safety on the job.'},
  {t:'qual',q:'What makes someone good at this job?',a:'Attention to detail, steady hands and patience. You need to follow written procedures exactly, use basic math for measurements and keep careful records.'},
+ {t:'roles',q:'Who else works in a chip factory?',a:'A whole team! <strong>Micro Electronics Manufacturers</strong> (manufacturing technicians) run the equipment, <strong>quality control technicians</strong> check the products, <strong>maintenance technicians</strong> keep machines running and <strong>process engineers</strong> improve how things are made.'},
+ {t:'roles',q:'What does a quality control technician do?',a:'They <strong>inspect products and identify defects</strong>, then record the results so bad parts never reach a customer.'},
+ {t:'roles',q:'Who fixes the machines when they break?',a:'<strong>Equipment maintenance technicians</strong>. They maintain and repair the manufacturing equipment, often before anything breaks.'},
+ {t:'roles',q:'What does a process engineer do?',a:'A <strong>process engineer</strong> develops and improves manufacturing processes: making each step faster, cleaner and more reliable.'},
+ {t:'roles',q:'How do people train for these jobs?',a:'It varies. Micro Electronics Manufacturers usually train through an <strong>apprenticeship</strong> (Grade 12 to start). Many technicians take a <strong>college diploma</strong>, and process engineers usually have a <strong>university engineering degree</strong>.'},
  {t:'path',q:'Can I start while still in high school?',a:'Yes! Co-op, the <strong>Ontario Youth Apprenticeship Program (OYAP)</strong> and a <strong>Specialist High Skills Major</strong> let you get experience before you graduate.'},
  {t:'path',q:'How do I actually become an apprentice?',a:'First, find an employer willing to <strong>sponsor and train you</strong>. Then you both register a training agreement through <strong>Employment Ontario</strong>.'},
  {t:'path',q:'How long does the apprenticeship take?',a:'Roughly <strong>two years</strong>: about 4,000 hours of paid on-the-job training plus <strong>304 hours</strong> of in-class training.'},
@@ -63,6 +68,10 @@ const QUIZ_POOL = [
  {t:'qual',s:'Finishing the apprenticeship earns a Certificate of Apprenticeship.',fact:true,why:'Skilled Trades Ontario issues it once all hours and skills are complete.'},
  {t:'qual',s:'This trade ends with a Red Seal exam.',fact:false,why:'It is not a Red Seal trade and has no Certificate of Qualification exam.'},
  {t:'qual',s:'WHMIS training is only for chemists.',fact:false,why:'Any worker who may handle or be exposed to hazardous products needs WHMIS training.'},
+ {t:'roles',s:'A process engineer’s main job is repairing broken machines.',fact:false,why:'That is the maintenance technician. Process engineers develop and improve manufacturing processes.'},
+ {t:'roles',s:'Quality control technicians inspect products and identify defects.',fact:true,why:'Catching defects before products ship is their core job.'},
+ {t:'roles',s:'Micro Electronics Manufacturers operate and monitor production equipment.',fact:true,why:'Setting up, running and monitoring process equipment is the heart of the trade.'},
+ {t:'roles',s:'Every job in a chip factory requires a university degree.',fact:false,why:'The Micro Electronics Manufacturer apprenticeship starts with Grade 12; many technicians have college diplomas.'},
  {t:'path',s:'Apprentices are paid while they train on the job.',fact:true,why:'An apprenticeship is a job: you earn while you learn from a sponsoring employer.'},
  {t:'path',s:'Most of this apprenticeship happens in a classroom.',fact:false,why:'About 4,000 hours are on the job. In-class training is 304 hours.'},
  {t:'path',s:'High school students can gain apprenticeship experience through OYAP.',fact:true,why:'The Ontario Youth Apprenticeship Program connects students with real trade placements.'},
@@ -110,6 +119,8 @@ const PARTS = {
  sensor:{name:'Sensor',job:'Detects changes like light or temperature',card:'A <strong>sensor</strong> detects a change, such as light or temperature. A phone uses a light sensor to adjust its screen brightness.'},
  led:{name:'LED',job:'Gives off light when current flows',card:'An <strong>LED</strong> (light-emitting diode) gives off light when electric current flows through it.'},
  transistor:{name:'Transistor',job:'Acts as a tiny on/off switch',card:'A <strong>transistor</strong> acts as a tiny switch. Modern chips contain billions of them.'},
+ ic:{name:'Integrated circuit (IC)',job:'Combines many components on one chip',card:'An <strong>integrated circuit (IC)</strong> combines many tiny components, like transistors, on a single piece of silicon.'},
+ pcb:{name:'Printed circuit board (PCB)',job:'Holds parts and connects them with copper tracks',card:'A <strong>printed circuit board (PCB)</strong> holds chips and other parts, and connects them with thin copper tracks.'},
  radio:{name:'Wireless chip',job:'Sends and receives radio signals',card:'A <strong>wireless chip</strong> sends and receives radio signals for Wi-Fi or Bluetooth.'}
 };
 const PART_EXTRAS = [
@@ -137,6 +148,20 @@ const STAGES = [
  {id:'dice',label:'Cut (dice) the wafer into chips'},
  {id:'package',label:'Package the chips'}
 ];
+/* Room 4 alternative: electrical test bay. */
+const ELEC={
+ current:{ask:g=>`${g.V} V across ${g.R} Ω. What is the current?`,unit:'A'},
+ voltage:{ask:g=>`${g.I} A through ${g.R} Ω. What is the voltage?`,unit:'V'},
+ resistance:{ask:g=>`${g.V} V pushes ${g.I} A. What is the resistance?`,unit:'Ω'},
+ power:{ask:g=>`${g.V} V at ${g.I} A. What is the power?`,unit:'W'}
+};
+/* Room 5 alternative: who does what in the factory. */
+const ROLES={
+ mem:{name:'Micro Electronics Manufacturer',task:'Operates and monitors production equipment'},
+ qc:{name:'Quality control technician',task:'Inspects products and identifies defects'},
+ maint:{name:'Equipment maintenance technician',task:'Maintains and repairs manufacturing equipment'},
+ proc:{name:'Process engineer',task:'Develops and improves manufacturing processes'}
+};
 /* Room 5 fact sheet: three of these fields are asked each game. */
 const FACT_FIELDS = {
  entry:{label:'Academic entry requirement',answer:'a',options:{a:'Grade 12 (OSSD or equivalent)',b:'A university degree',c:'Grade 10',d:'A college diploma'}},
@@ -161,8 +186,8 @@ const STORY={
      ['sam','Every door also needs a code swapped with the Google Form, so keep it open in another tab. First stop: the staff terminal. Learn what’s inside NB-7.']],
  r1:[['sam','NB-7 is inside the cleanroom. Before we go in, check the camera feed.'],['sam','One speck of dust, a hair or a fingerprint can ruin a whole wafer. Anything that breaks the rules gets flagged.']],
  r2:[['nova','PROCESS CHART CORRUPTED. Stage order: UNKNOWN.'],['sam','The night crew kept notes in the materials archive. Rebuild the chart so the line knows what comes after what.']],
- r3:[['sam','Last stop on the floor: inspection. The equipment tubes have to meet spec before NB-7 can move.'],['sam','Measure every sample. No guessing. A part that’s “almost right” is still wrong.']],
- r4:[['sam','NB-7 is cleared and loaded. Seriously, nice work tonight. You’re a natural.'],['sam','Nova sponsors apprentices. If you want to do this for real, head to the training office and see Mira.'],['mira','Hi {name}! The surge locked my door too, so beat the guardian first. Then let’s find out what this trade actually requires.']],
+ r3:[['sam','Last stop on the floor: quality check. Nothing in NB-7 moves until it meets spec.'],['sam','Check every reading. No guessing. “Almost right” is still wrong.']],
+ r4:[['sam','NB-7 is cleared and loaded. Seriously, nice work tonight. You’re a natural.'],['sam','Nova sponsors apprentices. If you want to do this for real, head to the training office and see Mira.'],['mira','Hi {name}! The surge locked my door too, so beat the guardian first. Then let’s talk about your future here.']],
  r5:[['mira','Fact sheet done! Now the important part: your route.'],['mira','Let’s map every step, from high school all the way to the certificate.']],
  final:[['nova','CORE OVERRIDE ACTIVE. Dispatch dock release: DENIED.'],['sam','The truck can’t leave until the core is cleared. Break all three seals, {name}. This is it!']],
  ending:[['sam','Dock open, truck rolling. Those heart monitors will get their chips on time, because of you.'],['mira','And you’ve mapped your own route into the trade. Whenever you’re ready, Sam’s sponsorship offer stands.'],['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}.']]
@@ -180,9 +205,11 @@ function makeVariant(){
  v.challenges=shuffle(CHALLENGES);
  v.discover=shuffle(TECH_MODES).concat(shuffle(CAREER_MODES));
  v.mazeSeed=rint(1,1e9);
- const tagged=(pool,t)=>pool.map((x,i)=>x.t===t?i:-1).filter(i=>i>=0);
- v.mentor={4:shuffle(tagged(MENTOR_POOL,'qual')),5:shuffle(tagged(MENTOR_POOL,'path'))};
- v.quiz={4:shuffle(tagged(QUIZ_POOL,'qual')),5:shuffle(tagged(QUIZ_POOL,'path'))};
+ v.inspect=Math.random()<.5?'samples':'electric';
+ v.office=Math.random()<.5?'facts':'roles';
+ const tagged=(pool,t)=>pool.map((x,i)=>x.t===t?i:-1).filter(i=>i>=0),officeTag=v.office==='roles'?'roles':'qual';
+ v.mentor={4:shuffle(tagged(MENTOR_POOL,officeTag)),5:shuffle(tagged(MENTOR_POOL,'path'))};
+ v.quiz={4:shuffle(tagged(QUIZ_POOL,officeTag)),5:shuffle(tagged(QUIZ_POOL,'path'))};
  v.glossary=pickN(GLOSSARY.map((_,i)=>i),3).map(i=>({i,mix:scramble(GLOSSARY[i][0])}));
  v.scope=pickN(SCOPE_DEFECTS.map((_,i)=>i),3).map(d=>({d,x:0,y:0}));
  // Spread the defects so the lens never shows two at once.
@@ -201,6 +228,13 @@ function makeVariant(){
  v.size=rint(4,6);
  do{v.samples=['A','B','C'].map(id=>({id,size:v.size+[0,0,1,-1,2][rint(0,4)],crack:Math.random()<.35}));}
  while(!v.samples.some(s=>s.size===v.size&&!s.crack)||v.samples.every(s=>s.size===v.size&&!s.crack));
+ // Room 4 alt – electrical diagnostics (whole-number answers)
+ v.elec=pickN(Object.keys(ELEC),3).map(type=>{const I=rint(2,6),R=rint(2,6),V=I*R,g=type==='power'?{V:rint(3,12),I:rint(2,5)}:{V,I,R};
+  const ans=type==='current'?I:type==='voltage'?V:type==='resistance'?R:g.V*g.I;
+  const opts=new Set([ans]);for(let n=0;opts.size<4&&n<50;n++){const d=ans+pickN([-3,-2,-1,1,2,3,ans],1)[0];if(d>0)opts.add(d);}
+  return {type,g,ans,opts:shuffle([...opts])};});
+ // Room 5 alt – roles
+ v.roles=shuffle(Object.keys(ROLES));v.roleTasks=shuffle(Object.keys(ROLES));
  // Room 5 – trade fact sheet
  v.facts=pickN(Object.keys(FACT_FIELDS),3).map(f=>({f,order:shuffle(Object.keys(FACT_FIELDS[f].options))}));
  // Room 6 – pathway order (4 or 5 of the 6 steps, kept in real order)
@@ -238,6 +272,17 @@ function roomContent(i,v){
   ],
   hint:labels.join(' → ')+'.',
   reward:'Process restored. Every stage depends on the one before it.'};}
+ if(i===3&&v.inspect==='electric')return {
+  meta:{verb:'Run the electrical tests'},
+  intro:'Before NB-7 leaves, its electrical test readings must be checked. Use the formulas to finish the diagnostics.',
+  question:'Finish the three electrical diagnostics. Pick the correct value for each test.',
+  evidence:[
+   {title:'Ohm’s law',text:'<p>Voltage, current and resistance are linked by <strong>Ohm’s law: V = I × R</strong>.</p><ul><li><strong>V</strong> = voltage, in volts (V)</li><li><strong>I</strong> = current, in amperes (A)</li><li><strong>R</strong> = resistance, in ohms (Ω)</li></ul>'+FIG.circuit()},
+   {title:'Rearranging the formula',text:'<p>Need a different value? Rearrange it:</p><ul><li><strong>I = V ÷ R</strong> (current)</li><li><strong>R = V ÷ I</strong> (resistance)</li></ul><p>Example: 12 V across 4 Ω gives I = 12 ÷ 4 = <strong>3 A</strong>.</p>'},
+   {title:'Electrical power',text:'<p><strong>Power: P = V × I</strong>, measured in watts (W).</p><p>Example: 6 V at 2 A gives P = 6 × 2 = <strong>12 W</strong>.</p><p>Every chip is electrically tested. A reading outside the spec means the chip fails.</p>'}
+  ],
+  hint:v.elec.map((e,k)=>`Test ${k+1}: ${e.ans} ${ELEC[e.type].unit}`).join(' · '),
+  reward:'Test bay calibrated. Every reading checks out.'};
  if(i===3){const L=v.size,pass=s=>s.size===L&&!s.crack;return {
   intro:'Inspect three sample tubes used in factory equipment. Compare every measurement with the requirement.',
   question:'Mark each sample Pass or Fail. A sample must meet BOTH rules.',
@@ -248,6 +293,17 @@ function roomContent(i,v){
   ],
   hint:v.samples.map(s=>`${s.id}: ${pass(s)?'pass':'fail'}${pass(s)?'':s.crack?' (crack)':' ('+s.size+' cm)'}`).join(' · '),
   reward:`Inspection complete. Only samples at exactly ${L} cm with no cracks passed.`};}
+ if(i===4&&v.office==='roles')return {
+  meta:{short:'CAREER · THE TEAM',verb:'Match each role to its job'},
+  intro:'Batch NB-7 is out. Before you pick a path, meet the team that makes a chip factory run.',
+  question:'Match each factory role to its main responsibility.',
+  evidence:[
+   {title:'Making and checking',text:'<p>A <strong>Micro Electronics Manufacturer</strong> (a manufacturing technician) <strong>operates and monitors the production equipment</strong>.</p><p>A <strong>quality control technician</strong> <strong>inspects products and identifies defects</strong>.</p>'},
+   {title:'Fixing and improving',text:'<p>An <strong>equipment maintenance technician</strong> <strong>maintains and repairs the manufacturing equipment</strong>.</p><p>A <strong>process engineer</strong> <strong>develops and improves the manufacturing processes</strong>.</p>'},
+   {title:'How people get there',text:'<p>Micro Electronics Manufacturers usually train through an <strong>apprenticeship</strong>, which starts with Grade 12.</p><p>Many technicians take a <strong>college diploma</strong> (for example, Electronics Engineering Technician). Process engineers usually have a <strong>university engineering degree</strong>.</p>'}
+  ],
+  hint:v.roles.map(r=>`${ROLES[r].name} → ${ROLES[r].task.toLowerCase()}`).join(' · '),
+  reward:'Team assigned. You know who does what on a chip factory floor.'};
  if(i===4){const label=f=>FACT_FIELDS[f].label,ans=f=>FACT_FIELDS[f].options[FACT_FIELDS[f].answer];return {
   intro:'Batch NB-7 is out. Now: what does this job require in Ontario?',
   question:'Fill in the trade fact sheet for a Micro Electronics Manufacturer in Ontario.',

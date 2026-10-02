@@ -3,8 +3,8 @@
 A six-room escape game about becoming a **Micro Electronics Manufacturer** (semiconductor worker) in Ontario.
 
 ## Room layout
-- **Rooms 1–4 · Factory floor (tech only):** chip parts, cleanroom rules, manufacturing process, inspection. Clues are unlocked by a lab walkthrough, microscope scan, word decoder or rover maze.
-- **Rooms 5–6 · Training office (career only):** Ontario qualifications, then the step-by-step pathway into the trade. Clues are unlocked by a mentor chat or a myth-or-fact quiz.
+- **Rooms 1–4 · Factory floor (tech only):** chip parts, cleanroom rules, manufacturing process, quality check (sample inspection or an Ohm’s-law electrical test, chosen at random). Clues are unlocked by a lab walkthrough, microscope scan, word decoder or rover maze.
+- **Rooms 5–6 · Training office (career only):** Room 5 covers either the Ontario qualifications or the factory team’s roles (chosen at random). Room 6 covers the step-by-step pathway into the trade. Clues are unlocked by a mentor chat or a myth-or-fact quiz.
 
 ## Story
 A power surge locks the Nova Semiconductor factory on your first night shift. Batch NB-7 (heart-monitor chips) must ship by dawn. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the factory system) guide you through radio messages. The story text is in `STORY` in `js/content.js`, and the portraits and clue-file figures are in `js/scene.js`.
