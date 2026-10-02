@@ -6,7 +6,13 @@ A six-room, hands-on escape game about becoming a **Micro Electronics Manufactur
 It's your first night shift at Nova Semiconductor. A power surge has wiped the last circuit layer of batch NB-7 (heart-monitor chips), and the truck leaves at dawn. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the factory system) guide you by radio.
 
 ## Rooms
-Each room is a real station. A procedure card explains what to do and why; the bench is where you do it. Mistakes explain what went wrong.
+Each room is a real station, built for Grade 10 students:
+
+- **Learn card** before every step: a few plain-language points and a “Did you know?” fact.
+- **Blue instruction banner** above the workbench that always says exactly what to do next.
+- **💡 Hint button** that makes the right thing glow. Hints also appear automatically after two mistakes in a row.
+- **Instant feedback** on every click, explaining why it was right or wrong.
+- **Stars, confetti and sound effects** (mute button in the top bar), plus a “What you just learned” card after each step.
 
 **Factory floor (tech only)**
 1. **Gowning room:** lock away personal items, gown up top-down with gloves last, run the air shower, then flag rule breaks on the bay cameras.
@@ -35,5 +41,6 @@ Fonts load from Google Fonts when online. Offline, the game falls back to system
 - `js/game.js`: screens, story playback, notebook, Google Form code exchange
 - `js/art.js`: portraits, gowning avatar, camera frames, floor plan
 - `css/style.css`: styles
+- `img/`: optional real photos (see `img/README.md`); missing photos fall back to drawings
 
 The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.

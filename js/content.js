@@ -18,60 +18,92 @@ const CAREER_ROOMS=[4,5];
 
 /* Each room is a short run of hands-on steps. `sop` is the procedure card beside the bench;
    `note` is what gets written into the field notebook when the step is done. */
+/* Each room is a short run of hands-on steps.
+   learn: the "Learn" card shown before the step (plain language for Grade 10).
+   remember: the short reminder beside the bench.  note: the takeaway saved to the notebook.
+   photo: optional real photo key (see PHOTOS). */
 const ROOMS = [
  {name:'Gowning room',short:'CLEANROOM ENTRY',code:'NOVA-7K4M',steps:[
-  {task:'gown',title:'Gown up',
-   sop:'<p>People are the biggest source of dirt in a cleanroom: skin flakes, hair and clothing fibres.</p><ol><li><b>Lock away personal items</b> first. Watches and phones can’t be cleaned.</li><li>Dress <b>from the top down</b>: hair, head, face, body, feet.</li><li><b>Gloves go on last</b>, so they touch nothing dirty.</li></ol><p class="tip">Click items on the worker to remove them. Then click garments on the rack.</p>',
+  {task:'gown',title:'Gown up',photo:'gowning',
+   learn:{points:['A chip’s wires are thousands of times thinner than a hair. One speck of dust can ruin one.','<b>People are the dirtiest thing in a cleanroom.</b> We shed skin flakes, hair and clothing fibres all the time.','So workers cover up completely in a special suit, put on in a set order.'],
+    fact:'Even standing still, a person sheds hundreds of thousands of tiny particles every minute.'},
+   remember:['Watch and phone go in the locker first.','Dress <b>top to bottom</b>: hair → head → face → body → feet.','<b>Gloves go on last.</b>'],
    note:'Gowning goes top-down (hair net, hood, mask, coverall, boots) with gloves last. Personal items stay in the locker.'},
-  {task:'airshower',title:'Air shower',
-   sop:'<p>An <b>air shower</b> blasts filtered air over your gown to knock loose particles before you enter.</p><p>Stay in for the <b>whole cycle</b>. Leaving early carries dust inside.</p><p class="tip">Press and hold the button (or hold Space) until the cycle finishes.</p>',
+  {task:'airshower',title:'Air shower',photo:'airshower',
+   learn:{points:['Before going in, you stand in an <b>air shower</b>: a small room that blasts clean, filtered air at you.','It knocks loose dust off your suit.','You must stay for the <b>whole cycle</b>. Leaving early lets dust in.'],
+    fact:'The air in an air shower is filtered first, so it blows dust off without adding any.'},
+   remember:['Hold the button for the <b>whole</b> countdown.','Letting go early restarts the cycle.'],
    note:'Air showers blow particles off the gown. Always stay for the full cycle.'},
-  {task:'cctv',title:'Contamination sweep',
-   sop:'<p>Before the batch comes in, check the bay cameras. Flag anything that breaks the rules:</p><ul><li><b>No food or drinks.</b></li><li><b>All hair covered</b>; masks over nose and mouth.</li><li><b>Never touch a wafer bare-handed.</b> Use gloves and tweezers.</li><li><b>No cardboard, paper notebooks or pencils.</b> They shed particles.</li></ul><p class="tip">Click a camera to flag it. Click again to unflag. Then send the report.</p>',
+  {task:'cctv',title:'Spot the rule-breakers',photo:'cleanroom',
+   learn:{points:['Cleanroom rules keep dirt away from the chips.','<b>Not allowed:</b> food, drinks, uncovered hair, a mask below the nose, bare hands on wafers, cardboard, pencils and normal paper.','<b>Allowed:</b> full gowns, gloves with tweezers, closed wafer carriers, special lint-free paper.'],
+    fact:'Cleanroom air can have thousands of times fewer particles than the air in your classroom.'},
+   remember:['No food or drink.','Hair covered, mask over the nose.','No bare hands on wafers.','No cardboard, pencils or normal paper.'],
    note:'Cleanroom rules: no food or drink, all hair covered, masks up, no bare hands on wafers, no cardboard or ordinary paper.'}
  ]},
  {name:'Litho bay',short:'PHOTOLITHOGRAPHY',code:'NOVA-2R8T',steps:[
-  {task:'litho',title:'Print the circuit layer',
-   sop:'<p><b>Photolithography</b> prints a circuit pattern onto the wafer using light. The bay is lit yellow because <b>photoresist reacts to UV and blue light</b>; yellow light is safe for it.</p><p>Each tool needs the one before it:</p><ul><li>Resist only sticks evenly to a <b>clean</b> wafer.</li><li>Light can only print on <b>resist</b>.</li><li>The <b>developer</b> washes away the resist that light hit, opening the pattern.</li><li>The <b>etcher</b> removes material where the resist is open.</li><li>Leftover resist is <b>stripped</b> at the end.</li></ul>',
+  {task:'litho',title:'Print a circuit layer',photo:'yellowroom',
+   learn:{points:['Chips are built in layers. Each layer’s pattern is <b>printed with light</b>, a bit like developing a photo. This is called <b>photolithography</b>.','A light-sensitive coating called <b>photoresist</b> is spread on the wafer. UV light shines through a stencil (the <b>mask</b>) to print the pattern.','You’ll use six machines. Each card says what the machine does, so you can work out the order.'],
+    fact:'The bay is lit yellow for the same reason old photo darkrooms used red light: it doesn’t affect the light-sensitive coating.'},
+   remember:['Clean → coat → expose → develop → etch → strip.','Each machine needs the step before it.','Read each machine’s card if you’re unsure.'],
    note:'Lithography order: clean → spin-coat resist → align mask and expose → develop → etch → strip. Spin speed sets resist thickness; etching stops at the endpoint signal.'}
  ]},
  {name:'Probe & dicing',short:'TEST AND CUT',code:'NOVA-5W9C',steps:[
-  {task:'probe',title:'Probe the wafer',
-   sop:'<p>Every chip is <b>tested while still on the wafer</b>. A prober touches each one and measures the current at a fixed test voltage.</p><p><b>Ohm’s law: I = V ÷ R.</b> With the same voltage, <b>higher resistance means lower current</b>.</p><p>Bad chips are <b>inked</b> (marked) so they are never packaged.</p>',
+  {task:'probe',title:'Test the chips',photo:'prober',
+   learn:{points:['One wafer holds lots of chips. Before cutting them apart, a machine called a <b>prober</b> tests each one.','It sends electricity through each chip and measures the <b>current</b> in milliamps (mA).','Chips outside the good range get a red ink dot so nobody uses them.'],
+    fact:'Testing chips on the wafer saves money: bad chips are never cut out or packaged.'},
+   remember:['<b>Ohm’s law: I = V ÷ R</b> (current = voltage ÷ resistance).','Green zone = good chip.','Click every chip <b>outside</b> the green zone.'],
    note:'Chips are probe-tested on the wafer. I = V ÷ R: higher resistance gives lower current. Failing chips are inked.'},
-  {task:'dice',title:'Dice the wafer',
-   sop:'<p>A <b>dicing saw</b> cuts the wafer into separate chips along the narrow gaps between them, called <b>streets</b> (or scribe lines).</p><p>Cut <b>only on the streets</b>. A cut through a chip destroys it.</p><p class="tip">Click each street to run the blade along it.</p>',
+  {task:'dice',title:'Cut the wafer',photo:'dicingsaw',
+   learn:{points:['Next, a <b>dicing saw</b> cuts the wafer into separate chips.','It cuts along the thin gaps between chips, called <b>streets</b>.','Cutting through a chip would destroy it.'],
+    fact:'Dicing blades are coated with tiny diamonds and can be thinner than a human hair.'},
+   remember:['Click the <b>gaps</b> between chips.','Never cut through a chip.'],
    note:'Dicing saws cut along the streets between chips, never through a chip.'},
-  {task:'pick',title:'Pick good chips',
-   sop:'<p>Only <b>known-good dies</b> move on to packaging. Inked chips stay behind.</p><p class="tip">Click a good chip to lift it with the vacuum pick-up tool and drop it in the tray.</p>',
+  {task:'pick',title:'Pick the good chips',photo:'dicedwafer',
+   learn:{points:['Only chips that passed the test go on to be packaged.','A <b>vacuum pick-up tool</b> lifts each good chip by suction.','Chips with a red ink dot stay behind.'],
+    fact:'Using suction instead of fingers or metal tips means nothing scratches the chip.'},
+   remember:['Pick chips <b>without</b> a red dot.','Red dot = failed the test.'],
    note:'Only known-good (un-inked) dies are picked for packaging.'}
  ]},
  {name:'Final inspection',short:'QUALITY CHECK',code:'NOVA-8H3P',steps:[
-  {task:'qc',title:'Measure, inspect, sort',
-   sop:'',note:'Every part is measured against its spec (nominal ± tolerance) and checked for cracks. Fail either check and it’s rejected.'}
+  {task:'qc',title:'Measure, inspect, sort',photo:'caliper',
+   learn:{points:['Every part is checked against its <b>specification</b> (spec): the size it’s supposed to be.','A spec like <b>10.00 ± 0.10 mm</b> means anything from 9.90 to 10.10 mm is OK. That allowed wiggle room is the <b>tolerance</b>.','You’ll measure with a <b>caliper</b>, look for cracks with a <b>microscope</b>, then sort each part: PASS or REJECT.'],
+    fact:'0.1 mm is about the thickness of a sheet of paper.'},
+   remember:['Close the caliper until it touches the part.','Look all over for cracks.','PASS only if the size is in the green zone <b>and</b> there’s no crack.'],
+   note:'Every part is measured against its spec (nominal ± tolerance) and checked for cracks. Fail either check and it’s rejected.'}
  ]},
  {name:'Training office',short:'CAREER · GETTING STARTED',code:'NOVA-4D7X',steps:[
   {task:'mentor',title:'Talk to Mira',
-   sop:'<p>Mira helps new apprentices get started. Ask her three questions. Her answers are saved in your notebook.</p>',
+   learn:{points:['What you did tonight is real work done by a <b>Micro Electronics Manufacturer</b>: an Ontario skilled trade (code 630A).','People learn it through an <b>apprenticeship</b>: a paid job where you train at work and in class.','Mira will answer your questions about how to start.'],
+    fact:'Apprentices earn a paycheque while they learn.'},
+   remember:['Ask Mira 3 questions.','Her answers go in your notebook.'],
    note:''},
   {task:'folder',title:'Build your application',
-   sop:'<p>Put together what you need to <b>start the Micro Electronics Manufacturer apprenticeship</b>. Only what’s required, plus anything that helps you get hired.</p><p class="tip">Click a document to put it in the folder (click again to take it out). Then hand it to Mira.</p>',
+   learn:{points:['To <b>start</b> this apprenticeship you need two things: <b>Grade 12</b> (an OSSD or equivalent) and an <b>employer who agrees to hire and train you</b> (a sponsor).','A resume showing co-op or OYAP experience helps you get hired.','You do <b>not</b> need a university degree or an exam to start.'],
+    fact:'OYAP (the Ontario Youth Apprenticeship Program) lets high school students start training in a trade.'},
+   remember:['Needed: Grade 12 + an employer sponsor.','Helpful: a resume with co-op or OYAP.','Not needed: degrees, exams or end-of-training certificates.'],
    note:'To start: Grade 12 (OSSD or equivalent) and an employer who agrees to sponsor you. A resume with co-op or OYAP helps. No degree or exam is needed to start.'},
-  {task:'logbook',title:'Sign your logbook',
-   sop:'<p>Apprentices record progress in a <b>training standard</b>, often called a logbook. A supervisor signs off each skill once you can do it.</p><p>Tick the skills <b>from this trade</b> that you practised tonight. Skills from other trades don’t belong here.</p>',
+  {task:'logbook',title:'Fill in your logbook',
+   learn:{points:['Apprentices keep a <b>logbook</b> (a training standard) listing the skills of their trade.','When you can do a skill, your supervisor signs it off.','Tonight you already practised several real skills from this trade!'],
+    fact:'Spin coating, photo aligning, etching, testing, dicing and inspecting are all real tasks listed for this trade.'},
+   remember:['Tick the skills you did tonight.','Skip skills from other trades.'],
    note:'The 630A training standard covers skills like gowning, spin coating, photo aligning, etching, testing, dicing, measuring and inspecting.'}
  ]},
  {name:'Career planner',short:'CAREER · YOUR ROUTE',code:'NOVA-6Y2B',steps:[
   {task:'route',title:'Map your route',
-   sop:'<p>Plan the route from where you are now to a <b>Certificate of Apprenticeship</b>.</p><p>Click the stops in the order you would reach them. <b>Some stops are traps</b>: they aren’t part of this trade’s route.</p>',
+   learn:{points:['Here’s the real route into this trade in Ontario:','High school (try co-op or OYAP) → finish Grade 12 → find an employer sponsor → register through Employment Ontario → train about 2 years (≈4,000 hours at work + 304 hours in class) → get your <b>Certificate of Apprenticeship</b>.','Watch out for trap stops that aren’t part of this route!'],
+    fact:'This trade has no final exam and no Red Seal: you earn the certificate by completing your hours and skills.'},
+   remember:['High school → Grade 12 → sponsor → register → train → certificate.','Avoid the traps.'],
    note:'Route: co-op or OYAP in high school → Grade 12 → find an employer sponsor → register through Employment Ontario → ≈4,000 h on the job + 304 h in class → Certificate of Apprenticeship.'},
   {task:'plan',title:'Pick your next moves',
-   sop:'<p>Every route starts with a small step. Choose <b>at least two</b> things you could do this school year.</p><p>There are no wrong answers here. Your picks appear on your final mission report.</p>',
+   learn:{points:['Every career starts with a small step you can take <b>this year</b>.','Pick at least two that you could really do.','They’ll appear on your final mission report.'],
+    fact:'Ontario colleges also offer 2- and 3-year electronics diplomas if you want another route into chipmaking.'},
+   remember:['Pick at least 2.','No wrong answers!'],
    note:''}
  ]}
 ];
 
-const FINAL={sop:'<p>The truck is at the dock, but the line is throwing alarms. For each alarm:</p><ol><li>Click the <b>station</b> where the problem started.</li><li>Choose the <b>fix</b>.</li></ol><p>Clear every alarm to open the dispatch dock.</p>'};
+const FINAL={learn:{points:['The truck is here, but the factory is throwing <b>alarms</b>.','For each alarm: click the <b>machine</b> where the problem started, then pick the <b>fix</b>.','Everything you need, you learned tonight. Use the Hint button if you get stuck!'],fact:''},
+ remember:['Read the alarm.','Click the machine causing it.','Pick the fix.','Stuck? Press 💡 Hint.']};
 
 /* ---------- Room 1 ---------- */
 const GOWN_ORDER=['hairnet','hood','mask','coverall','boots','gloves'];
@@ -85,22 +117,29 @@ const GOWN_WHY={
  sweater:'Wool sheds fibres. It never goes into the cleanroom.',
  scarf:'Ordinary fabric sheds lint. Leave it in the locker.'
 };
-// `where` is the neutral camera caption; `title` names the situation in feedback after the report.
+// `where` is the neutral camera caption; `why` explains the call after a click.
 const HAZARDS={
- drink:{unsafe:true,title:'Open drink',where:'Tool bench B'},hair:{unsafe:true,title:'Uncovered hair',where:'Operator, hood station'},cardboard:{unsafe:true,title:'Cardboard box',where:'Delivery area'},
- hand:{unsafe:true,title:'Bare hand on wafer',where:'Wafer hand-off'},snack:{unsafe:true,title:'Snack on bench',where:'Tool bench A'},pencil:{unsafe:true,title:'Pencil & notebook',where:'Note-taking station'},
- mask:{unsafe:true,title:'Mask below nose',where:'Operator, bay entrance'},carrier:{unsafe:false,title:'Closed wafer carrier',where:'Wafer transport'},gown:{unsafe:false,title:'Fully gowned worker',where:'Operator, hood station'},
- tweezers:{unsafe:false,title:'Gloved hand with tweezers',where:'Wafer hand-off'},cleanpaper:{unsafe:false,title:'Lint-free paper and cleanroom pen',where:'Note-taking station'}
+ drink:{unsafe:true,title:'Open drink',where:'Tool bench B',why:'Drinks can spill and leave droplets. No food or drink inside.'},
+ hair:{unsafe:true,title:'Uncovered hair',where:'Operator, hood station',why:'Hair falls out all the time, so it must be fully covered.'},
+ cardboard:{unsafe:true,title:'Cardboard box',where:'Delivery area',why:'Cardboard sheds tiny fibres and dust.'},
+ hand:{unsafe:true,title:'Bare hand on wafer',where:'Wafer hand-off',why:'Skin oils and flakes ruin wafers. Always wear gloves.'},
+ snack:{unsafe:true,title:'Snack on bench',where:'Tool bench A',why:'Food leaves crumbs and grease.'},
+ pencil:{unsafe:true,title:'Pencil & notebook',where:'Note-taking station',why:'Pencils and normal paper shed dust. Use cleanroom paper and pens.'},
+ mask:{unsafe:true,title:'Mask below nose',where:'Operator, bay entrance',why:'Breath carries droplets. The mask must cover the nose.'},
+ carrier:{unsafe:false,title:'Closed wafer carrier',where:'Wafer transport',why:'A closed carrier keeps wafers clean while they move.'},
+ gown:{unsafe:false,title:'Fully gowned worker',where:'Operator, hood station',why:'Fully covered with gloves on: exactly right.'},
+ tweezers:{unsafe:false,title:'Gloved hand with tweezers',where:'Wafer hand-off',why:'Gloves plus tweezers means no skin touches the wafer.'},
+ cleanpaper:{unsafe:false,title:'Lint-free paper and cleanroom pen',where:'Note-taking station',why:'Special lint-free paper and pens are allowed.'}
 };
 
 /* ---------- Room 2 ---------- */
 const LITHO=[
- {id:'clean',tool:'Wet clean bench',done:'Wafer cleaned and dried.',early:'Already clean. Cleaning now would wash off your work.'},
- {id:'coat',tool:'Spin coater',done:'Even resist coat.',early:'Clean the wafer first, or particles get trapped under the resist.'},
- {id:'expose',tool:'Mask aligner',done:'Pattern exposed.',early:'There’s no resist yet, so the light has nothing to print on.'},
- {id:'develop',tool:'Developer',done:'Pattern developed.',early:'The resist hasn’t been exposed yet, so no pattern would appear.'},
- {id:'etch',tool:'Plasma etcher',done:'Etched to the endpoint.',early:'Develop first. Etching needs the pattern opened up in the resist.'},
- {id:'strip',tool:'Resist stripper',done:'Resist stripped. Layer complete!',early:'Keep the resist until etching is done. It protects the areas that should stay.'}
+ {id:'clean',desc:'Washes the wafer with ultra-pure water',tool:'Wet clean bench',done:'Wafer cleaned and dried.',early:'Already clean. Cleaning now would wash off your work.'},
+ {id:'coat',desc:'Spins a layer of light-sensitive resist onto the wafer',tool:'Spin coater',done:'Even resist coat.',early:'Clean the wafer first, or particles get trapped under the resist.'},
+ {id:'expose',desc:'Shines UV light through a mask to print the pattern',tool:'Mask aligner',done:'Pattern exposed.',early:'There’s no resist yet, so the light has nothing to print on.'},
+ {id:'develop',desc:'Washes away the resist that the light hit',tool:'Developer',done:'Pattern developed.',early:'The resist hasn’t been exposed yet, so no pattern would appear.'},
+ {id:'etch',desc:'Uses plasma to carve the pattern into the wafer',tool:'Plasma etcher',done:'Etched to the endpoint.',early:'Develop first. Etching needs the pattern opened up in the resist.'},
+ {id:'strip',desc:'Removes the leftover resist',tool:'Resist stripper',done:'Resist stripped. Layer complete!',early:'Keep the resist until etching is done. It protects the areas that should stay.'}
 ];
 
 /* ---------- Room 5 ---------- */
@@ -195,6 +234,34 @@ const STORY={
  final:[['nova','LINE ALARMS ACTIVE. Dispatch dock locked until the line is clear.'],['sam','The truck’s here and the line is throwing alarms. Find each problem, fix it, and we ship!']],
  ending:[['sam','Dock open, truck rolling. Those heart monitors will get their chips on time, because of you.'],['mira','And you’ve mapped your own route into the trade. Whenever you’re ready, Sam’s sponsorship offer stands.'],['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}.']]
 };
+
+/* ---------- Real photos ----------
+   Files live in img/. Any photo that is missing falls back to the drawn illustration,
+   so the game works with none, some or all of them. Fill in `credit` for every photo added
+   (author, licence, source) — it is shown in Menu → Sources. */
+const PHOTOS={
+ cleanroom:{file:'cleanroom.jpg',caption:'A real semiconductor cleanroom',credit:''},
+ gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns',credit:''},
+ airshower:{file:'airshower.jpg',caption:'An air shower at a cleanroom entrance',credit:''},
+ yellowroom:{file:'yellowroom.jpg',caption:'A lithography bay under yellow safe-light',credit:''},
+ wafer:{file:'wafer.jpg',caption:'A patterned silicon wafer',credit:''},
+ wetbench:{file:'wetbench.jpg',caption:'A wet clean bench',credit:''},
+ spincoater:{file:'spincoater.jpg',caption:'A spin coater',credit:''},
+ maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner',credit:''},
+ developer:{file:'developer.jpg',caption:'A develop station',credit:''},
+ etcher:{file:'etcher.jpg',caption:'A plasma etcher',credit:''},
+ stripper:{file:'stripper.jpg',caption:'A resist strip station',credit:''},
+ prober:{file:'prober.jpg',caption:'A wafer prober testing chips',credit:''},
+ dicingsaw:{file:'dicingsaw.jpg',caption:'A wafer dicing saw',credit:''},
+ dicedwafer:{file:'dicedwafer.jpg',caption:'A diced wafer on tape',credit:''},
+ caliper:{file:'caliper.jpg',caption:'A digital caliper',credit:''},
+ microscope:{file:'microscope.jpg',caption:'An inspection microscope',credit:''},
+ hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:''},hood:{file:'hood.jpg',caption:'Cleanroom hood',credit:''},
+ mask:{file:'facemask.jpg',caption:'Face mask',credit:''},coverall:{file:'coverall.jpg',caption:'Cleanroom coverall',credit:''},
+ boots:{file:'boots.jpg',caption:'Cleanroom boots',credit:''},gloves:{file:'gloves.jpg',caption:'Nitrile gloves',credit:''},
+ sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:''},scarf:{file:'scarf.jpg',caption:'Cotton scarf',credit:''}
+};
+const TOOL_PHOTO={clean:'wetbench',coat:'spincoater',expose:'maskaligner',develop:'developer',etch:'etcher',strip:'stripper'};
 
 /* ---------- Random helpers & per-mission variant ---------- */
 const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));

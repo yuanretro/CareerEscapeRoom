@@ -1,6 +1,6 @@
 "use strict";
 /* All game artwork as inline SVG. Light, industrial palette; no external images. */
-const COL={ink:'#1f2a37',muted:'#6b7280',line:'#cfd6de',paper:'#f6f4ef',blue:'#2e5c8a',amber:'#e0a01e',red:'#c2412d',ok:'#2f7d4f',si:'#8d99ab',skin:'#c98e66'};
+const COL={ink:'#14202d',muted:'#5b6878',line:'#d3dae2',paper:'#eef1f4',blue:'#1c5fd4',accent:'#1c5fd4',amber:'#e3a21a',red:'#c2412d',ok:'#2f7d4f',si:'#8d99ab',skin:'#c98e66'};
 
 /* ---------- Story cast ---------- */
 function portrait(id){
@@ -14,11 +14,11 @@ function portrait(id){
    <rect x="53" y="72" width="14" height="14" fill="#d9a882"/><path d="M14 120c4-25 21-37 46-37s42 12 46 37Z" fill="#3b4f6b"/><path d="M50 83l10 17 10-17Z" fill="#f6f4ef"/>
    <ellipse cx="60" cy="55" rx="18" ry="21" fill="#e6b994"/><path d="M41 51c3-15 14-22 27-20 7 2 12 8 12 17-11-7-25-5-39 3Z" fill="#2a201c"/>${eyes(55)}
    <path d="M52 66q8 6 16 0" stroke="#8a4632" fill="none" stroke-width="2.2" stroke-linecap="round"/><path d="M47 85l13 23 13-23" stroke="${COL.amber}" fill="none" stroke-width="2.5"/><rect x="54" y="106" width="12" height="11" rx="1.5" fill="${COL.amber}"/>`,
-  nova:`<circle cx="60" cy="60" r="60" fill="#1f2a37"/>
-   <g stroke="${COL.amber}" stroke-width="3" stroke-linecap="round">${[42,54,66,78].map(p=>`<path d="M${p} 22v8M${p} 90v8M22 ${p}h8M90 ${p}h8"/>`).join('')}</g>
-   <rect x="30" y="30" width="60" height="60" rx="9" fill="#2d3b4d" stroke="${COL.amber}" stroke-width="2.5"/>
-   <rect class="nova-eye" x="41" y="50" width="13" height="7" rx="3.5" fill="#f3c25a"/><rect class="nova-eye" x="66" y="50" width="13" height="7" rx="3.5" fill="#f3c25a"/>
-   <path d="M44 72h6l3-5 4 9 4-9 4 9 3-4h8" fill="none" stroke="#f3c25a" stroke-width="2" stroke-linejoin="round"/>`
+  nova:`<circle cx="60" cy="60" r="60" fill="#14202d"/>
+   <g stroke="#7fb0ff" stroke-width="3" stroke-linecap="round">${[42,54,66,78].map(p=>`<path d="M${p} 22v8M${p} 90v8M22 ${p}h8M90 ${p}h8"/>`).join('')}</g>
+   <rect x="30" y="30" width="60" height="60" rx="9" fill="#2d3b4d" stroke="#7fb0ff" stroke-width="2.5"/>
+   <rect class="nova-eye" x="41" y="50" width="13" height="7" rx="3.5" fill="#bcd6ff"/><rect class="nova-eye" x="66" y="50" width="13" height="7" rx="3.5" fill="#bcd6ff"/>
+   <path d="M44 72h6l3-5 4 9 4-9 4 9 3-4h8" fill="none" stroke="#bcd6ff" stroke-width="2" stroke-linejoin="round"/>`
  }[id]||'';
  return `<svg viewBox="0 0 120 120" class="portrait" aria-hidden="true">${art}</svg>`;
 }
@@ -85,15 +85,23 @@ function cameraArt(kind){
 function floorPlan(){
  const room=(x,y,w,h,n,label,sub,fill='#ffffff')=>`<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${COL.ink}" stroke-width="1.5"/><text x="${x+10}" y="${y+20}" font-size="10" font-family="IBM Plex Mono,monospace" fill="${COL.muted}">${n}</text><text x="${x+10}" y="${y+38}" font-size="13" font-weight="600" fill="${COL.ink}" font-family="IBM Plex Sans,Inter,sans-serif">${label}</text><text x="${x+10}" y="${y+54}" font-size="11" fill="${COL.muted}" font-family="IBM Plex Sans,Inter,sans-serif">${sub}</text></g>`;
  return `<svg viewBox="0 0 600 330" class="floorplan" role="img" aria-label="Floor plan of the Nova factory: four factory rooms, then the training office and career planner, then the dispatch dock">
-  <rect x="1" y="1" width="598" height="328" fill="#fbfaf7" stroke="${COL.line}"/>
+  <rect x="1" y="1" width="598" height="328" fill="#f7f9fb" stroke="${COL.line}"/>
   <g stroke="${COL.line}" stroke-width="1">${Array.from({length:14},(_,i)=>`<path d="M${i*44+10} 1v328"/>`).join('')}${Array.from({length:8},(_,i)=>`<path d="M1 ${i*44+10}h598"/>`).join('')}</g>
   <text x="18" y="26" font-size="11" font-family="IBM Plex Mono,monospace" fill="${COL.muted}" letter-spacing="2">NOVA SEMICONDUCTOR · LEVEL 1</text>
   <rect x="18" y="40" width="420" height="160" fill="none" stroke="${COL.blue}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="26" y="214" font-size="10" font-family="IBM Plex Mono,monospace" fill="${COL.blue}">CLEANROOM · CLASS 100</text>
-  ${room(30,52,120,70,'01','Gowning','Get clean')}${room(162,52,130,70,'02','Litho bay','Print the pattern','#fdf3d9')}${room(304,52,120,70,'03','Probe & dice','Test and cut')}
+  ${room(30,52,120,70,'01','Gowning','Get clean')}${room(162,52,130,70,'02','Litho bay','Print the pattern','#fff6cc')}${room(304,52,120,70,'03','Probe & dice','Test and cut')}
   ${room(304,130,120,62,'04','Inspection','Measure & sort')}
   ${room(30,236,140,72,'05','Training office','Qualifications')}${room(184,236,140,72,'06','Career planner','Your route')}
   ${room(460,52,124,140,'⚑','Dispatch dock','Truck at dawn','#eef2f6')}
-  <path d="M150 87h12M292 87h12M364 122v8M424 161h36M364 192v20H100v24M170 272h14M324 272h80V192" fill="none" stroke="${COL.amber}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 7"/>
-  <circle cx="60" cy="140" r="7" fill="${COL.amber}"/><text x="72" y="144" font-size="11" fill="${COL.ink}" font-family="IBM Plex Sans,Inter,sans-serif">You start here</text>
+  <path d="M150 87h12M292 87h12M364 122v8M424 161h36M364 192v20H100v24M170 272h14M324 272h80V192" fill="none" stroke="${COL.accent}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 7"/>
+  <circle cx="60" cy="140" r="7" fill="${COL.accent}"/><text x="72" y="144" font-size="11" fill="${COL.ink}" font-family="IBM Plex Sans,Inter,sans-serif">You start here</text>
  </svg>`;
 }
+
+/* ---------- Photo helpers ----------
+   photoFigure: a captioned photo that removes itself if the file is missing.
+   photoOr: a photo laid over a drawn fallback; if the photo fails, the drawing shows. */
+function photoFigure(key,cls=''){const p=PHOTOS[key];if(!p)return '';
+ return `<figure class="photo ${cls}"><img src="img/${p.file}" alt="${p.caption}" loading="lazy" onerror="this.parentNode.remove()"><figcaption>${p.caption}</figcaption></figure>`;}
+function photoOr(key,fallback,cls=''){const p=PHOTOS[key];if(!p)return fallback;
+ return `<span class="ph ${cls}">${fallback}<img src="img/${p.file}" alt="" loading="lazy" onload="this.parentNode.classList.add('has-photo')" onerror="this.remove()"></span>`;}
