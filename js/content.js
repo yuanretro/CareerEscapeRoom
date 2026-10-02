@@ -14,58 +14,63 @@ const SOURCES = [
 // Outbound codes go into the Form. Return codes are revealed by the Form.
 const RETURN_CODES = ['GATE-2F8R','GATE-3M6T','GATE-4K9P','GATE-5D2W','GATE-6H7C','BATCH-SAVED'];
 
+/* Rooms 1–4 are the factory floor (tech only). Rooms 5–6 are the training office (career only). */
+const CAREER_ROOMS=[4,5];
+const isCareer=i=>CAREER_ROOMS.includes(i);
 const ROOMS = [
  {name:'Staff terminal',short:'CHIP BASICS',code:'NOVA-7K4M',verb:'Match the parts'},
  {name:'Cleanroom entrance',short:'SPOT THE HAZARDS',code:'NOVA-2R8T',verb:'Check the cleanroom'},
  {name:'Materials archive',short:'PUT IT IN ORDER',code:'NOVA-5W9C',verb:'Rebuild the steps'},
  {name:'Inspection station',short:'PASS OR FAIL',code:'NOVA-8H3P',verb:'Inspect the samples'},
- {name:'Project records',short:'RECORD THE RESULTS',code:'NOVA-4D7X',verb:'Complete the test report'},
- {name:'Dispatch terminal',short:'TRACK THE BATCH',code:'NOVA-6Y2B',verb:'Match the batch record'}
+ {name:'Training office',short:'CAREER · QUALIFICATIONS',code:'NOVA-4D7X',verb:'Complete the trade fact sheet'},
+ {name:'Career planner',short:'CAREER · PATHWAY',code:'NOVA-6Y2B',verb:'Plan the route into the trade'}
 ];
 
-/* The real-world pathway. One step is unlocked per room and the full roadmap is shown at the end. */
+/* The real-world route into the trade, in order. Used by Room 6, the career guide and the ending. */
 const PATHWAY = [
- {title:'Finish high school',tag:'Grade 12 / OSSD',
-  text:'The Ontario apprenticeship lists <strong>Grade 12</strong> (an Ontario Secondary School Diploma or equivalent) as its academic entry requirement. Math, physics or chemistry, and technology courses such as Computer Engineering (TEJ) are useful preparation.'},
- {title:'Get early experience',tag:'Co-op · OYAP · SHSM',
-  text:'High school students can try the trade through <strong>co-op</strong>, the <strong>Ontario Youth Apprenticeship Program (OYAP)</strong> or a <strong>Specialist High Skills Major</strong> in manufacturing. These count as real workplace experience.'},
- {title:'Find a sponsor and register',tag:'Employment Ontario',
-  text:'An apprenticeship starts when an <strong>employer agrees to sponsor and train you</strong>. Together you register a training agreement through <strong>Employment Ontario</strong>. You then get a training standard (logbook) that lists the skills to master.'},
- {title:'Learn on the job',tag:'≈ 4,000 hours',
-  text:'Most of the training is <strong>paid, on-the-job learning</strong>: about 4,000 hours (around 2 years). You set up and monitor process equipment and follow cleanroom procedures. Tasks include spin coating, photo aligning, etching, dicing, testing and inspecting. A supervisor signs off each skill.'},
- {title:'Complete in-class training',tag:'304 hours',
-  text:'Apprentices also complete <strong>304 hours of in-class technical training</strong>, split into levels at an approved college or training provider. Safety training such as <strong>WHMIS</strong> is required for anyone working with hazardous products.'},
- {title:'Earn your certificate',tag:'Certificate of Apprenticeship',
-  text:'When all hours and skills are signed off, <strong>Skilled Trades Ontario</strong> issues a <strong>Certificate of Apprenticeship</strong>. It is a <strong>non-compulsory</strong> trade (code <strong>630A</strong>), so there is no Certificate of Qualification exam and it is not a Red Seal trade. You can keep growing through college diplomas (Electronics Engineering Technician or Technologist) or university engineering.'}
+ {id:'school',title:'Try the trade in high school',tag:'Co-op · OYAP · SHSM',
+  text:'While still in high school, students can try the trade through <strong>co-op</strong>, the <strong>Ontario Youth Apprenticeship Program (OYAP)</strong> or a <strong>Specialist High Skills Major</strong> in manufacturing.'},
+ {id:'grade12',title:'Finish Grade 12',tag:'OSSD or equivalent',
+  text:'The apprenticeship lists <strong>Grade 12</strong> (an Ontario Secondary School Diploma or equivalent) as its academic entry requirement. Math, science and technology courses are useful preparation.'},
+ {id:'sponsor',title:'Find an employer sponsor',tag:'Get hired',
+  text:'An apprenticeship is a job. It starts when an <strong>employer agrees to sponsor and train you</strong>.'},
+ {id:'register',title:'Register the apprenticeship',tag:'Employment Ontario',
+  text:'You and your sponsor <strong>register a training agreement through Employment Ontario</strong>. You receive a training standard (logbook) listing the skills to master.'},
+ {id:'train',title:'Train on the job and in class',tag:'≈ 4,000 h + 304 h',
+  text:'About <strong>4,000 hours of paid on-the-job training</strong> (around 2 years) plus <strong>304 hours of in-class technical training</strong> at an approved college or training provider. A supervisor signs off each skill.'},
+ {id:'cert',title:'Earn the Certificate of Apprenticeship',tag:'Skilled Trades Ontario',
+  text:'When all hours and skills are signed off, <strong>Skilled Trades Ontario</strong> issues a <strong>Certificate of Apprenticeship</strong>. The trade (code <strong>630A</strong>) is non-compulsory, with no Certificate of Qualification exam and no Red Seal.'}
 ];
 
-/* ---------- Discovery pools (replace the maze in most rooms) ---------- */
+/* ---------- Discovery pools ---------- */
+// Career pools are tagged by room: 'qual' = Room 5 (qualifications), 'path' = Room 6 (pathway).
 const MENTOR_POOL = [
- {q:'What does your job actually involve?',a:'I set up, run and monitor process equipment that builds microchips. Some machines are manual and some are automatic. Day to day I do spin coating, photo aligning, developing, etching, sputtering, dicing, baking, testing and inspecting.'},
- {q:'What education do I need to start?',a:'For the Ontario apprenticeship the academic entry requirement is <strong>Grade 12</strong>, which means an OSSD or equivalent. Math, science and tech courses make the first months much easier.'},
- {q:'How long is the apprenticeship?',a:'Roughly <strong>two years</strong>. That is about 4,000 hours of paid on-the-job training plus <strong>304 hours</strong> of in-class technical training.'},
- {q:'How do I actually become an apprentice?',a:'First, find an employer willing to <strong>sponsor and train you</strong>. Then you register a training agreement through <strong>Employment Ontario</strong>. As you learn, your skills get signed off in a training standard (logbook).'},
- {q:'What certificate do I get at the end?',a:'A <strong>Certificate of Apprenticeship</strong> from Skilled Trades Ontario. The trade is non-compulsory, so there is no Certificate of Qualification exam, and it is not a Red Seal trade.'},
- {q:'Can I start while still in high school?',a:'Yes! Co-op, the <strong>Ontario Youth Apprenticeship Program (OYAP)</strong> and a <strong>Specialist High Skills Major</strong> let you earn experience before you graduate.'},
- {q:'What safety training will I need?',a:'Ontario workplaces require <strong>WHMIS</strong> training if you work with hazardous products, and chip fabs use plenty of chemicals. You also learn cleanroom gowning and equipment safety on the job.'},
- {q:'What makes someone good at this?',a:'Attention to detail, steady hands, patience, and following written procedures exactly. You also need basic math for measurements and careful record-keeping. One skipped step can ruin a whole batch.'},
- {q:'Are there other routes into chipmaking?',a:'Yes. Ontario colleges offer <strong>Electronics Engineering Technician</strong> (2-year) and <strong>Technologist</strong> (3-year) diplomas. Universities offer electrical, computer and nanotechnology engineering.'}
+ {t:'qual',q:'What education do I need to start?',a:'For the Ontario apprenticeship the academic entry requirement is <strong>Grade 12</strong>: an OSSD or equivalent. Math, science and tech courses make the first months much easier.'},
+ {t:'qual',q:'What certificate do I get at the end?',a:'A <strong>Certificate of Apprenticeship</strong> from Skilled Trades Ontario. There is no Certificate of Qualification exam, and it is not a Red Seal trade.'},
+ {t:'qual',q:'Do I need the certificate to work?',a:'No. Micro Electronics Manufacturer (trade code <strong>630A</strong>) is a <strong>non-compulsory</strong> trade. The certificate still proves your skills to employers.'},
+ {t:'qual',q:'What safety training will I need?',a:'<strong>WHMIS</strong> training is required in Ontario if you work with hazardous products, and chip factories use plenty of chemicals. You also learn gowning and equipment safety on the job.'},
+ {t:'qual',q:'What makes someone good at this job?',a:'Attention to detail, steady hands and patience. You need to follow written procedures exactly, use basic math for measurements and keep careful records.'},
+ {t:'path',q:'Can I start while still in high school?',a:'Yes! Co-op, the <strong>Ontario Youth Apprenticeship Program (OYAP)</strong> and a <strong>Specialist High Skills Major</strong> let you get experience before you graduate.'},
+ {t:'path',q:'How do I actually become an apprentice?',a:'First, find an employer willing to <strong>sponsor and train you</strong>. Then you both register a training agreement through <strong>Employment Ontario</strong>.'},
+ {t:'path',q:'How long does the apprenticeship take?',a:'Roughly <strong>two years</strong>: about 4,000 hours of paid on-the-job training plus <strong>304 hours</strong> of in-class training.'},
+ {t:'path',q:'Where does the in-class training happen?',a:'At an approved <strong>college or training provider</strong>, split into levels. Everything else is learned on the job with your sponsor.'},
+ {t:'path',q:'Are there other routes into chipmaking?',a:'Yes. Ontario colleges offer <strong>Electronics Engineering Technician</strong> (2-year) and <strong>Technologist</strong> (3-year) diplomas. Universities offer electrical, computer and nanotechnology engineering.'}
 ];
 
 const QUIZ_POOL = [
- {s:'You need a university degree to start the Micro Electronics Manufacturer apprenticeship.',fact:false,why:'The academic entry requirement is Grade 12 (OSSD or equivalent).'},
- {s:'Apprentices are paid while they train on the job.',fact:true,why:'An apprenticeship is a job: you earn while you learn from a sponsoring employer.'},
- {s:'Most of this apprenticeship happens in a classroom.',fact:false,why:'About 4,000 hours are on the job. In-class training is 304 hours.'},
- {s:'Micro Electronics Manufacturer is a non-compulsory trade in Ontario.',fact:true,why:'You can work in the field without the certificate, but the certificate proves your skills.'},
- {s:'Finishing the apprenticeship earns a Certificate of Apprenticeship.',fact:true,why:'Skilled Trades Ontario issues it once all hours and skills are complete.'},
- {s:'This trade ends with a Red Seal exam.',fact:false,why:'It is not a Red Seal trade and has no Certificate of Qualification exam.'},
- {s:'Cleanroom workers may wear regular clothes if they were freshly washed.',fact:false,why:'Workers wear gowns, hoods, boots and gloves. Normal fabric sheds particles.'},
- {s:'High school students can gain apprenticeship experience through OYAP.',fact:true,why:'The Ontario Youth Apprenticeship Program connects students with real trade placements.'},
- {s:'One silicon wafer can hold hundreds of chips.',fact:true,why:'Many identical chips are built side by side, then cut apart (diced).'},
- {s:'WHMIS training is only for chemists.',fact:false,why:'Any worker who may handle or be exposed to hazardous products needs WHMIS training.'},
- {s:'An apprentice needs an employer sponsor.',fact:true,why:'The sponsor provides the on-the-job training and signs off your skills.'}
+ {t:'qual',s:'You need a university degree to start the Micro Electronics Manufacturer apprenticeship.',fact:false,why:'The academic entry requirement is Grade 12 (OSSD or equivalent).'},
+ {t:'qual',s:'Micro Electronics Manufacturer is a non-compulsory trade in Ontario.',fact:true,why:'You can work without the certificate, but it proves your skills.'},
+ {t:'qual',s:'Finishing the apprenticeship earns a Certificate of Apprenticeship.',fact:true,why:'Skilled Trades Ontario issues it once all hours and skills are complete.'},
+ {t:'qual',s:'This trade ends with a Red Seal exam.',fact:false,why:'It is not a Red Seal trade and has no Certificate of Qualification exam.'},
+ {t:'qual',s:'WHMIS training is only for chemists.',fact:false,why:'Any worker who may handle or be exposed to hazardous products needs WHMIS training.'},
+ {t:'path',s:'Apprentices are paid while they train on the job.',fact:true,why:'An apprenticeship is a job: you earn while you learn from a sponsoring employer.'},
+ {t:'path',s:'Most of this apprenticeship happens in a classroom.',fact:false,why:'About 4,000 hours are on the job. In-class training is 304 hours.'},
+ {t:'path',s:'High school students can gain apprenticeship experience through OYAP.',fact:true,why:'The Ontario Youth Apprenticeship Program connects students with real trade placements.'},
+ {t:'path',s:'An apprentice needs an employer sponsor.',fact:true,why:'The sponsor provides the on-the-job training and signs off your skills.'},
+ {t:'path',s:'You register an apprenticeship by applying to a university.',fact:false,why:'You and your sponsor register a training agreement through Employment Ontario.'}
 ];
 
+// Word decoder is a factory-floor mode, so it only uses technical terms.
 const GLOSSARY = [
  ['WAFER','A thin, round slice of silicon that many chips are built on.'],
  ['SILICON','The element, found in sand, that most chips are made from.'],
@@ -73,11 +78,9 @@ const GLOSSARY = [
  ['ETCHING','Removing material from a wafer to shape a circuit pattern.'],
  ['DICING','Cutting a finished wafer into individual chips.'],
  ['GOWNING','Putting on the cleanroom suit, hood, boots and gloves in order.'],
- ['APPRENTICE','A worker who learns a trade on the job while being paid.'],
- ['WHMIS','Canada’s system for labelling and safely handling hazardous products.'],
  ['SENSOR','A part that detects changes like light, heat or motion.'],
- ['LOGBOOK','The record where an apprentice’s completed skills are signed off.'],
- ['SPONSOR','The employer who agrees to train an apprentice.'],
+ ['TRANSISTOR','A tiny switch. Modern chips contain billions of them.'],
+ ['PARTICLE','A speck of dust that can ruin a circuit pattern.'],
  ['INSPECTION','Checking a product carefully against its requirements.']
 ];
 
@@ -93,10 +96,11 @@ const DISCOVERY = {
  maze:{name:'Service maze',icon:'⌗',how:'Drive the rover to each numbered terminal and press E.'},
  scene:{name:'Lab walkthrough',icon:'◎',how:'Click each numbered station in the lab to open its file.'},
  scope:{name:'Microscope scan',icon:'⊕',how:'Move the lens over the wafer. Click the 3 hidden defects.'},
- mentor:{name:'Ask a mentor',icon:'✉',how:'Ask the senior technician 3 questions. Each answer unlocks a file.'},
- quiz:{name:'Myth or fact',icon:'?',how:'Call each statement Myth or Fact. Every correct call unlocks a file.'},
- decode:{name:'Word decoder',icon:'⇄',how:'Unscramble 3 chipmaking terms to unlock the files.'}
+ decode:{name:'Word decoder',icon:'⇄',how:'Unscramble 3 chipmaking terms to unlock the files.'},
+ mentor:{name:'Ask a mentor',icon:'✉',how:'Ask the training advisor 3 questions. Each answer unlocks a file.'},
+ quiz:{name:'Myth or fact',icon:'?',how:'Call each statement Myth or Fact. Every correct call unlocks a file.'}
 };
+const TECH_MODES=['maze','scene','scope','decode'],CAREER_MODES=['mentor','quiz'];
 const CHALLENGES = ['shooter','stacker','dodge','memory','timing','breaker'];
 
 /* ---------- Puzzle pools ---------- */
@@ -109,9 +113,9 @@ const PARTS = {
  radio:{name:'Wireless chip',job:'Sends and receives radio signals',card:'A <strong>wireless chip</strong> sends and receives radio signals for Wi-Fi or Bluetooth.'}
 };
 const PART_EXTRAS = [
- 'A <strong>Micro Electronics Manufacturer</strong> (Ontario trade code <strong>630A</strong>) sets up, operates and monitors the equipment that makes tiny parts like this.',
- 'In Ontario this is an <strong>apprenticeship</strong> trade: you train mostly on the job and are paid while you learn.',
- 'Workers in this trade also <strong>inspect products, record results</strong> and follow cleanroom procedures.'
+ 'Parts like this are built on a thin slice of silicon called a <strong>wafer</strong>.',
+ 'Their circuits are so small that a single <strong>dust particle</strong> can ruin one.',
+ 'Every finished part is <strong>tested</strong> before it leaves the factory.'
 ];
 const HAZARDS = {
  drink:{unsafe:true,title:'Open drink',caption:'Coffee beside the work surface'},
@@ -133,8 +137,15 @@ const STAGES = [
  {id:'dice',label:'Cut (dice) the wafer into chips'},
  {id:'package',label:'Package the chips'}
 ];
-const DEFECTS = {cracked:'Their cases were cracked',bent:'Their pins were bent',scratched:'Their surfaces were scratched',untested:'They had not been tested'};
-
+/* Room 5 fact sheet: three of these fields are asked each game. */
+const FACT_FIELDS = {
+ entry:{label:'Academic entry requirement',answer:'a',options:{a:'Grade 12 (OSSD or equivalent)',b:'A university degree',c:'Grade 10',d:'A college diploma'}},
+ credential:{label:'Credential earned at the end',answer:'a',options:{a:'Certificate of Apprenticeship',b:'Red Seal endorsement',c:'Certificate of Qualification',d:'Bachelor’s degree'}},
+ type:{label:'Is the certificate required to work?',answer:'a',options:{a:'No: non-compulsory trade',b:'Yes: compulsory trade'}},
+ safety:{label:'Training needed to handle hazardous products',answer:'a',options:{a:'WHMIS',b:'A driver’s licence',c:'None',d:'Lifeguard certificate'}},
+ code:{label:'Ontario trade code',answer:'a',options:{a:'630A',b:'309A',c:'442A',d:'310S'}},
+ hours:{label:'In-class technical training',answer:'a',options:{a:'304 hours',b:'40 hours',c:'2,000 hours',d:'4 years'}}
+};
 /* ---------- Random helpers ---------- */
 const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -145,10 +156,11 @@ function scramble(word){if(word.length<2)return word;let s=word;for(let n=0;n<20
 function makeVariant(){
  const v={};
  v.challenges=shuffle(CHALLENGES);
- v.discover=shuffle(Object.keys(DISCOVERY));
+ v.discover=shuffle(TECH_MODES).concat(shuffle(CAREER_MODES));
  v.mazeSeed=rint(1,1e9);
- v.mentor=pickN(MENTOR_POOL.map((_,i)=>i),5);
- v.quiz=shuffle(QUIZ_POOL.map((_,i)=>i));
+ const tagged=(pool,t)=>pool.map((x,i)=>x.t===t?i:-1).filter(i=>i>=0);
+ v.mentor={4:shuffle(tagged(MENTOR_POOL,'qual')),5:shuffle(tagged(MENTOR_POOL,'path'))};
+ v.quiz={4:shuffle(tagged(QUIZ_POOL,'qual')),5:shuffle(tagged(QUIZ_POOL,'path'))};
  v.glossary=pickN(GLOSSARY.map((_,i)=>i),3).map(i=>({i,mix:scramble(GLOSSARY[i][0])}));
  v.scope=pickN(SCOPE_DEFECTS.map((_,i)=>i),3).map(d=>({d,x:0,y:0}));
  // Spread the defects so the lens never shows two at once.
@@ -156,8 +168,7 @@ function makeVariant(){
  v.scope.forEach((s,k)=>{s.x=spots[k][0]+rint(-3,3);s.y=spots[k][1]+rint(-3,3);});
  // Room 1 – parts
  v.parts=pickN(Object.keys(PARTS),3);
- v.jobs=shuffle(Object.keys(PARTS)).filter(p=>!v.parts.includes(p)).slice(0,1).concat(v.parts);
- v.jobs=shuffle(v.jobs);
+ v.jobs=shuffle(shuffle(Object.keys(PARTS)).filter(p=>!v.parts.includes(p)).slice(0,1).concat(v.parts));
  // Room 2 – hazards
  const unsafe=Object.keys(HAZARDS).filter(k=>HAZARDS[k].unsafe),safe=Object.keys(HAZARDS).filter(k=>!HAZARDS[k].unsafe),n=rint(3,4);
  v.hazards=shuffle(pickN(unsafe,n).concat(pickN(safe,6-n)));
@@ -168,20 +179,19 @@ function makeVariant(){
  v.size=rint(4,6);
  do{v.samples=['A','B','C'].map(id=>({id,size:v.size+[0,0,1,-1,2][rint(0,4)],crack:Math.random()<.35}));}
  while(!v.samples.some(s=>s.size===v.size&&!s.crack)||v.samples.every(s=>s.size===v.size&&!s.crack));
- // Room 5 – test report
- v.tested=rint(6,12)*10;v.failed=rint(2,Math.floor(v.tested/20))*5;v.passed=v.tested-v.failed;
- v.defect=pickN(['cracked','bent','scratched'],1)[0];
- // Room 6 – batches
- const ids=pickN([302,304,306,311,318,325,327,333,340,348],3);
- v.batches={fail:'B-'+ids[0],pass:'B-'+ids[1],wait:'B-'+ids[2]};
- v.batchOrder=shuffle(['fail','pass','wait']);v.stationOrder=shuffle(['office','pack','hold']);v.defectOrder=shuffle(Object.keys(DEFECTS));v.packStation=rint(3,8);v.holdStation=pickN([1,2,9].filter(n=>n!==v.packStation),1)[0];
+ // Room 5 – trade fact sheet
+ v.facts=pickN(Object.keys(FACT_FIELDS),3).map(f=>({f,order:shuffle(Object.keys(FACT_FIELDS[f].options))}));
+ // Room 6 – pathway order (4 or 5 of the 6 steps, kept in real order)
+ const drop=pickN(PATHWAY.map((_,i)=>i),rint(1,2));
+ v.path=PATHWAY.map(p=>p.id).filter((_,i)=>!drop.includes(i));
+ v.pathOrder=shuffle(v.path);
  return v;
 }
 
 /* Clue cards, question, hint and reward for one room, built from the variant. */
 function roomContent(i,v){
  if(i===0)return {
-  intro:'You are training as a Micro Electronics Manufacturer. Learn about three parts made in the factory, then match each to its job.',
+  intro:'Welcome to the Nova chip factory. Learn about three parts made here, then match each to its job.',
   question:'Match each part to its job. One job does not belong to any of them.',
   evidence:v.parts.map((p,k)=>({title:PARTS[p].name,text:`<p>${PARTS[p].card}</p><p>${PART_EXTRAS[k]}</p>`})),
   hint:v.parts.map(p=>`${PARTS[p].name} → ${PARTS[p].job.toLowerCase()}`).join('. ')+'.',
@@ -212,28 +222,28 @@ function roomContent(i,v){
   evidence:[
    {title:'The two rules',text:`<p>A sample passes only if it has:</p><ul><li><strong>No cracks</strong>, and</li><li>exactly the correct size: <strong>${L} cm</strong>.</li></ul><p>These are simplified training rules for this game.</p>`},
    {title:'Sample report',text:`<div class="mini-table">${v.samples.map(s=>`<div><b>Sample ${s.id}</b><span>${s.size} cm · ${s.crack?'has a crack':'no cracks'}</span></div>`).join('')}</div><p>Check size and cracks separately. One failed rule means the sample fails.</p>`},
-   {title:'Why inspect?',text:'<p>A Micro Electronics Manufacturer <strong>measures parts, checks for defects and records results</strong>. It is listed among the core tasks of the trade.</p><p>A part that is “almost right” still fails if it does not meet the requirement.</p>'}
+   {title:'Why inspect?',text:'<p>Parts are <strong>measured and checked for defects</strong> before they go into factory equipment, and every result is recorded.</p><p>A part that is “almost right” still fails if it does not meet the requirement.</p>'}
   ],
   hint:v.samples.map(s=>`${s.id}: ${pass(s)?'pass':'fail'}${pass(s)?'':s.crack?' (crack)':' ('+s.size+' cm)'}`).join(' · '),
   reward:`Inspection complete. Only samples at exactly ${L} cm with no cracks passed.`};}
- if(i===4)return {
-  intro:'The last batch of chips has been tested. Record the defect and count how many chips passed.',
-  question:`Why did ${v.failed} chips fail? How many of the ${v.tested} chips passed?`,
+ if(i===4){const label=f=>FACT_FIELDS[f].label,ans=f=>FACT_FIELDS[f].options[FACT_FIELDS[f].answer];return {
+  intro:'The batch passed inspection. Now, in the training office: what does this job require in Ontario?',
+  question:'Fill in the trade fact sheet for a Micro Electronics Manufacturer in Ontario.',
   evidence:[
-   {title:'Test report',text:`<p>The lab tested <strong>${v.tested} chips</strong>. Exactly <strong>${v.failed} failed</strong>. The other chips passed every check.</p><p>All counts in this training report are fictional.</p>`},
-   {title:'Defect record',text:`<p>Inspector note: “${DEFECTS[v.defect]}.” Record the actual defect, and keep the failed chips clearly marked and separate from passing ones.</p><p>Identifying defects and recording test results are part of the trade.</p>`},
-   {title:'Results summary',text:`<p><strong>Passed = total tested − failed.</strong></p><p>Record both counts so the next worker knows which products passed inspection.</p>`}
+   {title:'Getting in',text:'<p>The Ontario apprenticeship for a <strong>Micro Electronics Manufacturer</strong> lists <strong>Grade 12</strong> (an OSSD or equivalent) as its academic entry requirement.</p><p>No university degree or college diploma is required to start. Math, science and technology courses are useful preparation.</p>'},
+   {title:'About the trade',text:'<p>The Ontario trade code is <strong>630A</strong>. It is a <strong>non-compulsory</strong> trade: the certificate is not legally required to work, but it proves your skills.</p><p>Finishing the apprenticeship earns a <strong>Certificate of Apprenticeship</strong> from Skilled Trades Ontario. There is no Certificate of Qualification exam and no Red Seal.</p>'},
+   {title:'Training and safety',text:'<p>The apprenticeship takes about 2 years: roughly <strong>4,000 hours on the job</strong> plus <strong>304 hours of in-class technical training</strong>.</p><p>Anyone who works with hazardous products must complete <strong>WHMIS</strong> safety training.</p>'}
   ],
-  hint:`${DEFECTS[v.defect]}. ${v.tested} − ${v.failed} = ${v.passed}.`,
-  reward:`Report complete: ${v.tested} tested, ${v.failed} failed, ${v.passed} passed.`};
- const b=v.batches;return {
-  intro:'Use the product tracking log to find the passing chips from Room 5 and send them to the right station.',
-  question:`Which batch contains the ${v.passed} passing chips? Where does it go next?`,
+  hint:v.facts.map(({f})=>`${label(f)}: ${ans(f)}`).join(' · '),
+  reward:'Fact sheet complete. You know what the trade requires.'};}
+ const label=id=>PATHWAY.find(p=>p.id===id).title;return {
+  intro:'Map your own route into the trade, from high school all the way to the certificate.',
+  question:`Click the ${v.path.length} steps in the order you would complete them.`,
   evidence:[
-   {title:'Batch tracking log',text:`<div class="mini-table">${v.batchOrder.map(k=>({fail:[b.fail,`${v.failed} failed chips · hold`],pass:[b.pass,`${v.passed} passing chips · ready`],wait:[b.wait,'Not yet tested · wait']})[k]).map(([id,t])=>`<div><b>${id}</b><span>${t}</span></div>`).join('')}</div><p>A batch ID is a label that helps workers track a group of products.</p>`},
-   {title:'Work order',text:`<p>Ready batches go to <strong>Packaging, Station ${v.packStation}</strong>.</p><p>Failed batches go to <strong>Hold area, Station ${v.holdStation}</strong>. The office only handles paperwork.</p>`},
-   {title:'Final checklist',text:'<p>Match the <strong>batch ID, test result and next station</strong> before moving anything.</p><p>Keeping product tracking records is part of the role. It stops tested, failed and untested products from getting mixed up.</p>'}
+   {title:'In high school',text:'<p>Start early. While still in high school, try the trade through <strong>co-op, OYAP or a Specialist High Skills Major</strong>.</p><p>Then <strong>finish Grade 12</strong> (OSSD or equivalent), the entry requirement for the apprenticeship.</p>'},
+   {title:'Getting hired',text:'<p>An apprenticeship is a job, so first <strong>find an employer willing to sponsor you</strong>.</p><p>Once you have a sponsor, you both <strong>register a training agreement through Employment Ontario</strong>.</p>'},
+   {title:'Training and certificate',text:'<p>After registering, you <strong>train on the job and in class</strong>: about 4,000 hours plus 304 hours.</p><p>The final step: once every skill is signed off, Skilled Trades Ontario issues your <strong>Certificate of Apprenticeship</strong>.</p>'}
   ],
-  hint:`${v.passed} passing chips → ${b.pass} → Packaging, Station ${v.packStation}.`,
-  reward:`Batch ${b.pass}: ${v.passed} passing chips, ready for Packaging, Station ${v.packStation}.`};
+  hint:v.path.map(label).join(' → ')+'.',
+  reward:'Route planned. You have mapped every step from high school to certified Micro Electronics Manufacturer.'};
 }

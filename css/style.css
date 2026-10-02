@@ -80,7 +80,7 @@ p{line-height:1.55}strong,b{font-weight:650}ul,ol{margin:12px 0;padding-left:24p
 .floor-screen.final{grid-template-rows:56px 1fr 18px}
 .room-heading{display:flex;align-items:center;gap:22px}
 .room-heading h1{font-size:27px;white-space:nowrap;margin-top:3px}
-.room-intro{flex:1;font-size:13.5px;color:var(--muted);line-height:1.45;max-width:440px}
+.room-intro{flex:1;font-size:13.5px;color:var(--muted);line-height:1.45;max-width:440px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .steps{display:flex;gap:8px;margin-left:auto}
 .step-chip{display:flex;align-items:center;gap:9px;padding:6px 12px 6px 7px;border:1px solid var(--line);border-radius:999px;background:#0b1f26;font-size:13px;font-weight:600;color:#7e9c99;white-space:nowrap}
 .step-chip small{display:block;font:9.5px var(--mono);letter-spacing:1px;text-transform:uppercase;font-weight:400}
@@ -144,7 +144,7 @@ p{line-height:1.55}strong,b{font-weight:650}ul,ol{margin:12px 0;padding-left:24p
 .quiz-card h2{font-size:28px;line-height:1.3;margin:14px 0 24px;font-weight:500}
 .quiz-actions{display:flex;justify-content:center;gap:16px}
 .btn.big{min-width:180px;min-height:58px;font-size:18px}
-.btn.myth{background:linear-gradient(180deg,#ffb3a6,#f08a78);border-color:#ffb3a6;color:#3a0d06;box-shadow:0 4px 18px #f08a7833}
+.btn.is-myth{background:linear-gradient(180deg,#ffb3a6,#f08a78);border-color:#ffb3a6;color:#3a0d06;box-shadow:0 4px 18px #f08a7833}
 .quiz-msg{margin-top:20px;font-size:14.5px;color:var(--muted);min-height:44px}
 .quiz-card.good{border-color:#3f9a80}.quiz-card.good .quiz-msg strong{color:var(--teal)}.quiz-card.bad .quiz-msg strong{color:var(--red)}
 
@@ -195,7 +195,7 @@ p{line-height:1.55}strong,b{font-weight:650}ul,ol{margin:12px 0;padding-left:24p
 .simple-form .math-line{font:600 24px var(--mono);color:var(--gold);margin:3px 0 10px}
 
 /* ---------- Gate ---------- */
-.gate-screen{padding:20px 48px;display:grid;grid-template-rows:auto auto 1fr;gap:14px}
+.gate-screen{padding:24px 48px 34px;display:grid;grid-template-rows:auto auto;align-content:center;gap:22px}
 .gate-heading h1{font-size:34px;margin-top:5px}
 .path-card{display:flex;gap:18px;align-items:flex-start;padding:16px 20px;border-radius:var(--radius);border:1px solid #6b5a33;background:linear-gradient(135deg,#2a2412,#12232a 60%)}
 .path-card p{font-size:14.5px;color:#d6dfd8;margin-top:6px;line-height:1.5}.path-card .eyebrow{color:var(--gold)}
@@ -256,3 +256,4 @@ dialog::backdrop{background:#01080cd9;backdrop-filter:blur(3px)}
 #signal-game{display:block;width:100%;height:auto;max-height:240px;outline-offset:2px;border-radius:10px}
 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.facts-label{margin-top:22px;color:var(--gold)}.facts-label+.fact-row{margin-top:8px}
