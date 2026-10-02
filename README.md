@@ -15,4 +15,4 @@ Fonts load from Google Fonts when online. Offline, the game falls back to system
 - `js/scene.js` – lab scene and camera artwork
 - `css/style.css` – styles
 
-To link a Google Form, set `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
+The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js` (currently https://forms.gle/tY4uzBWDxj7RLszAA). Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.

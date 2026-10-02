@@ -1,6 +1,6 @@
 "use strict";
 // Optional: put the published Google Forms responder URL here before sharing.
-const DEFAULT_FORM_URL = '';
+const DEFAULT_FORM_URL = 'https://forms.gle/tY4uzBWDxj7RLszAA';
 const SAVE_KEY='nova-last-batch-v5';
 const FORM_KEY='nova-last-batch-form-v1';
 const VERSION=5;
