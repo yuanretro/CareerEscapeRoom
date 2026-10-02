@@ -146,6 +146,28 @@ const FACT_FIELDS = {
  code:{label:'Ontario trade code',answer:'a',options:{a:'630A',b:'309A',c:'442A',d:'310S'}},
  hours:{label:'In-class technical training',answer:'a',options:{a:'304 hours',b:'40 hours',c:'2,000 hours',d:'4 years'}}
 };
+
+/* ---------- Storyline ---------- */
+const CAST={
+ sam:{name:'Sam Okoro',role:'Night-shift supervisor'},
+ mira:{name:'Mira Tran',role:'Apprenticeship training advisor'},
+ nova:{name:'NOVA',role:'Factory control system'}
+};
+// One beat plays the first time each scene opens. {name} becomes the player's name.
+const STORY={
+ r0:[['nova','⚠ POWER SURGE DETECTED. Security guardians restarted in lockdown mode. All doors sealed. Batch NB-7 is stranded on the factory floor.'],
+     ['sam','{name}! Perfect timing for your first shift. NB-7 is a batch of sensor chips for hospital heart monitors, and the truck leaves at dawn.'],
+     ['sam','The surge scrambled every room. Get past each glitching guardian, recover the files the day crew left, then solve the door puzzle. I’ll be on the radio.'],
+     ['sam','Every door also needs a code swapped with the Google Form, so keep it open in another tab. First stop: the staff terminal. Learn what’s inside NB-7.']],
+ r1:[['sam','NB-7 is inside the cleanroom. Before we go in, check the camera feed.'],['sam','One speck of dust, a hair or a fingerprint can ruin a whole wafer. Anything that breaks the rules gets flagged.']],
+ r2:[['nova','PROCESS CHART CORRUPTED. Stage order: UNKNOWN.'],['sam','The night crew kept notes in the materials archive. Rebuild the chart so the line knows what comes after what.']],
+ r3:[['sam','Last stop on the floor: inspection. The equipment tubes have to meet spec before NB-7 can move.'],['sam','Measure every sample. No guessing. A part that’s “almost right” is still wrong.']],
+ r4:[['sam','NB-7 is cleared and loaded. Seriously, nice work tonight. You’re a natural.'],['sam','Nova sponsors apprentices. If you want to do this for real, head to the training office and see Mira.'],['mira','Hi {name}! The surge locked my door too, so beat the guardian first. Then let’s find out what this trade actually requires.']],
+ r5:[['mira','Fact sheet done! Now the important part: your route.'],['mira','Let’s map every step, from high school all the way to the certificate.']],
+ final:[['nova','CORE OVERRIDE ACTIVE. Dispatch dock release: DENIED.'],['sam','The truck can’t leave until the core is cleared. Break all three seals, {name}. This is it!']],
+ ending:[['sam','Dock open, truck rolling. Those heart monitors will get their chips on time, because of you.'],['mira','And you’ve mapped your own route into the trade. Whenever you’re ready, Sam’s sponsorship offer stands.'],['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}.']]
+};
+
 /* ---------- Random helpers ---------- */
 const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -200,7 +222,7 @@ function roomContent(i,v){
   intro:'Tiny chips can be ruined by a single speck of dust. Learn the cleanroom rules before opening the door.',
   question:`Select every unsafe situation on the camera feed (there are ${bad.length}). Leave the safe ones unselected.`,
   evidence:[
-   {title:'Keep it clean',text:'<p>Dust, hair, skin flakes and food crumbs can damage tiny circuits.</p><p><strong>No food or drinks</strong> are allowed inside. <strong>All hair stays covered</strong> by the hood, and the <strong>face mask covers nose and mouth</strong>.</p>'},
+   {title:'Keep it clean',text:'<p>Dust, hair, skin flakes and food crumbs can damage tiny circuits.</p><p><strong>No food or drinks</strong> are allowed inside. <strong>All hair stays covered</strong> by the hood, and the <strong>face mask covers nose and mouth</strong>.</p>'+FIG.gown()},
    {title:'Handle with care',text:'<p><strong>Never touch a wafer with bare hands.</strong> Skin leaves oils and particles.</p><p>A <strong>gloved hand using wafer tweezers</strong> is correct. So is a <strong>fully gowned worker</strong> with hair covered and clean gloves.</p>'},
    {title:'Approved materials only',text:'<p><strong>Cardboard, ordinary paper notebooks and wood pencils</strong> shed particles, so they stay outside.</p><p>Use <strong>lint-free cleanroom paper with an approved pen</strong>. Move wafers in a <strong>closed, approved clean carrier</strong>.</p>'}
   ],
@@ -210,9 +232,9 @@ function roomContent(i,v){
   intro:'The factory’s process chart is mixed up. Read the notes and put the stages back in order.',
   question:`Click the ${v.stages.length} cards in manufacturing order. Use Undo if you change your mind.`,
   evidence:[
-   {title:'Start with a wafer',text:'<p>A <strong>wafer</strong> is a thin slice of silicon. Hundreds of chips can be made on one wafer.</p><p><strong>Prepare the wafer first.</strong> The surface must be perfectly clean and flat before anything is built on it.</p>'},
+   {title:'Start with a wafer',text:'<p>A <strong>wafer</strong> is a thin slice of silicon. Hundreds of chips can be made on one wafer.</p><p><strong>Prepare the wafer first.</strong> The surface must be perfectly clean and flat before anything is built on it.</p>'+FIG.wafer()},
    {title:'Build, then test',text:'<p>Next, <strong>build the circuit layers</strong> through steps like spin coating, photo aligning, developing and etching, repeated many times.</p><p>Then <strong>test each chip while it is still on the wafer</strong> to find the ones that work.</p>'},
-   {title:'Cut, then package',text:'<p>After testing, the wafer is <strong>cut (diced) into individual chips</strong>.</p><p><strong>Packaging comes last.</strong> It protects the chip and connects it to a device. Operators monitor equipment at every stage.</p>'}
+   {title:'Cut, then package',text:'<p>After testing, the wafer is <strong>cut (diced) into individual chips</strong>.</p><p><strong>Packaging comes last.</strong> It protects the chip and connects it to a device. Operators monitor equipment at every stage.</p>'+FIG.dice()}
   ],
   hint:labels.join(' → ')+'.',
   reward:'Process restored. Every stage depends on the one before it.'};}
@@ -220,19 +242,19 @@ function roomContent(i,v){
   intro:'Inspect three sample tubes used in factory equipment. Compare every measurement with the requirement.',
   question:'Mark each sample Pass or Fail. A sample must meet BOTH rules.',
   evidence:[
-   {title:'The two rules',text:`<p>A sample passes only if it has:</p><ul><li><strong>No cracks</strong>, and</li><li>exactly the correct size: <strong>${L} cm</strong>.</li></ul><p>These are simplified training rules for this game.</p>`},
+   {title:'The two rules',text:`<p>A sample passes only if it has:</p><ul><li><strong>No cracks</strong>, and</li><li>exactly the correct size: <strong>${L} cm</strong>.</li></ul><p>These are simplified training rules for this game.</p>${FIG.tube(L)}`},
    {title:'Sample report',text:`<div class="mini-table">${v.samples.map(s=>`<div><b>Sample ${s.id}</b><span>${s.size} cm · ${s.crack?'has a crack':'no cracks'}</span></div>`).join('')}</div><p>Check size and cracks separately. One failed rule means the sample fails.</p>`},
    {title:'Why inspect?',text:'<p>Parts are <strong>measured and checked for defects</strong> before they go into factory equipment, and every result is recorded.</p><p>A part that is “almost right” still fails if it does not meet the requirement.</p>'}
   ],
   hint:v.samples.map(s=>`${s.id}: ${pass(s)?'pass':'fail'}${pass(s)?'':s.crack?' (crack)':' ('+s.size+' cm)'}`).join(' · '),
   reward:`Inspection complete. Only samples at exactly ${L} cm with no cracks passed.`};}
  if(i===4){const label=f=>FACT_FIELDS[f].label,ans=f=>FACT_FIELDS[f].options[FACT_FIELDS[f].answer];return {
-  intro:'The batch passed inspection. Now, in the training office: what does this job require in Ontario?',
+  intro:'Batch NB-7 is out. Now: what does this job require in Ontario?',
   question:'Fill in the trade fact sheet for a Micro Electronics Manufacturer in Ontario.',
   evidence:[
    {title:'Getting in',text:'<p>The Ontario apprenticeship for a <strong>Micro Electronics Manufacturer</strong> lists <strong>Grade 12</strong> (an OSSD or equivalent) as its academic entry requirement.</p><p>No university degree or college diploma is required to start. Math, science and technology courses are useful preparation.</p>'},
-   {title:'About the trade',text:'<p>The Ontario trade code is <strong>630A</strong>. It is a <strong>non-compulsory</strong> trade: the certificate is not legally required to work, but it proves your skills.</p><p>Finishing the apprenticeship earns a <strong>Certificate of Apprenticeship</strong> from Skilled Trades Ontario. There is no Certificate of Qualification exam and no Red Seal.</p>'},
-   {title:'Training and safety',text:'<p>The apprenticeship takes about 2 years: roughly <strong>4,000 hours on the job</strong> plus <strong>304 hours of in-class technical training</strong>.</p><p>Anyone who works with hazardous products must complete <strong>WHMIS</strong> safety training.</p>'}
+   {title:'About the trade',text:'<p>The Ontario trade code is <strong>630A</strong>. It is a <strong>non-compulsory</strong> trade: the certificate is not legally required to work, but it proves your skills.</p><p>Finishing the apprenticeship earns a <strong>Certificate of Apprenticeship</strong> from Skilled Trades Ontario. There is no Certificate of Qualification exam and no Red Seal.</p>'+FIG.certificate()},
+   {title:'Training and safety',text:'<p>The apprenticeship takes about 2 years: roughly <strong>4,000 hours on the job</strong> plus <strong>304 hours of in-class technical training</strong>.</p><p>Anyone who works with hazardous products must complete <strong>WHMIS</strong> safety training.</p>'+FIG.hours()}
   ],
   hint:v.facts.map(({f})=>`${label(f)}: ${ans(f)}`).join(' · '),
   reward:'Fact sheet complete. You know what the trade requires.'};}
