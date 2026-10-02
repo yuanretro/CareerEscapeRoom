@@ -1,25 +1,39 @@
 # The Last Batch
 
-A six-room escape game about becoming a **Micro Electronics Manufacturer** (semiconductor worker) in Ontario.
-
-## Room layout
-- **Rooms 1–4 · Factory floor (tech only):** chip parts, cleanroom rules, manufacturing process, quality check (sample inspection or an Ohm’s-law electrical test, chosen at random). Clues are unlocked by a lab walkthrough, microscope scan, word decoder or rover maze.
-- **Rooms 5–6 · Training office (career only):** Room 5 covers either the Ontario qualifications or the factory team’s roles (chosen at random). Room 6 covers the step-by-step pathway into the trade. Clues are unlocked by a mentor chat or a myth-or-fact quiz.
+A six-room, hands-on escape game about becoming a **Micro Electronics Manufacturer** (semiconductor worker) in Ontario.
 
 ## Story
-A power surge locks the Nova Semiconductor factory on your first night shift. Batch NB-7 (heart-monitor chips) must ship by dawn. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the factory system) guide you through radio messages. The story text is in `STORY` in `js/content.js`, and the portraits and clue-file figures are in `js/scene.js`.
+It's your first night shift at Nova Semiconductor. A power surge has wiped the last circuit layer of batch NB-7 (heart-monitor chips), and the truck leaves at dawn. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the factory system) guide you by radio.
+
+## Rooms
+Each room is a real station. A procedure card explains what to do and why; the bench is where you do it. Mistakes explain what went wrong.
+
+**Factory floor (tech only)**
+1. **Gowning room:** lock away personal items, gown up top-down with gloves last, run the air shower, then flag rule breaks on the bay cameras.
+2. **Litho bay:** pick each lithography tool in the right order, then run it: clean, spin-coat at the target speed, align the mask and expose, develop, etch to the endpoint signal, strip.
+3. **Probe & dicing:** work out the pass band with Ohm's law, probe the wafer and ink the bad chips, dice along the streets, pick the good dies.
+4. **Final inspection:** measure parts with a caliper, scan them for cracks under a microscope, sort them into PASS and REJECT bins.
+
+**Training office (career only)**
+
+5. **Training office:** ask Mira about the trade, build an application folder, tick off the skills you practised in your logbook.
+6. **Career planner:** map the route from high school to the Certificate of Apprenticeship (avoiding the trap stops), then pick your next moves.
+
+**Final: Line control.** Five alarms hit the line. Find the station causing each one, then choose the fix.
+
+Readings, specs, layouts, offsets and alarms are randomized every game.
 
 ## Run it
 - **On a PC:** double-click `index.html`. No install or server needed.
-- **On a web server:** upload the whole folder (`index.html`, `css/`, `js/`) to any static HTML host. `The-Last-Batch.html` redirects to `index.html` so old links keep working.
+- **On a web server:** upload `index.html`, `css/` and `js/` to any static host. `The-Last-Batch.html` redirects to `index.html`.
 
 Fonts load from Google Fonts when online. Offline, the game falls back to system fonts.
 
 ## Files
-- `js/content.js` – career facts, question pools, puzzle data and the per-game random mix
-- `js/game.js` – screens, discovery modes, puzzles, Google Form code exchange
-- `js/arcade.js` – canvas mini-games (challenges, maze, final boss, hint game)
-- `js/scene.js` – lab scene and camera artwork
-- `css/style.css` – styles
+- `js/content.js`: rooms, procedure cards, story, career facts and the per-game random mix
+- `js/tasks.js`: the hands-on stations
+- `js/game.js`: screens, story playback, notebook, Google Form code exchange
+- `js/art.js`: portraits, gowning avatar, camera frames, floor plan
+- `css/style.css`: styles
 
-The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js` (currently https://forms.gle/tY4uzBWDxj7RLszAA). Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
+The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
