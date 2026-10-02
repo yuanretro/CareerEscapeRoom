@@ -20,34 +20,34 @@ const CAREER_ROOMS=[4,5];
    `note` is what gets written into the field notebook when the step is done. */
 const ROOMS = [
  {name:'Gowning room',short:'CLEANROOM ENTRY',code:'NOVA-7K4M',steps:[
-  {task:'gown',title:'Gown up',
+  {task:'gown',photo:'gowning',title:'Gown up',
    sop:'<p>People are the biggest source of dirt in a cleanroom: skin flakes, hair and clothing fibres.</p><ol><li><b>Lock away personal items</b> first. Watches and phones can’t be cleaned.</li><li>Dress <b>from the top down</b>: hair, head, face, body, feet.</li><li><b>Gloves go on last</b>, so they touch nothing dirty.</li></ol><p class="tip">Click items on the worker to remove them. Then click garments on the rack.</p>',
    note:'Gowning goes top-down (hair net, hood, mask, coverall, boots) with gloves last. Personal items stay in the locker.'},
-  {task:'airshower',title:'Air shower',
+  {task:'airshower',photo:'airshower',title:'Air shower',
    sop:'<p>An <b>air shower</b> blasts filtered air over your gown to knock loose particles before you enter.</p><p>Stay in for the <b>whole cycle</b>. Leaving early carries dust inside.</p><p class="tip">Press and hold the button (or hold Space) until the cycle finishes.</p>',
    note:'Air showers blow particles off the gown. Always stay for the full cycle.'},
-  {task:'cctv',title:'Contamination sweep',
+  {task:'cctv',photo:'cleanroom',title:'Contamination sweep',
    sop:'<p>Before the batch comes in, check the bay cameras. Flag anything that breaks the rules:</p><ul><li><b>No food or drinks.</b></li><li><b>All hair covered</b>; masks over nose and mouth.</li><li><b>Never touch a wafer bare-handed.</b> Use gloves and tweezers.</li><li><b>No cardboard, paper notebooks or pencils.</b> They shed particles.</li></ul><p class="tip">Click a camera to flag it. Click again to unflag. Then send the report.</p>',
    note:'Cleanroom rules: no food or drink, all hair covered, masks up, no bare hands on wafers, no cardboard or ordinary paper.'}
  ]},
  {name:'Litho bay',short:'PHOTOLITHOGRAPHY',code:'NOVA-2R8T',steps:[
-  {task:'litho',title:'Print the circuit layer',
+  {task:'litho',photo:'yellowroom',title:'Print the circuit layer',
    sop:'<p><b>Photolithography</b> prints a circuit pattern onto the wafer using light. The bay is lit yellow because <b>photoresist reacts to UV and blue light</b>; yellow light is safe for it.</p><p>Each tool needs the one before it:</p><ul><li>Resist only sticks evenly to a <b>clean</b> wafer.</li><li>Light can only print on <b>resist</b>.</li><li>The <b>developer</b> washes away the resist that light hit, opening the pattern.</li><li>The <b>etcher</b> removes material where the resist is open.</li><li>Leftover resist is <b>stripped</b> at the end.</li></ul>',
    note:'Lithography order: clean → spin-coat resist → align mask and expose → develop → etch → strip. Spin speed sets resist thickness; etching stops at the endpoint signal.'}
  ]},
  {name:'Probe & dicing',short:'TEST AND CUT',code:'NOVA-5W9C',steps:[
-  {task:'probe',title:'Probe the wafer',
+  {task:'probe',photo:'prober',title:'Probe the wafer',
    sop:'<p>Every chip is <b>tested while still on the wafer</b>. A prober touches each one and measures the current at a fixed test voltage.</p><p><b>Ohm’s law: I = V ÷ R.</b> With the same voltage, <b>higher resistance means lower current</b>.</p><p>Bad chips are <b>inked</b> (marked) so they are never packaged.</p>',
    note:'Chips are probe-tested on the wafer. I = V ÷ R: higher resistance gives lower current. Failing chips are inked.'},
-  {task:'dice',title:'Dice the wafer',
+  {task:'dice',photo:'dicingsaw',title:'Dice the wafer',
    sop:'<p>A <b>dicing saw</b> cuts the wafer into separate chips along the narrow gaps between them, called <b>streets</b> (or scribe lines).</p><p>Cut <b>only on the streets</b>. A cut through a chip destroys it.</p><p class="tip">Click each street to run the blade along it.</p>',
    note:'Dicing saws cut along the streets between chips, never through a chip.'},
-  {task:'pick',title:'Pick good chips',
+  {task:'pick',photo:'dicedwafer',title:'Pick good chips',
    sop:'<p>Only <b>known-good dies</b> move on to packaging. Inked chips stay behind.</p><p class="tip">Click a good chip to lift it with the vacuum pick-up tool and drop it in the tray.</p>',
    note:'Only known-good (un-inked) dies are picked for packaging.'}
  ]},
  {name:'Final inspection',short:'QUALITY CHECK',code:'NOVA-8H3P',steps:[
-  {task:'qc',title:'Measure, inspect, sort',
+  {task:'qc',photo:'caliper',title:'Measure, inspect, sort',
    sop:'',note:'Every part is measured against its spec (nominal ± tolerance) and checked for cracks. Fail either check and it’s rejected.'}
  ]},
  {name:'Training office',short:'CAREER · GETTING STARTED',code:'NOVA-4D7X',steps:[
@@ -195,6 +195,34 @@ const STORY={
  final:[['nova','LINE ALARMS ACTIVE. Dispatch dock locked until the line is clear.'],['sam','The truck’s here and the line is throwing alarms. Find each problem, fix it, and we ship!']],
  ending:[['sam','Dock open, truck rolling. Those heart monitors will get their chips on time, because of you.'],['mira','And you’ve mapped your own route into the trade. Whenever you’re ready, Sam’s sponsorship offer stands.'],['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}.']]
 };
+
+/* ---------- Real photos ----------
+   Files live in img/. Any photo that is missing falls back to the drawn illustration,
+   so the game works with none, some or all of them. Fill in `credit` for every photo added
+   (author, licence, source) — it is shown in Menu → Sources. */
+const PHOTOS={
+ cleanroom:{file:'cleanroom.jpg',caption:'A real semiconductor cleanroom',credit:''},
+ gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns',credit:''},
+ airshower:{file:'airshower.jpg',caption:'An air shower at a cleanroom entrance',credit:''},
+ yellowroom:{file:'yellowroom.jpg',caption:'A lithography bay under yellow safe-light',credit:''},
+ wafer:{file:'wafer.jpg',caption:'A patterned silicon wafer',credit:''},
+ wetbench:{file:'wetbench.jpg',caption:'A wet clean bench',credit:''},
+ spincoater:{file:'spincoater.jpg',caption:'A spin coater',credit:''},
+ maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner',credit:''},
+ developer:{file:'developer.jpg',caption:'A develop station',credit:''},
+ etcher:{file:'etcher.jpg',caption:'A plasma etcher',credit:''},
+ stripper:{file:'stripper.jpg',caption:'A resist strip station',credit:''},
+ prober:{file:'prober.jpg',caption:'A wafer prober testing chips',credit:''},
+ dicingsaw:{file:'dicingsaw.jpg',caption:'A wafer dicing saw',credit:''},
+ dicedwafer:{file:'dicedwafer.jpg',caption:'A diced wafer on tape',credit:''},
+ caliper:{file:'caliper.jpg',caption:'A digital caliper',credit:''},
+ microscope:{file:'microscope.jpg',caption:'An inspection microscope',credit:''},
+ hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:''},hood:{file:'hood.jpg',caption:'Cleanroom hood',credit:''},
+ mask:{file:'facemask.jpg',caption:'Face mask',credit:''},coverall:{file:'coverall.jpg',caption:'Cleanroom coverall',credit:''},
+ boots:{file:'boots.jpg',caption:'Cleanroom boots',credit:''},gloves:{file:'gloves.jpg',caption:'Nitrile gloves',credit:''},
+ sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:''},scarf:{file:'scarf.jpg',caption:'Cotton scarf',credit:''}
+};
+const TOOL_PHOTO={clean:'wetbench',coat:'spincoater',expose:'maskaligner',develop:'developer',etch:'etcher',strip:'stripper'};
 
 /* ---------- Random helpers & per-mission variant ---------- */
 const rint=(a,b)=>a+Math.floor(Math.random()*(b-a+1));

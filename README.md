@@ -35,5 +35,6 @@ Fonts load from Google Fonts when online. Offline, the game falls back to system
 - `js/game.js`: screens, story playback, notebook, Google Form code exchange
 - `js/art.js`: portraits, gowning avatar, camera frames, floor plan
 - `css/style.css`: styles
+- `img/`: optional real photos (see `img/README.md`); missing photos fall back to drawings
 
 The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.

@@ -21,7 +21,7 @@ TASKS.gown=(bench,ctx)=>{
  function render(){
   const ready=g.watch&&g.phone;
   bench.innerHTML=`<div class="gown-layout"><div class="avatar-stage">${gownAvatar(g)}<div class="locker"><b>Locker</b>${['watch','phone'].map(x=>`<span class="${g[x]?'in':''}">${x==='watch'?'Wristwatch':'Phone'}</span>`).join('')}</div></div>
-  <div class="rack"><div class="eyebrow">Garment rack</div><div class="rack-grid">${ctx.v.rack.map(id=>`<button class="garment" data-g="${id}" ${g[id]?'disabled':''}>${garmentIcon(id)}<span>${GARMENTS[id]}</span>${g[id]?'<i>✓ on</i>':''}</button>`).join('')}</div>
+  <div class="rack"><div class="eyebrow">Garment rack</div><div class="rack-grid">${ctx.v.rack.map(id=>`<button class="garment" data-g="${id}" ${g[id]?'disabled':''}>${photoOr(id,garmentIcon(id),'garment-ph')}<span>${GARMENTS[id]}</span>${g[id]?'<i>✓ on</i>':''}</button>`).join('')}</div>
   <p class="bench-hint">${ready?`${k}/6 garments on. Dress from the top down.`:'Start by clicking the watch and phone on the worker.'}</p></div></div>`;
  }
  bench.onclick=e=>{
@@ -80,7 +80,7 @@ function waferView(stage,opts={}){
 TASKS.litho=(bench,ctx)=>{
  const v=ctx.v;let stage=0,open=null,cleanup=()=>{};
  function shell(panel){
-  bench.innerHTML=`<div class="litho"><div class="toolbar">${v.tools.map(id=>{const s=LITHO.findIndex(x=>x.id===id),d=s<stage;return `<button class="tool ${d?'done':''} ${open===id?'open':''}" data-tool="${id}">${d?'✓ ':''}${LITHO[s].tool}</button>`;}).join('')}</div>
+  bench.innerHTML=`<div class="litho"><div class="toolbar">${v.tools.map(id=>{const s=LITHO.findIndex(x=>x.id===id),d=s<stage;return `<button class="tool ${d?'done':''} ${open===id?'open':''}" data-tool="${id}">${photoOr(TOOL_PHOTO[id],'','tool-ph')}<span>${d?'✓ ':''}${LITHO[s].tool}</span></button>`;}).join('')}</div>
    <div class="litho-station"><div class="wafer-box" id="wbox">${waferView(stage)}<span class="bench-hint">${stage}/6 steps done</span></div><div class="panel" id="panel">${panel||'<p class="muted">Choose the tool for the next step from the bay above.</p>'}</div></div></div>`;
  }
  function complete(){cleanup();cleanup=()=>{};ctx.say(LITHO[stage].done,'good');stage++;open=null;shell();if(stage===6)setTimeout(ctx.done,800);}
@@ -194,7 +194,7 @@ TASKS.qc=(bench,ctx)=>{
     <rect x="30" y="40" width="620" height="26" rx="3" fill="#d6dbe1" stroke="#8a95a3"/>${Array.from({length:60},(_,i)=>`<path d="M${X0+i*10} 40v${i%5?8:14}" stroke="#5b6573"/>`).join('')}
     <rect x="${X0-18}" y="40" width="18" height="150" fill="#b8c0ca" stroke="#6b7686"/>
     <rect x="${X0}" y="120" width="${p.len*PX}" height="44" fill="#2f3b4c" rx="2"/><text x="${X0+p.len*PX/2}" y="147" fill="#e8edf3" font-size="13" text-anchor="middle" font-family="IBM Plex Mono,monospace">PART ${p.id}</text>
-    <g id="jaw" class="jaw" transform="translate(${jx} 0)" tabindex="0" role="slider" aria-label="Caliper jaw" aria-valuetext="${((jx-X0)/PX).toFixed(2)} mm"><rect x="0" y="34" width="18" height="156" fill="#c9a227" stroke="#8c6a1f"/><rect x="-6" y="0" width="70" height="34" rx="3" fill="#1f2a37"/><text x="29" y="23" fill="#f3c25a" font-size="15" text-anchor="middle" font-family="IBM Plex Mono,monospace" id="lcd">${((jx-X0)/PX).toFixed(2)}</text></g>
+    <g id="jaw" class="jaw" transform="translate(${jx} 0)" tabindex="0" role="slider" aria-label="Caliper jaw" aria-valuetext="${((jx-X0)/PX).toFixed(2)} mm"><rect x="0" y="34" width="18" height="156" fill="#c3cad3" stroke="#6f7b88"/><rect x="-8" y="-2" width="74" height="38" rx="4" fill="#2b3644"/><rect x="-3" y="3" width="64" height="28" rx="2" fill="#d6dde0"/><text x="29" y="23" fill="#14202d" font-size="15" text-anchor="middle" font-family="IBM Plex Mono,monospace" id="lcd">${((jx-X0)/PX).toFixed(2)}</text></g>
    </svg></div><div class="bench-actions"><button class="text-btn" id="close">◀ Close jaw</button><button class="text-btn" id="open">Open ▶</button><span class="bench-hint">Reading: <b id="rd">${((jx-X0)/PX).toFixed(2)} mm</b></span><button class="btn" id="rec">Record reading</button></div></div>`;
    const svg=$(bench,'#cal');let drag=false;
    const setJ=x=>{jx=Math.max(right,Math.min(640,x));const r=((jx-X0)/PX).toFixed(2);$(bench,'#jaw').setAttribute('transform',`translate(${jx} 0)`);$(bench,'#lcd').textContent=r;$(bench,'#rd').textContent=r+' mm';$(bench,'#jaw').setAttribute('aria-valuetext',r+' mm');};
