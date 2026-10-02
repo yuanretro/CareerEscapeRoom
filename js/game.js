@@ -104,7 +104,7 @@ function renderRoom(){
 function learnKey(){return view==='final'?'final':view==='room'?`${state.current}-${Math.min(state.progress[state.current],ROOMS[state.current].steps.length-1)}`:null;}
 function learnCard(){const key=learnKey();if(!key)return;const L=key==='final'?FINAL:ROOMS[state.current].steps[+key.split('-')[1]],title=key==='final'?'Line control':L.title;
  if(!state.learned.includes(key)){state.learned.push(key);save();}
- showModal(title,`<div class="learn">${L.photo?photoFigure(L.photo,'learn-photo'):''}<ul class="learn-points">${L.learn.points.map(p=>`<li>${p}</li>`).join('')}</ul>${L.learn.fact?`<p class="fact-box"><b>Did you know?</b> ${L.learn.fact}</p>`:''}</div>`,
+ showModal(title,`<div class="learn ${L.photo?'has-photo':''}">${L.photo?photoFigure(L.photo,'learn-photo'):''}<div class="learn-text"><ul class="learn-points">${L.learn.points.map(p=>`<li>${p}</li>`).join('')}</ul>${L.learn.fact?`<p class="fact-box"><b>Did you know?</b> ${L.learn.fact}</p>`:''}</div></div>`,
   `<span class="small muted">Read this, then try it yourself.</span><button class="btn" data-action="close-modal">Let’s do it →</button>`,'Learn');}
 function stepDone(i,k){
  if(view!=='room'||state.current!==i||state.progress[i]!==k)return;const step=ROOMS[i].steps[k],stars=starsFor();pendingContinue=true;
