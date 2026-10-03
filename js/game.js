@@ -172,6 +172,18 @@ async function copyCode(i){if(!state.solved[i])return;try{await navigator.clipbo
 let audioCtx=null;
 function sfx(kind){if(!state.sound)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const notes={good:[660,880],bad:[220,180],done:[523,659,784,1047],hint:[880]}[kind]||[];
  notes.forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+i*.09;o.type=kind==='bad'?'square':'sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='bad'?.04:.07,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+.2);});}catch{}}
+/* Air-shower whoosh: looping filtered noise with a fast flutter, like air jets. Plays while the button is held. */
+const airSound={node:null,
+ start(){if(!state.sound||this.node)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume?.()?.catch?.(()=>{});
+  const sr=audioCtx.sampleRate,buf=audioCtx.createBuffer(1,sr*2,sr),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
+  const hp=audioCtx.createBiquadFilter();hp.type='highpass';hp.frequency.value=250;
+  const bp=audioCtx.createBiquadFilter();bp.type='bandpass';bp.Q.value=0.7;const t=audioCtx.currentTime;bp.frequency.setValueAtTime(500,t);bp.frequency.linearRampToValueAtTime(1300,t+0.5);
+  const lfo=audioCtx.createOscillator(),depth=audioCtx.createGain();lfo.frequency.value=7;depth.gain.value=220;lfo.connect(depth).connect(bp.frequency);
+  const g=audioCtx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.16,t+0.4);
+  src.connect(hp).connect(bp).connect(g).connect(audioCtx.destination);src.start();lfo.start();this.node={src,lfo,g};}catch{}},
+ stop(fade=0.25){const n=this.node;if(!n)return;this.node=null;try{const t=audioCtx.currentTime;n.g.gain.cancelScheduledValues(t);n.g.gain.setValueAtTime(Math.max(n.g.gain.value,0.0001),t);n.g.gain.exponentialRampToValueAtTime(0.0001,t+fade);n.src.stop(t+fade+0.05);n.lfo.stop(t+fade+0.05);}catch{}}
+};
 function confetti(){if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const box=document.createElement('div');box.className='confetti';
  for(let n=0;n<60;n++){const c=document.createElement('i');c.style.left=Math.random()*100+'%';c.style.background=['#1c5fd4','#f2c200','#2f7d4f','#e05a47','#8e6bb8'][n%5];c.style.animationDelay=Math.random()*.4+'s';c.style.setProperty('--dx',(Math.random()*160-80)+'px');c.style.setProperty('--r',(Math.random()*720)+'deg');box.appendChild(c);}
  app.appendChild(box);setTimeout(()=>box.remove(),2200);}
@@ -193,7 +205,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
   case 'learn':learnCard();break;
   case 'hint':showHint(false);break;
   case 'continue':closeModal();break;
-  case 'sound':state.sound=!state.sound;save();b.textContent=state.sound?'🔊':'🔇';b.setAttribute('aria-label',state.sound?'Sound on':'Sound off');break;
+  case 'sound':state.sound=!state.sound;if(!state.sound)airSound.stop(0.1);save();b.textContent=state.sound?'🔊':'🔇';b.setAttribute('aria-label',state.sound?'Sound on':'Sound off');break;
   case 'howto':howto();break;
   case 'sources':sources();break;
   case 'menu':menu();break;
