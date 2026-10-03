@@ -49,9 +49,9 @@ TASKS.airshower=(bench,ctx)=>{
  ctx.coach(`Press and <b>hold</b> the button until the timer reaches 0 (${need} seconds). You can also hold the Space bar.`);ctx.hint(()=>$(bench,'#hold'));
  const cab=$(bench,'#cab'),arc=$(bench,'#arc'),secs=$(bench,'#secs');
  function frame(now){const dt=(now-last)/1000;last=now;t=Math.min(need,t+dt);arc.setAttribute('stroke-dasharray',`${t/need*100} 100`);secs.textContent=(need-t).toFixed(1)+' s';
-  if(t>=need){finished=true;cab.classList.remove('on');ctx.coach('Clean! 🎉');ctx.say('Cycle complete. You’re clean enough to go in.','good');setTimeout(ctx.done,700);return;}raf=requestAnimationFrame(frame);}
- const off=holdControl($(bench,'#hold'),()=>{if(finished)return;cab.classList.add('on');ctx.coach('Keep holding…');last=performance.now();raf=requestAnimationFrame(frame);},()=>{if(finished)return;cancelAnimationFrame(raf);cab.classList.remove('on');if(t>0){t=0;arc.setAttribute('stroke-dasharray','0 100');secs.textContent=need+'.0 s';ctx.coach('Press and <b>hold</b> again, and keep holding until the timer reaches 0.');ctx.say('You let go too early, so dust could get in. Try again and hold the whole time.','bad');}});
- return ()=>{off();cancelAnimationFrame(raf);};
+  if(t>=need){finished=true;cab.classList.remove('on');airSound.stop(0.8);ctx.coach('Clean! 🎉');ctx.say('Cycle complete. You’re clean enough to go in.','good');setTimeout(ctx.done,700);return;}raf=requestAnimationFrame(frame);}
+ const off=holdControl($(bench,'#hold'),()=>{if(finished)return;cab.classList.add('on');airSound.start();ctx.coach('Keep holding…');last=performance.now();raf=requestAnimationFrame(frame);},()=>{if(finished)return;cancelAnimationFrame(raf);cab.classList.remove('on');airSound.stop();if(t>0){t=0;arc.setAttribute('stroke-dasharray','0 100');secs.textContent=need+'.0 s';ctx.coach('Press and <b>hold</b> again, and keep holding until the timer reaches 0.');ctx.say('You let go too early, so dust could get in. Try again and hold the whole time.','bad');}});
+ return ()=>{off();cancelAnimationFrame(raf);airSound.stop(0.1);};
 };
 
 /* ---------- Room 1 · Spot the rule-breakers ---------- */
