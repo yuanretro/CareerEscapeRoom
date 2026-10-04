@@ -257,7 +257,7 @@ const PHOTOS={
  hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:'David Ring, CC0, via Wikimedia Commons'},
  hood:{file:'hood.jpg',caption:'Cleanroom hood and gown',credit:'Stan Zurek, CC BY-SA 3.0, via Wikimedia Commons',pos:'center 12%'},
  mask:{file:'facemask.jpg',caption:'Face mask',credit:'AlexChirkin, CC0, via Wikimedia Commons'},
- coverall:{file:'gowning.jpg',caption:'Cleanroom coveralls',credit:''},
+ coverall:{file:'coverall.jpg',caption:'Cleanroom coveralls',credit:''},
  boots:{file:'boots.jpg',caption:'Boot covers',credit:'Sergeev Pavel, CC BY-SA 3.0, via Wikimedia Commons'},
  gloves:{file:'gloves.jpg',caption:'Nitrile cleanroom glove',credit:'BlueThunderTechnologies, CC BY-SA 4.0, via Wikimedia Commons'},
  sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:'Andrew Toskin, CC BY 2.0, via Wikimedia Commons'},
