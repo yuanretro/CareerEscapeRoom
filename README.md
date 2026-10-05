@@ -3,7 +3,9 @@
 A six-room, hands-on escape game about becoming a **Micro Electronics Manufacturer** (semiconductor worker) in Ontario.
 
 ## Story
-It's your first night shift at Nova Semiconductor. A power surge has wiped the last circuit layer of batch NB-7 (heart-monitor chips), and the truck leaves at dawn. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the factory system) guide you by radio.
+You're the new co-op student on the night shift at Nova Semiconductor. A mysterious power surge has wiped the last circuit layer of batch NB-7 (heart-monitor chips), and the truck leaves in 25 minutes. Sam Okoro (shift supervisor), Mira Tran (apprenticeship training advisor) and NOVA (the slightly sassy factory system) guide you by radio.
+
+Along the way you pick your own replies in some radio messages, Sam, Mira and NOVA react to the stars you earn, each door screen teases what comes next, and NOVA slowly investigates the surge. Your guess about its cause in Room 4 comes back in the ending.
 
 ## Rooms
 Each room is a real station, built for Grade 10 students:
@@ -12,7 +14,7 @@ Each room is a real station, built for Grade 10 students:
 - **Blue instruction banner** above the workbench that always says exactly what to do next.
 - **💡 Hint button** that makes the right thing glow. Hints also appear automatically after two mistakes in a row.
 - **Instant feedback** on every click, explaining why it was right or wrong.
-- **Stars, confetti and sound effects** (mute button in the top bar), plus a “What you just learned” card after each step.
+- **Stars, confetti and sound effects** (🔊 button in the top bar), plus a “What you just learned” card after each step. Every machine has its own synthesized sound: rinse, spin-coater motor, UV flash, developer bubbles, plasma buzz, dicing saw, vacuum pen, caliper beep, alarms and more.
 
 **Factory floor (tech only)**
 1. **Gowning room:** lock away personal items, gown up top-down with gloves last, run the air shower, then flag rule breaks on the bay cameras.
@@ -31,7 +33,10 @@ Readings, specs, layouts, offsets and alarms are randomized every game.
 
 ## Run it
 - **On a PC:** double-click `index.html`. No install or server needed.
-- **On a web server:** upload `index.html`, `css/` and `js/` to any static host. `The-Last-Batch.html` redirects to `index.html`.
+- **On a web server:** upload `index.html`, `css/`, `js/`, `img/` and any `bgm*.mp3` files to any static host. `The-Last-Batch.html` redirects to `index.html`.
+
+### Background music
+Put music files in the game folder (next to `index.html`) named `bgm1.mp3`, `bgm2.mp3`, `bgm3.mp3`, … with no gaps in the numbers. They play in order, and after the last one the list starts again from `bgm1.mp3`. Music is on by default and starts after the player's first click or key press (browsers block autoplay). The 🎵 button in the top bar turns it off, and the choice is remembered in that browser. With no `bgm1.mp3`, the game simply plays without music.
 
 Fonts load from Google Fonts when online. Offline, the game falls back to system fonts.
 
