@@ -31,7 +31,7 @@ function fmt(sec){const n=Math.max(0,Math.floor(sec));return String(Math.floor(n
 function expired(){return !!(state.startedAt&&!state.finishedAt&&Date.now()>=state.deadline);}
 function clockText(){if(!state.startedAt)return '25:00';const t=state.finishedAt||Date.now(),left=Math.ceil((state.deadline-t)/1000);return left>=0?fmt(left):state.training?'+'+fmt(-left):'00:00';}
 function canVisit(i){return Number.isInteger(i)&&i>=0&&i<6&&(i===0||state.released[i-1]);}
-const who=()=>state.names.length>1?'team':state.names[0]||'trainee';
+const who=()=>state.names.length>1?'Team':state.names[0]||'trainee';
 
 /* ---------- Shell ---------- */
 function header(playing=true){
