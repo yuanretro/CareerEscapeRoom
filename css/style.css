@@ -409,3 +409,71 @@ kbd{font:500 12.5px var(--mono);padding:1px 6px;border:1px solid var(--line2);bo
 .form-frame iframe{width:100%;max-width:820px;height:100%;border:0;background:#fff;box-shadow:0 0 0 1px var(--line)}
 body.form-open #app{visibility:hidden}
 .fs-return{position:fixed;right:16px;bottom:16px;z-index:70;padding:10px 16px;border:0;border-radius:var(--r);background:var(--blue);color:#fff;font-weight:600;box-shadow:0 6px 20px #14202d40;animation:pop .3s ease both}
+.room-code{position:relative}.room-code.copied::after{content:attr(data-copied);position:absolute;top:-10px;right:-10px;background:var(--ok);color:#fff;font:600 12px var(--sans);letter-spacing:0;padding:3px 9px;border-radius:999px;animation:pop .3s ease both}
+.plan-card.nope{border-color:var(--red);background:var(--red-soft);opacity:1;cursor:default}.plan-card.nope .box{border-color:var(--red);color:var(--red)}
+.plan-card em{display:block;font-style:normal;font-size:13px;color:var(--red);margin-top:4px;line-height:1.35}
+.plan .plan-card{padding:10px 14px;font-size:14.5px}.plan .plan-grid{gap:9px}
+
+/* ---------- Room 3: realistic wafer, chips, prober, dicing tape, waffle pack ---------- */
+.wafer-disc{background:radial-gradient(circle at 34% 26%,#f4f7fa 0,#c4ced9 30%,#97a5b6 70%,#7b889a 100%);border:2px solid #6b7686;box-shadow:0 6px 18px #14202d33}
+.wafer-disc::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 200deg,#c9b8ef33,#a9e0ef33,#f0e3a833,#efb8c833,#c9b8ef33);mix-blend-mode:screen}
+.wafer-disc::after{content:"";position:absolute;left:50%;bottom:-3px;width:14px;height:8px;margin-left:-7px;border-radius:8px 8px 0 0;background:var(--panel);border:2px solid #6b7686;border-bottom:0}
+.die{color:#f4f7fa;border:1px solid #1f2d40;border-radius:1px;
+ background:linear-gradient(135deg,#ffffff1f,transparent 45%),repeating-linear-gradient(90deg,#7f96b622 0 1px,transparent 1px 7px),repeating-linear-gradient(0deg,#7f96b622 0 1px,transparent 1px 7px),#3a5272;
+ box-shadow:inset 0 0 0 3px #3a5272,inset 0 0 0 5px #c9a24a66,0 1px 2px #14202d55}
+.die b{text-shadow:0 1px 2px #000a}.die small{color:#c3cfdc}
+.die.inked{background:linear-gradient(135deg,#ffffff14,transparent 45%),#4a5568;color:#e8edf3}
+.die.inked::after{right:6px;top:6px;width:17px;height:15px;border-radius:52% 48% 55% 45%;background:radial-gradient(circle at 40% 35%,#ff6b57,#c2271b 60%,#8b1610);box-shadow:0 0 0 1px #6b0f0b44}
+.die.diced{box-shadow:inset 0 0 0 3px #3a5272,inset 0 0 0 5px #c9a24a66,3px 4px 0 #14202d55}
+.probe-head{position:absolute;width:80px;height:70px;z-index:3;pointer-events:none;transition:left .04s,top .04s}.probe-head svg{width:100%;height:100%}
+.wafer-map.on-tape .tape-frame{position:absolute;inset:-34px;border-radius:50%;background:radial-gradient(circle,#9cc8ef55 0 74%,#c3cad3 74.5% 82%,#8a95a3 82.5% 84%,transparent 84.5%)}
+.street.cut{background:linear-gradient(90deg,transparent 30%,#1f2a37 30% 70%,transparent 70%)}.street.h.cut{background:linear-gradient(0deg,transparent 30%,#1f2a37 30% 70%,transparent 70%)}
+.street.fresh::after{content:"";position:absolute;width:34px;height:34px;border-radius:50%;border:2px solid #5b6573;background:radial-gradient(circle,#5b6573 0 4px,transparent 5px),repeating-conic-gradient(#e8edf3 0 12deg,#8a95a3 12deg 24deg);box-shadow:0 2px 6px #0006;pointer-events:none}
+.street.v.fresh::after{left:50%;margin-left:-17px;animation:sawv .55s linear forwards}.street.h.fresh::after{top:50%;margin-top:-17px;animation:sawh .55s linear forwards}
+@keyframes sawv{from{top:-17px;transform:rotate(0)}to{top:calc(100% - 17px);transform:rotate(720deg);opacity:0}}
+@keyframes sawh{from{left:-17px;transform:rotate(0)}to{left:calc(100% - 17px);transform:rotate(720deg);opacity:0}}
+.tray{background:linear-gradient(#22282f,#14181d);border:2px solid #3a4250;box-shadow:inset 0 2px 6px #000a,0 4px 12px #14202d44}
+.tray span{border:2px solid #0c0f12;border-radius:4px;background:linear-gradient(#0d1013,#1d232a);box-shadow:inset 0 2px 4px #000}
+.tray span.full{border:2px solid #0c0f12;background:linear-gradient(135deg,#ffffff1f,transparent 45%),repeating-linear-gradient(90deg,#7f96b622 0 1px,transparent 1px 7px),#3a5272;box-shadow:inset 0 0 0 4px #0d1013,inset 0 0 0 6px #c9a24a66}
+
+/* ---------- Room 3 packaging + Room 4 inspection visuals ---------- */
+.pack-row{display:flex;align-items:flex-end;gap:12px}.vac-pen{width:34px;height:104px;flex:none;transform:rotate(-12deg)}
+.tray-wrap{background:#3a4250;border-radius:8px;padding:6px;box-shadow:0 4px 12px #14202d44}.tray-label{font:600 10px var(--mono);letter-spacing:1px;color:#f2c200;padding:2px 6px 6px}
+.fly-chip{position:fixed;z-index:80;pointer-events:none;border:1px solid #1f2d40;background:linear-gradient(135deg,#ffffff2a,transparent 45%),repeating-linear-gradient(90deg,#7f96b622 0 1px,transparent 1px 7px),#3a5272;box-shadow:inset 0 0 0 3px #3a5272,inset 0 0 0 5px #c9a24a66,0 10px 18px #14202d66}
+.circuit{width:100%;max-width:440px;height:auto}
+.quiz-card{margin:10px auto!important;gap:6px!important}
+.surface{inset:24px 50px;border-radius:4px;border:2px solid #0b0f14;
+ background:repeating-linear-gradient(90deg,transparent 0 22px,#c9a24a99 22px 25px,transparent 25px 48px),repeating-linear-gradient(0deg,transparent 0 30px,#c9a24a77 30px 33px,transparent 33px 62px),repeating-linear-gradient(90deg,#ffffff0d 0 1px,transparent 1px 6px),radial-gradient(circle at 30% 30%,#4b6687,#2c3f58)}
+.surface::before{content:"";position:absolute;inset:8px;border:7px dotted #d9b45a;border-radius:2px;opacity:.85;pointer-events:none}
+.lens-ring{border:4px solid #c9cfd8;box-shadow:0 0 0 2px #0b0f14,inset 0 0 18px #000a}
+.lens-ring::before,.lens-ring::after{content:"";position:absolute;background:#9fe0ffaa}.lens-ring::before{left:50%;top:12px;bottom:12px;width:1px}.lens-ring::after{top:50%;left:12px;right:12px;height:1px}
+.scope-mag{position:absolute;left:14px;top:10px;font:600 11px var(--mono);letter-spacing:1px;color:#9fe0ff;pointer-events:none}
+.bin{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:auto!important;padding:8px 10px;font-size:14px}.bin svg{width:120px;height:70px}
+
+/* ---------- Ship-out scene ---------- */
+.scene{position:fixed;inset:0;z-index:90;background:#0d1526;overflow:hidden;animation:fade .4s ease both}
+.scene svg{width:100%;height:100%;display:block}
+.outro .so-night{animation:so-fade 4.5s 1s ease forwards}.outro .so-stars{animation:so-fade 3s 1s ease forwards}
+.outro .so-sun{animation:so-rise 6s 1s ease-out forwards}.intro .so-sun{display:none}
+@keyframes so-fade{to{opacity:0}}@keyframes so-rise{from{transform:translateY(80px)}to{transform:translateY(-200px)}}
+.so-box{opacity:0}.so-box.b1{animation:so-load .9s .3s ease-in-out forwards}.so-box.b2{animation:so-load .9s .9s ease-in-out forwards}.so-box.b3{animation:so-load .9s 1.5s ease-in-out forwards}
+@keyframes so-load{0%{opacity:1;transform:translate(330px,390px)}40%{transform:translate(400px,340px)}99%{opacity:1;transform:translate(560px,360px)}100%{opacity:0;transform:translate(560px,360px)}}
+.outro .so-reardoor{transform-box:fill-box;transform-origin:left;transform:scaleX(0);animation:so-door .4s 2.5s ease forwards}@keyframes so-door{to{transform:scaleX(1)}}
+.outro .so-truck{animation:so-drive 2.6s 3.1s ease-in forwards}@keyframes so-drive{to{transform:translateX(900px)}}
+.outro .so-wheel{animation:so-spin .5s 3.1s linear 5}@keyframes so-spin{to{transform:rotate(360deg)}}
+.so-worker{opacity:0;animation:so-walk 2.6s 5.2s linear forwards}@keyframes so-walk{0%{opacity:1;transform:translateX(0)}100%{opacity:1;transform:translateX(-120px)}}
+.outro .so-doorlight{animation:so-fade 1s 7.4s forwards}
+.so-card{position:absolute;left:50%;top:14%;transform:translateX(-50%);background:#fbfcfdee;border-radius:10px;padding:18px 34px;text-align:center;box-shadow:0 10px 30px #14202d55;opacity:0;animation:fade .6s 5.4s ease forwards}
+.so-card h2{font-size:34px;margin:4px 0}.so-card p{color:var(--ink2)}.so-time{font:600 13px var(--mono);letter-spacing:1px;color:var(--accent)}
+.so-skip{position:absolute;right:20px;bottom:20px}
+@media (prefers-reduced-motion: reduce){.scene *{animation-duration:.01s!important;animation-delay:0s!important}}
+
+/* shift start */
+.intro .so-card{animation:fade .5s 2.6s ease forwards}
+.si-worker{opacity:0;animation:si-walk 2.6s .3s linear forwards}@keyframes si-walk{0%{opacity:1;transform:translateX(-190px)}90%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(0)}}
+.intro .so-window,.intro .so-doorlight{animation:si-flicker 1.2s 4.2s steps(2) forwards}@keyframes si-flicker{0%,30%,60%{opacity:1}15%,45%,75%,100%{opacity:.08}}
+.si-surge{opacity:0;animation:si-surge 1.6s 4.3s ease forwards}@keyframes si-surge{0%,40%,80%{opacity:0}20%,60%{opacity:.45}100%{opacity:.25}}
+.si-alert{font:700 22px var(--mono);color:var(--red);opacity:0;animation:si-blink .5s 4.4s steps(2) 5 forwards;margin-top:6px!important}@keyframes si-blink{0%{opacity:0}50%,100%{opacity:1}}
+.qc .bins{margin-top:10px}.bin svg{width:92px;height:54px}.bin{padding:6px 10px!important;min-width:170px}
+.qc .result-card{padding-top:10px;padding-bottom:10px}
+.quiz-card .circuit{max-width:400px}.quiz-card .formula{font-size:28px}.quiz-card .q{margin-top:2px!important}

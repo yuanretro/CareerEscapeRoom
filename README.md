@@ -25,9 +25,13 @@ Each room is a real station, built for Grade 10 students:
 **Training office (career only)**
 
 5. **Training office:** ask Mira about the trade, build an application folder, tick off the skills you practised in your logbook.
-6. **Career planner:** map the route from high school to the Certificate of Apprenticeship (avoiding the trap stops), then pick your next moves.
+6. **Career planner:** map the route from high school to the Certificate of Apprenticeship (avoiding the trap stops), then pick next moves you can really do now (some options aren’t possible yet and bounce back with the reason).
 
-**Final: Line control.** Five alarms hit the line. Find the station causing each one, then choose the fix.
+**Final: Line control.** Five alarms hit the line. Find the station causing each one, then choose the fix, and earn stars like every other step.
+
+Short, skippable cut-scenes open and close the shift: you clock in at 05:35 just before the power surge hits (the 25-minute clock starts after it), and at the end the NB-7 boxes are loaded, the truck drives off at sunrise and you clock out at 06:00.
+
+When a room is finished, its Form code is copied to the clipboard automatically.
 
 Readings, specs, layouts, offsets and alarms are randomized every game.
 

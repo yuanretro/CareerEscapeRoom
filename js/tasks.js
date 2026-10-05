@@ -68,14 +68,25 @@ TASKS.cctv=(bench,ctx)=>{
 };
 
 /* ---------- Room 2 · Lithography ---------- */
-function waferView(stage,opts={}){
- const lines=[[70,40,14,120],[110,40,14,120],[150,40,14,120],[60,70,130,12],[60,128,130,12]];
- const lineFill=stage>=5?'#3b4656':stage>=4?'#a9b3c1':stage>=3?'#f7e3a6':null,coat=stage>=2&&stage<6;
- return `<svg viewBox="0 0 250 200" class="wafer-view" aria-hidden="true"><defs><clipPath id="wc"><circle cx="125" cy="100" r="88"/></clipPath></defs>
-  <circle cx="125" cy="100" r="90" fill="#aab4c2" stroke="#6b7686" stroke-width="2"/><path d="M110 189h30" stroke="#6b7686" stroke-width="4"/>
-  ${coat?`<circle cx="125" cy="100" r="88" fill="${COL.amber}" opacity=".55"/>`:''}
-  ${lineFill?`<g clip-path="url(#wc)" fill="${lineFill}">${lines.map(([x,y,w,h])=>`<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`).join('')}</g>`:''}
-  ${stage===0?Array.from({length:14},(_,i)=>`<circle cx="${60+(i*37)%130}" cy="${40+(i*53)%120}" r="2.6" fill="#5b4a3a" class="speck"/>`).join(''):''}
+/* The wafer seen from above as it goes through lithography. stage: 0 dusty, 1 clean, 2 coated, 3 exposed, 4 developed, 5 etched, 6 stripped.
+   A real wafer repeats the same circuit pattern in every die, so each die gets the same small pattern. */
+function waferView(stage){
+ const coat=stage>=2&&stage<6,pat={3:'#fbe9b0',4:'#dfe6ee',5:'#3b4656',6:'#3b4656'}[stage],op=stage===3?.35:1,cx=125,cy=100,R=86,D=26;
+ let dies='',marks='';
+ for(let gx=-3;gx<3;gx++)for(let gy=-3;gy<3;gy++){const x=cx+gx*D+1,y=cy+gy*D+1,far=Math.max(Math.hypot(x-cx,y-cy),Math.hypot(x+D-2-cx,y-cy),Math.hypot(x-cx,y+D-2-cy),Math.hypot(x+D-2-cx,y+D-2-cy));
+  if(far>R-2)continue;
+  dies+=`<rect x="${x}" y="${y}" width="${D-2}" height="${D-2}" fill="none" stroke="#6f7c8e" stroke-opacity=".55" stroke-width=".8"/>`;
+  if(pat)marks+=`<g fill="${pat}" fill-opacity="${op}"><rect x="${x+4}" y="${y+4}" width="3" height="16"/><rect x="${x+10}" y="${y+4}" width="3" height="16"/><rect x="${x+16}" y="${y+4}" width="3" height="16"/><rect x="${x+4}" y="${y+10}" width="15" height="3"/></g>`;}
+ return `<svg viewBox="0 0 250 200" class="wafer-view" aria-hidden="true"><defs>
+  <radialGradient id="wv-si" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#e9eef4"/><stop offset=".45" stop-color="#b3bfcc"/><stop offset="1" stop-color="#7e8b9c"/></radialGradient>
+  <linearGradient id="wv-sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d7c6f0" stop-opacity=".35"/><stop offset=".35" stop-color="#bfe3f0" stop-opacity=".25"/><stop offset=".6" stop-color="#f3e6b8" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="wv-coat" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${COL.amber}" stop-opacity=".55"/><stop offset=".88" stop-color="${COL.amber}" stop-opacity=".62"/><stop offset=".97" stop-color="#c2410c" stop-opacity=".55"/><stop offset="1" stop-color="#7c2d12" stop-opacity=".5"/></radialGradient>
+  <clipPath id="wv-clip"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>
+  <ellipse cx="${cx}" cy="${cy+R+5}" rx="${R*.8}" ry="5" fill="#14202d" fill-opacity=".12"/>
+  <circle cx="${cx}" cy="${cy}" r="${R+2}" fill="#6b7686"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#wv-si)"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#wv-sheen)"/>
+  <g clip-path="url(#wv-clip)">${dies}${coat?`<circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#wv-coat)"/>`:''}${marks}<path d="M${cx-60} ${cy-50}q40-26 92-14" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/></g>
+  <path d="M${cx-5} ${cy+R+1}q5-7 10 0" fill="#eef1f4" stroke="#6b7686"/>
+  ${stage===0?Array.from({length:16},(_,i)=>`<circle cx="${cx-60+(i*37)%120}" cy="${cy-55+(i*53)%110}" r="${2+(i%3)*.7}" fill="#5b4a3a" class="speck"/>`).join(''):''}
  </svg>`;
 }
 const WAFER_STATE=['Dusty wafer','Clean wafer','Coated with resist','Pattern printed (not visible yet)','Pattern developed','Pattern etched','Finished layer'];
@@ -157,16 +168,24 @@ TASKS.litho=(bench,ctx)=>{
 /* ---------- Room 3 · Probe, dice, pick ---------- */
 const DIE=60,GAP=14,ORIGIN=30;
 const diePos=d=>[ORIGIN+d.c*(DIE+GAP),ORIGIN+d.r*(DIE+GAP)];
-function waferMap(inner,extra=''){const span=5*DIE+4*GAP;return `<div class="wafer-map" style="width:${span+2*ORIGIN}px;height:${span+2*ORIGIN}px"><div class="wafer-disc"></div>${inner}${extra}</div>`;}
+function waferMap(inner,extra='',cls=''){const span=5*DIE+4*GAP;return `<div class="wafer-map ${cls}" style="width:${span+2*ORIGIN}px;height:${span+2*ORIGIN}px">${cls.includes('on-tape')?'<div class="tape-frame"></div>':''}<div class="wafer-disc"></div>${inner}${extra}</div>`;}
+/* Probe card: the needles that touch a chip's pads while the prober tests it. */
+const PROBE_HEAD='<svg viewBox="0 0 80 70" aria-hidden="true"><rect x="6" y="2" width="68" height="22" rx="4" fill="#2f6b4f" stroke="#1d4734"/><path d="M14 8h52M14 14h52" stroke="#c9a24a" stroke-width="1.4" stroke-dasharray="3 2"/><path d="M22 24l8 30M34 24l4 30M46 24l-4 30M58 24l-8 30" stroke="#c3cad3" stroke-width="1.6"/><circle cx="30" cy="55" r="1.6" fill="#e8edf3"/><circle cx="38" cy="55" r="1.6" fill="#e8edf3"/><circle cx="42" cy="55" r="1.6" fill="#e8edf3"/><circle cx="50" cy="55" r="1.6" fill="#e8edf3"/></svg>';
 TASKS.probe=(bench,ctx)=>{
  const p=ctx.v.probe,bad=ctx.v.dies.map((d,i)=>d.bad?i:-1).filter(i=>i>=0),ink=new Set();let phase='quiz',shown=0;
  const choices=[...new Set([p.hi,p.V*p.Rlo,p.V+p.Rlo])].sort(()=>Math.random()-.5);
  function render(){
-  if(phase==='quiz'){bench.innerHTML=`<div class="quiz-card"><div class="eyebrow">Warm-up: Ohm’s law</div><p class="formula">I = V ÷ R</p><p class="small muted">current (mA) = voltage (V) ÷ resistance (kΩ)</p>
+  if(phase==='quiz'){bench.innerHTML=`<div class="quiz-card"><div class="eyebrow">Warm-up: Ohm’s law</div><svg viewBox="0 0 440 150" class="circuit" aria-label="Test circuit: power supply, probe needles on the chip, ammeter"><g fill="none" stroke="#5b6573" stroke-width="2.5"><path d="M98 58H170V26H222"/><path d="M302 26H340V58H352"/><path d="M398 112V138H52V112"/></g>
+     <rect x="8" y="38" width="90" height="74" rx="6" fill="#2b3644" stroke="#14202d"/><rect x="16" y="46" width="74" height="26" rx="2" fill="#0f1a12"/><text x="53" y="65" text-anchor="middle" font-size="16" font-weight="700" fill="#5bd67a" font-family="IBM Plex Mono,monospace">${p.V}.0 V</text><text x="53" y="98" text-anchor="middle" font-size="9" fill="#c3cad3" font-family="IBM Plex Mono,monospace">POWER SUPPLY</text><circle cx="98" cy="58" r="3" fill="#c94a3a"/>
+     <path d="M222 26l18 54M302 26l-18 54" stroke="#c3cad3" stroke-width="2"/><rect x="214" y="18" width="16" height="10" rx="2" fill="#2f6b4f"/><rect x="294" y="18" width="16" height="10" rx="2" fill="#2f6b4f"/>
+     <rect x="226" y="80" width="72" height="46" rx="2" fill="#3a5272" stroke="#1f2d40"/><rect x="236" y="80" width="10" height="6" fill="#c9a24a"/><rect x="278" y="80" width="10" height="6" fill="#c9a24a"/>
+     <path d="M244 104h8l4-7 6 14 6-14 6 14 4-7h8" fill="none" stroke="#f4f7fa" stroke-width="2"/><text x="262" y="122" text-anchor="middle" font-size="10" fill="#e8edf3" font-family="IBM Plex Mono,monospace">R = ${p.Rlo} kΩ</text>
+     <rect x="352" y="38" width="80" height="74" rx="6" fill="#f2c200" stroke="#7a5a00"/><rect x="360" y="46" width="64" height="26" rx="2" fill="#c9d6c4" stroke="#14202d"/><text x="392" y="65" text-anchor="middle" font-size="16" font-weight="700" fill="#14202d" font-family="IBM Plex Mono,monospace">? mA</text><text x="392" y="98" text-anchor="middle" font-size="9" fill="#14202d" font-family="IBM Plex Mono,monospace">AMMETER</text></svg>
+   <p class="formula">I = V ÷ R</p><p class="small muted">current (mA) = voltage (V) ÷ resistance (kΩ)</p>
    <p class="q">The prober uses <b>${p.V} volts</b>. A chip has a resistance of <b>${p.Rlo} kΩ</b>. What current flows through it?</p><p class="calc">${p.V} ÷ ${p.Rlo} = ?</p>
    <div class="choices">${choices.map(c=>`<button class="choice" data-c="${c}">${c} mA</button>`).join('')}</div></div>`;
    ctx.coach(`Use <b>I = V ÷ R</b>. Work out <b>${p.V} ÷ ${p.Rlo}</b>, then click your answer.`);ctx.hint(()=>$(bench,`[data-c="${p.hi}"]`));return;}
-  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d),r=i<shown;return `<button class="die ${ink.has(i)?'inked':''}" data-d="${i}" style="left:${x}px;top:${y}px" ${r?'':'disabled'}>${r?`<b>${d.mA.toFixed(1)}</b><small>mA</small>`:''}</button>`;}).join(''))}
+  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d),r=i<shown;return `<button class="die ${ink.has(i)?'inked':''}" data-d="${i}" style="left:${x}px;top:${y}px" ${r?'':'disabled'}>${r?`<b>${d.mA.toFixed(1)}</b><small>mA</small>`:''}</button>`;}).join(''),shown>0&&shown<ctx.v.dies.length?(([x,y])=>`<div class="probe-head" style="left:${x-10}px;top:${y-44}px">${PROBE_HEAD}</div>`)(diePos(ctx.v.dies[shown-1])):'')}
    <div class="probe-side"><div class="spec-card"><div class="eyebrow">Good chips read between</div><p class="big-num">${p.lo} and ${p.hi} mA</p>
    <div class="zone"><span class="z-bad">too low</span><span class="z-ok">${p.lo}–${p.hi} ✓</span><span class="z-bad">too high</span></div></div>
    ${shown?`<p class="counter">${ink.size} of ${bad.length} bad chips found</p>`:'<button class="btn big" id="run">Run the prober</button>'}</div></div>`;
@@ -183,27 +202,31 @@ TASKS.probe=(bench,ctx)=>{
  render();
 };
 TASKS.dice=(bench,ctx)=>{
- const cut=new Set(),span=5*DIE+4*GAP,all=['v1','v2','v3','v4','h1','h2','h3','h4'];
+ const cut=new Set(),span=5*DIE+4*GAP,all=['v1','v2','v3','v4','h1','h2','h3','h4'];let fresh='';
  function render(){
-  const streets=[];for(let n=1;n<5;n++){const at=ORIGIN+n*(DIE+GAP)-GAP;streets.push(`<button class="street v ${cut.has('v'+n)?'cut':''}" data-s="v${n}" style="left:${at}px;top:${ORIGIN-18}px;width:${GAP}px;height:${span+36}px" aria-label="Vertical gap ${n}"></button>`,`<button class="street h ${cut.has('h'+n)?'cut':''}" data-s="h${n}" style="top:${at}px;left:${ORIGIN-18}px;height:${GAP}px;width:${span+36}px" aria-label="Horizontal gap ${n}"></button>`);}
-  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d);return `<div class="die static ${d.bad?'inked':''}" data-chip="${i}" style="left:${x}px;top:${y}px"></div>`;}).join(''),streets.join(''))}
+  const streets=[];for(let n=1;n<5;n++){const at=ORIGIN+n*(DIE+GAP)-GAP;streets.push(`<button class="street v ${cut.has('v'+n)?'cut':''} ${fresh==='v'+n?'fresh':''}" data-s="v${n}" style="left:${at}px;top:${ORIGIN-18}px;width:${GAP}px;height:${span+36}px" aria-label="Vertical gap ${n}"></button>`,`<button class="street h ${cut.has('h'+n)?'cut':''} ${fresh==='h'+n?'fresh':''}" data-s="h${n}" style="top:${at}px;left:${ORIGIN-18}px;height:${GAP}px;width:${span+36}px" aria-label="Horizontal gap ${n}"></button>`);}
+  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d);return `<div class="die static ${d.bad?'inked':''}" data-chip="${i}" style="left:${x}px;top:${y}px"></div>`;}).join(''),streets.join(''),'on-tape')}
    <div class="probe-side"><div class="spec-card"><div class="eyebrow">Dicing saw</div><p class="big-num">${cut.size} / 8 cuts</p></div></div></div>`;
   ctx.coach(`Click each <b>gap between the chips</b> to run the saw along it. ${8-cut.size} cut${8-cut.size===1?'':'s'} to go: 4 up-and-down, 4 side-to-side.`);ctx.hint(()=>$(bench,`[data-s="${all.find(s=>!cut.has(s))}"]`));
  }
- bench.onclick=e=>{const s=e.target.closest('[data-s]');if(s){if(!cut.has(s.dataset.s)){cut.add(s.dataset.s);fx('saw');render();if(cut.size===8){ctx.coach('Wafer cut into chips! 🎉');ctx.say('✓ Every chip is now separate.','good');setTimeout(ctx.done,700);}}return;}
+ bench.onclick=e=>{const s=e.target.closest('[data-s]');if(s){if(!cut.has(s.dataset.s)){cut.add(s.dataset.s);fresh=s.dataset.s;fx('saw');render();if(cut.size===8){ctx.coach('Wafer cut into chips! 🎉');ctx.say('✓ Every chip is now separate.','good');setTimeout(ctx.done,700);}}return;}
   if(e.target.closest('[data-chip]'))ctx.say('Careful! That would cut straight through a chip and destroy it. Click the thin gaps between chips.','bad');};
  render();
 };
+/* A picked chip glides from the wafer into its tray pocket. */
+function flyChip(from,toEl){if(!toEl||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const to=toEl.getBoundingClientRect(),f=document.createElement('div');f.className='fly-chip';
+ f.style.cssText=`left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px`;document.body.appendChild(f);toEl.style.visibility='hidden';
+ f.animate([{transform:'none'},{transform:`translate(${(to.left-from.left)/2}px,${(to.top-from.top)/2-60}px) scale(1.15)`},{transform:`translate(${to.left-from.left}px,${to.top-from.top}px) scale(${to.width/from.width})`}],{duration:520,easing:'ease-in-out'}).onfinish=()=>{f.remove();toEl.style.visibility='';};}
 TASKS.pick=(bench,ctx)=>{
  const tray=[];
  function render(){
-  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d);return tray.includes(i)?'':`<button class="die diced ${d.bad?'inked':''}" data-p="${i}" style="left:${x}px;top:${y}px" aria-label="${d.bad?'Inked chip':'Good chip'}"></button>`;}).join(''))}
-   <div class="probe-side"><div class="eyebrow">Packaging tray</div><div class="tray">${Array.from({length:ctx.v.tray},(_,n)=>`<span class="${n<tray.length?'full':''}"></span>`).join('')}</div><p class="counter">${tray.length} of ${ctx.v.tray} placed</p></div></div>`;
+  bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d);return tray.includes(i)?'':`<button class="die diced ${d.bad?'inked':''}" data-p="${i}" style="left:${x}px;top:${y}px" aria-label="${d.bad?'Inked chip':'Good chip'}"></button>`;}).join(''),'','on-tape cut-all')}
+   <div class="probe-side"><div class="eyebrow">Packaging tray (waffle pack)</div><div class="pack-row"><svg class="vac-pen" viewBox="0 0 40 120" aria-hidden="true"><rect x="12" y="4" width="16" height="70" rx="6" fill="#3b4656" stroke="#14202d"/><rect x="14" y="20" width="12" height="18" rx="2" fill="#c94a3a"/><path d="M20 74v34" stroke="#c3cad3" stroke-width="4"/><path d="M14 108h12l-2 6h-8Z" fill="#8a95a3"/><path d="M28 12q10 4 8 20" fill="none" stroke="#5b6573" stroke-width="3"/></svg><div class="tray-wrap"><div class="tray-label">NB-7 · ESD SAFE</div><div class="tray">${Array.from({length:ctx.v.tray},(_,n)=>`<span class="${n<tray.length?'full':''}"></span>`).join('')}</div></div></div><p class="counter">${tray.length} of ${ctx.v.tray} placed</p></div></div>`;
   ctx.coach(`Click <b>${ctx.v.tray-tray.length} more good chip${ctx.v.tray-tray.length===1?'':'s'}</b> (no red dot) to move them into the tray.`);ctx.hint(()=>$(bench,`[data-p="${ctx.v.dies.findIndex((d,i)=>!d.bad&&!tray.includes(i))}"]`));
  }
  bench.onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const i=+b.dataset.p;
   if(ctx.v.dies[i].bad){ctx.say('That chip has a red dot: it failed the test. It stays behind.','bad');return;}
-  tray.push(i);fx('vacuum');render();if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,700);}else ctx.say('✓ Good chip picked.','good');};
+  const from=b.getBoundingClientRect();tray.push(i);fx('vacuum');render();flyChip(from,bench.querySelectorAll('.tray span.full')[tray.length-1]);if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,700);}else ctx.say('✓ Good chip picked.','good');};
  render();
 };
 
@@ -214,12 +237,27 @@ TASKS.qc=(bench,ctx)=>{
  function head(){return `<div class="part-strip">${v.parts.map((p,k)=>`<span class="${k<n?'done':k===n?'now':''}">Part ${p.id}${k<n?' ✓':''}</span>`).join('')}<span class="spec-pill">Spec: ${S}.00 ± 0.10 mm (${lo} to ${hi})</span></div>`;}
  function render(){
   const p=P(),right=X0+p.len*PX;
-  if(phase==='measure'){bench.innerHTML=`<div class="qc">${head()}<div class="caliper-wrap"><svg viewBox="0 0 680 230" class="caliper" id="cal">
-    <rect x="30" y="40" width="620" height="26" rx="3" fill="#d6dbe1" stroke="#8a95a3"/>${Array.from({length:60},(_,i)=>`<path d="M${X0+i*10} 40v${i%5?8:14}" stroke="#5b6573"/>`).join('')}
-    <rect x="${X0-18}" y="40" width="18" height="150" fill="#c3cad3" stroke="#6f7b88"/>
-    <rect x="${X0}" y="120" width="${p.len*PX}" height="44" fill="#2f3b4c" rx="2"/><text x="${X0+p.len*PX/2}" y="147" fill="#e8edf3" font-size="13" text-anchor="middle" font-family="IBM Plex Mono,monospace">PART ${p.id}</text>
-    <g id="jaw" class="jaw" transform="translate(${jx} 0)" tabindex="0" role="slider" aria-label="Caliper jaw"><rect x="0" y="34" width="18" height="156" fill="#c3cad3" stroke="#6f7b88"/><rect x="-8" y="-2" width="74" height="38" rx="4" fill="#2b3644"/><rect x="-3" y="3" width="64" height="28" rx="2" fill="#d6dde0"/><text x="29" y="23" fill="#14202d" font-size="15" text-anchor="middle" font-family="IBM Plex Mono,monospace" id="lcd">${((jx-X0)/PX).toFixed(2)}</text></g>
-    <path d="M${jx-30} 205h-60" stroke="${COL.blue}" stroke-width="3" marker-end="url(#ar)" id="arrow"/><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0l8 4-8 4Z" fill="${COL.blue}"/></marker></defs>
+  if(phase==='measure'){bench.innerHTML=`<div class="qc">${head()}<div class="caliper-wrap"><svg viewBox="0 0 680 230" class="caliper" id="cal"><defs>
+     <linearGradient id="cal-steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f4"/><stop offset=".5" stop-color="#c9d0d8"/><stop offset="1" stop-color="#9aa5b2"/></linearGradient>
+     <linearGradient id="cal-jaw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b3bdc8"/><stop offset=".5" stop-color="#e3e8ed"/><stop offset="1" stop-color="#a9b4c0"/></linearGradient>
+     <linearGradient id="cal-ic" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a414c"/><stop offset="1" stop-color="#1b1f25"/></linearGradient>
+     <marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0l8 4-8 4Z" fill="${COL.blue}"/></marker></defs>
+    <rect x="30" y="40" width="636" height="30" rx="2" fill="url(#cal-steel)" stroke="#7d8896"/>
+    ${Array.from({length:39},(_,i)=>{const x=X0+i*15,mm=i%2===0;return `<path d="M${x} 70v${mm?(i%10===0?-14:-10):-6}" stroke="#2b3644" stroke-width="${i%10===0?1.4:1}"/>${mm?`<text x="${x}" y="54" font-size="8" text-anchor="middle" fill="#2b3644" font-family="IBM Plex Mono,monospace">${i/2}</text>`:''}`;}).join('')}
+    <text x="648" y="52" font-size="7" fill="#5b6573" font-family="IBM Plex Mono,monospace">mm</text>
+    <path d="M${X0-26} 16h26v24h-26Z" fill="url(#cal-jaw)" stroke="#6f7b88"/><path d="M${X0} 16l-6 0" stroke="#6f7b88"/>
+    <path d="M${X0-30} 70h30v112l-8 14h-22Z" fill="url(#cal-jaw)" stroke="#6f7b88"/>
+    <rect x="${X0}" y="118" width="${p.len*PX}" height="50" rx="2" fill="url(#cal-ic)" stroke="#0f1215"/>
+    ${Array.from({length:Math.floor(p.len*PX/24)},(_,k)=>{const x=X0+14+k*24;return `<rect x="${x}" y="110" width="8" height="8" fill="#c3cad3" stroke="#7d8896" stroke-width=".6"/><rect x="${x}" y="168" width="8" height="8" fill="#c3cad3" stroke="#7d8896" stroke-width=".6"/>`;}).join('')}
+    <circle cx="${X0+12}" cy="130" r="3.5" fill="#4b525c"/><text x="${X0+p.len*PX/2}" y="148" fill="#c9d0d8" font-size="13" text-anchor="middle" font-family="IBM Plex Mono,monospace">NB-7 · PART ${p.id}</text>
+    <g id="jaw" class="jaw" transform="translate(${jx} 0)" tabindex="0" role="slider" aria-label="Caliper jaw">
+     <path d="M0 16h26v24H0Z" fill="url(#cal-jaw)" stroke="#6f7b88"/>
+     <path d="M0 70h30v126h-22l-8-14Z" fill="url(#cal-jaw)" stroke="#6f7b88"/>
+     <rect x="-6" y="30" width="92" height="50" rx="5" fill="#2b3644" stroke="#14202d"/><rect x="0" y="36" width="62" height="24" rx="2" fill="#c9d6c4" stroke="#14202d"/>
+     <text x="31" y="54" fill="#14202d" font-size="15" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="600" id="lcd">${((jx-X0)/PX).toFixed(2)}</text>
+     <circle cx="70" cy="44" r="5" fill="#c94a3a"/><circle cx="70" cy="62" r="5" fill="#e8edf3"/><text x="8" y="72" font-size="6" fill="#c3cad3" font-family="IBM Plex Mono,monospace">ON/OFF  ZERO  mm</text>
+     <ellipse cx="40" cy="86" rx="12" ry="5" fill="#5b6573" stroke="#2b3644"/><path d="M30 86h20M32 84h16M32 88h16" stroke="#8a95a3" stroke-width=".8"/></g>
+    <path d="M${jx-30} 215h-60" stroke="${COL.blue}" stroke-width="3" marker-end="url(#ar)" id="arrow"/>
    </svg></div><div class="bench-actions"><button class="btn secondary" id="close">◀ Close jaw</button><span class="counter">Reading: <b id="rd">${((jx-X0)/PX).toFixed(2)} mm</b></span><button class="btn" id="rec">Record reading</button></div></div>`;
    ctx.coach(`<b>Part ${p.id}:</b> drag the caliper’s right jaw to the <b>left</b> until it touches the part (or click <b>Close jaw</b>). Then click <b>Record reading</b>.`);ctx.hint(()=>$(bench,jx>right+0.5?'#close':'#rec'));
    const svg=$(bench,'#cal');let drag=false;
@@ -231,7 +269,7 @@ TASKS.qc=(bench,ctx)=>{
    $(bench,'#rec').onclick=()=>{if(jx>right+0.5){ctx.say('The jaw isn’t touching the part yet, so that number is too big. Close the jaw first.','bad');return;}
     phase='scope';found=false;fx('beep');ctx.say(`✓ Part ${p.id} measures ${p.len.toFixed(2)} mm.`,'good');render();};
    return;}
-  if(phase==='scope'){bench.innerHTML=`<div class="qc">${head()}<div class="scope-part" id="sc"><div class="surface">${p.crack?`<button class="crack" style="left:${p.cx}%;top:${p.cy}%" aria-label="Crack"><svg viewBox="0 0 60 40"><path d="M4 30l12-10 6 6 14-16 8 6 12-12" fill="none" stroke="#f2f4f7" stroke-width="3"/></svg></button>`:''}</div><div class="lens-shade"></div><div class="lens-ring"></div></div>
+  if(phase==='scope'){bench.innerHTML=`<div class="qc">${head()}<div class="scope-part" id="sc"><div class="surface">${p.crack?`<button class="crack" style="left:${p.cx}%;top:${p.cy}%" aria-label="Crack"><svg viewBox="0 0 60 40"><path d="M2 32l9-7 4 3 8-9 3 2 9-11 5 4 7-8 4 2 7-6M26 20l-2 9 3 5M43 11l6 5 3 8" fill="none" stroke="#0b0f14" stroke-width="4.5" stroke-linejoin="round" stroke-opacity=".55"/><path d="M2 32l9-7 4 3 8-9 3 2 9-11 5 4 7-8 4 2 7-6M26 20l-2 9 3 5M43 11l6 5 3 8" fill="none" stroke="#f4f7fa" stroke-width="2.2" stroke-linejoin="round"/></svg></button>`:''}</div><div class="lens-shade"></div><div class="lens-ring"></div><span class="scope-mag">MICROSCOPE · 50×</span></div>
    <div class="bench-actions"><button class="btn secondary" id="clean">No cracks found</button></div></div>`;
    ctx.coach(`Move your mouse over the dark area to look at Part ${p.id} through the microscope. If you see a <b>white crack</b>, click it. If not, click <b>No cracks found</b>.`);ctx.hint(()=>p.crack?$(bench,'.crack'):$(bench,'#clean'));
    const sc=$(bench,'#sc'),mv=e=>{const b=sc.getBoundingClientRect(),k=b.width/sc.offsetWidth||1;sc.style.setProperty('--x',(e.clientX-b.left)/k+'px');sc.style.setProperty('--y',(e.clientY-b.top)/k+'px');};
@@ -243,7 +281,7 @@ TASKS.qc=(bench,ctx)=>{
   bench.innerHTML=`<div class="qc">${head()}<div class="result-card"><div class="eyebrow">Part ${p.id} · inspection record</div>
    <div class="numline"><div class="nl-ok" style="left:${pos(S-.1)}%;width:${pos(S+.1)-pos(S-.1)}%"><span>OK zone</span></div><div class="nl-mark" style="left:${pos(p.len)}%"><b>${p.len.toFixed(2)}</b></div><span class="nl-l">${min.toFixed(1)}</span><span class="nl-r">${max.toFixed(1)} mm</span></div>
    <div class="rec-row"><span>Size</span><b class="${lenOk?'ok':'bad'}">${p.len.toFixed(2)} mm · ${lenOk?'in the OK zone':'outside the OK zone'}</b></div><div class="rec-row"><span>Surface</span><b class="${p.crack?'bad':'ok'}">${p.crack?'Cracked':'No cracks'}</b></div></div>
-   <div class="bins"><button class="bin pass" data-bin="pass">✓ PASS bin</button><button class="bin reject" data-bin="reject">✗ REJECT bin</button></div></div>`;
+   <div class="bins">${[["pass","PASS","#2f7d4f"],["reject","REJECT","#c2412d"]].map(([k,t,c])=>`<button class="bin ${k}" data-bin="${k}"><svg viewBox="0 0 120 70" aria-hidden="true"><path d="M8 18h104l-8 48H16Z" fill="#3b5168" stroke="#22303f"/><path d="M4 12h112v8H4Z" fill="#4c6681" stroke="#22303f"/><path d="M22 30h76M24 42h72M26 54h68" stroke="#2c3e52" stroke-width="2"/><rect x="38" y="27" width="44" height="20" rx="2" fill="#fff" stroke="${c}" stroke-width="2"/><text x="60" y="41" text-anchor="middle" font-size="10" font-weight="700" fill="${c}" font-family="IBM Plex Mono,monospace">${t}</text><path d="M95 52l6-10 6 10Z" fill="#f2c200" stroke="#7a5a00" stroke-width=".8"/></svg><span>${k==="pass"?"✓":"✗"} ${t} bin</span></button>`).join("")}</div></div>`;
   ctx.coach(`Part ${p.id} passes only if the size is in the <b>OK zone</b> <b>and</b> there are <b>no cracks</b>. Which bin does it go in?`);ctx.hint(()=>$(bench,`[data-bin="${good?'pass':'reject'}"]`));
   bench.querySelectorAll('[data-bin]').forEach(b=>b.onclick=()=>{const want=good?'pass':'reject';
    if(b.dataset.bin!==want){ctx.say(good?'This part is in the OK zone with no cracks, so it passes.':p.crack?'A cracked part always fails, even if the size is right.':'The size is outside the OK zone, so it fails. “Close enough” isn’t good enough.','bad');return;}
@@ -321,12 +359,15 @@ TASKS.route=(bench,ctx)=>{
 
 /* ---------- Room 6 · Next moves ---------- */
 TASKS.plan=(bench,ctx)=>{
- const sel=new Set();
- function render(){bench.innerHTML=`<div class="plan"><div class="plan-grid">${ctx.v.plan.map((p,i)=>`<button class="plan-card ${sel.has(i)?'on':''}" data-i="${i}" aria-pressed="${sel.has(i)}"><span class="box">${sel.has(i)?'✓':''}</span>${p}</button>`).join('')}</div>
+ const opts=ctx.v.plan.map(p=>typeof p==='string'?{t:p,ok:true}:p),sel=new Set(),no=new Set(),good=opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0);
+ function render(){bench.innerHTML=`<div class="plan"><div class="plan-grid">${opts.map((p,i)=>`<button class="plan-card ${sel.has(i)?'on':''} ${no.has(i)?'nope':''}" data-i="${i}" aria-pressed="${sel.has(i)}" ${no.has(i)?'disabled':''}><span class="box">${sel.has(i)?'✓':no.has(i)?'✗':''}</span><span>${p.t}${no.has(i)?`<em>${p.why}</em>`:''}</span></button>`).join('')}</div>
   <div class="bench-actions"><span class="counter">${sel.size} chosen</span><button class="btn" id="save" ${sel.size<2?'disabled':''}>Save my plan →</button></div></div>`;
-  ctx.coach(sel.size<2?`Pick <b>at least 2</b> things you could really do this school year. (${sel.size} chosen)`:'Great choices! Click <b>Save my plan</b>.');ctx.hint(()=>$(bench,sel.size<2?'.plan-card:not(.on)':'#save'));}
- bench.onclick=e=>{const c=e.target.closest('[data-i]');if(c){const i=+c.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);fx('pen');render();return;}
-  if(e.target.closest('#save')&&sel.size>=2){ctx.setPlan([...sel].map(i=>ctx.v.plan[i]));fx('stamp');ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
+  ctx.coach(sel.size<2?`Pick <b>at least 2</b> things you could <b>really do now</b>, in Grade 10 or 11. Some options aren’t possible yet! (${sel.size} chosen)`:'Great choices! Pick more if you like, then click <b>Save my plan</b>.');
+  ctx.hint(()=>$(bench,sel.size<2?`[data-i="${good.find(i=>!sel.has(i))}"]`:'#save'));}
+ bench.onclick=e=>{const c=e.target.closest('[data-i]');if(c&&!c.disabled){const i=+c.dataset.i;
+   if(!opts[i].ok){no.add(i);fx('paper');ctx.say(`Not yet: ${opts[i].why}`,'bad','mira');render();return;}
+   sel.has(i)?sel.delete(i):sel.add(i);fx('pen');if(sel.has(i))ctx.say('✓ You could do that this year.','good');render();return;}
+  if(e.target.closest('#save')&&sel.size>=2){ctx.setPlan([...sel].map(i=>opts[i].t));fx('stamp');ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
  render();
 };
 
