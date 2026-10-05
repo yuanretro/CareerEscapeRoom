@@ -275,7 +275,8 @@ const STORY={
      {guess:{rule:['sam','You called it, {name}: someone broke the no-drinks rule.'],lightning:['nova','Not lightning. Lightning does not come in a can.'],nova:['nova','As I said: not me. Apology accepted in advance.']}},
      ['sam','…and THAT is why there are no drinks on the floor. Anyway: dock open, truck rolling. Those heart monitors will be on time because of you.'],
      ['mira','And you’ve mapped your own route into a real career. Sam’s sponsorship offer stands, whenever you’re ready.'],
-     ['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}. Please leave your energy drinks in the locker.']]
+     ['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}. Please leave your energy drinks in the locker.'],
+     ['nova','Oh, and before you submit the Form: add your star total. Why? No reason. Definitely no reason at all.']]
 };
 /* Shown on each room's door screen: a teaser for what comes next. */
 const HOOKS=[
@@ -286,16 +287,37 @@ const HOOKS=[
  ['mira','Your application is ready. One last question: where do YOU go from here?'],
  ['nova','Career route saved. Uh-oh. The dispatch dock is throwing alarms…']
 ];
-/* Step-complete reactions, picked by stars earned. Career rooms use Mira. */
+/* Step-complete reactions, picked by stars earned. Career rooms use Mira; the final has its own lines.
+   A line is not repeated until every line for that star count has been used. */
 const REACT={
- floor:{3:[['sam','Clean work. Not a single hint!'],['sam','Textbook. Are you sure this is your first shift?'],['nova','Flawless. Updating your file to “suspiciously good”.']],
-  2:[['sam','Nice! A couple of slips, but that’s how everyone learns.'],['sam','Solid work. Mistakes happen, and you fixed them.'],['nova','Acceptable. Above acceptable, even.']],
-  1:[['nova','Hints used. Filed under “learning experience”.'],['sam','You got there, and that’s what counts. It gets easier with practice.'],['sam','Every pro needed hints on day one. Keep going.']]},
- career:{3:[['mira','Perfect! You really know your stuff.'],['mira','Wow, first try. Employers love that kind of focus.']],
-  2:[['mira','Nicely done! A few tries, and you got it.'],['mira','Good work. Asking questions is how you learn a trade.']],
-  1:[['mira','You got there. That’s what matters!'],['mira','No shame in hints. Every apprentice asks for help.']]}
+ floor:{
+  3:[['sam','Clean work. Not a single hint!'],['sam','Textbook. Are you sure this is your first shift?'],['nova','Flawless. Updating your file to “suspiciously good”.'],
+     ['sam','That’s how the senior techs do it. Nice.'],['nova','Zero errors detected. I am… impressed. Do not tell anyone.'],['sam','Smooth! I didn’t even have to look over your shoulder.'],
+     ['nova','Performance: optimal. Coffee consumption: hopefully zero.'],['sam','Perfect run. The patients waiting on NB-7 would thank you.'],['nova','Three stars. My circuits are tingling.'],
+     ['sam','You make it look easy. It isn’t, trust me.']],
+  2:[['sam','Nice! A couple of slips, but that’s how everyone learns.'],['sam','Solid work. Mistakes happen, and you fixed them.'],['nova','Acceptable. Above acceptable, even.'],
+     ['sam','Good job. You spotted your mistake and fixed it. That’s the real skill.'],['nova','Minor errors logged. Major progress also logged.'],['sam','Not bad at all for night one.'],
+     ['nova','Two stars. Respectable. I have seen worse. Mostly from Sam.'],['sam','Close to perfect. Next one, go for three!'],['nova','Efficiency: good. Room for improvement: a little.'],
+     ['sam','That’s a pass in my book. Keep that focus.']],
+  1:[['nova','Hints used. Filed under “learning experience”.'],['sam','You got there, and that’s what counts. It gets easier with practice.'],['sam','Every pro needed hints on day one. Keep going.'],
+     ['nova','Mission accomplished. Style points: pending.'],['sam','Done is done! You’ll be faster next time.'],['nova','The hint button and you are becoming close friends.'],
+     ['sam','Tricky one, right? You still finished it.'],['nova','Recalibrating expectations… upward. Eventually.'],['sam','Hey, the chips don’t care how many tries it took. On to the next!'],
+     ['sam','Remember why it went wrong. That lesson sticks.']]},
+ career:{
+  3:[['mira','Perfect! You really know your stuff.'],['mira','Wow, first try. Employers love that kind of focus.'],['mira','You’d ace an interview with answers like that.'],
+     ['mira','Spot on! You’ve clearly been paying attention tonight.'],['mira','Flawless. I might hire you myself.'],['mira','That’s exactly how a strong apprentice thinks.']],
+  2:[['mira','Nicely done! A few tries, and you got it.'],['mira','Good work. Asking questions is how you learn a trade.'],['mira','Almost perfect. You’re getting the hang of this.'],
+     ['mira','Great! The tricky parts trip up lots of people.'],['mira','Solid. Your guidance counsellor would be proud.'],['mira','Well done. That’s real career knowledge right there.']],
+  1:[['mira','You got there. That’s what matters!'],['mira','No shame in hints. Every apprentice asks for help.'],['mira','Career paths are confusing. You worked it out.'],
+     ['mira','Finished! Now you know more than most people your age.'],['mira','That was a hard one. Good on you for sticking with it.'],['mira','Every expert started exactly where you are now.']]},
+ final:{
+  3:[['sam','Five alarms, zero panic. You’re a natural operator.'],['nova','Line restored perfectly. I take back everything I said about humans.'],['sam','That’s the fastest line recovery I’ve seen all year.']],
+  2:[['sam','Line’s running and the truck’s loading. Great save!'],['nova','Alarms cleared. Minor chaos, major success.'],['sam','You kept your cool under pressure. That’s the job.']],
+  1:[['sam','We made it! That’s a real save under pressure.'],['nova','All alarms cleared. Eventually. The truck driver is still smiling. Mostly.'],['sam','Messy, but the line is running. That counts!']]}
 };
-const HINT_QUIPS=['Hint deployed. I won’t tell Sam. (I will tell Sam.)','Making it glow for you. You’re welcome.','Hint activated. Even pros check the manual.','Look for the glow. NOVA always delivers.'];
+const HINT_QUIPS=['Hint deployed. I won’t tell Sam. (I will tell Sam.)','Making it glow for you. You’re welcome.','Hint activated. Even pros check the manual.','Look for the glow. NOVA always delivers.',
+ 'Psst. Over here. The glowing thing.','Helping is my favourite subroutine.','A little nudge never hurt anyone. Except my star rating for you.','Glow mode: on. Ego: intact.',
+ 'Hint unlocked. Pretend you knew it all along.','Following the glow is a valid strategy. Ask any moth.'];
 
 /* ---------- Real photos ----------
    Files live in img/. Any photo that is missing falls back to the drawn illustration,
