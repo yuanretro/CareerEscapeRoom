@@ -67,7 +67,7 @@ function renderLanding(){
  document.getElementById('start-form')?.addEventListener('submit',startMission);
 }
 function startMission(e){e.preventDefault();if(state.startedAt)return;const names=document.getElementById('names').value.split(/[,\n]/).map(x=>x.trim()).filter(Boolean);if(!names.length||names.some(n=>n.length>40)){document.getElementById('name-error').textContent='Enter at least one name. Keep each name under 41 characters.';return;}
- const sound=state.sound;state=freshState();state.sound=sound;state.names=names;state.startedAt=Date.now();state.deadline=state.startedAt+MISSION_MS;state.variant=makeVariant();view='room';save();render();}
+ const sound=state.sound;state=freshState();state.sound=sound;state.names=names;state.startedAt=Date.now();state.deadline=state.startedAt+MISSION_MS;state.variant=makeVariant();view='room';save();shiftStart();}
 
 /* ---------- Room: procedure card + bench ---------- */
 function stationScreen({eyebrow,title,stepper,learnTitle,remember,photo}){
@@ -80,7 +80,13 @@ function stationScreen({eyebrow,title,stepper,learnTitle,remember,photo}){
 /* Per-step coaching: banner text, hint target, mistake/hint counts for the star rating. */
 let coachState={hint:null,mistakes:0,streak:0,hints:0},currentCtx=null;
 let pendingContinue=false; // set when a step's celebration card is open; closing it moves on
-modal.addEventListener('close',()=>{if(!pendingContinue)return;pendingContinue=false;render();if(view==='gate')cinematic(`Room ${state.current+1} · complete`);});
+let pendingShip=false,shipping=false; // final cleared: the ship-out scene plays before the ending story
+modal.addEventListener('close',()=>{if(pendingShip){pendingShip=false;shipOut();return;}if(!pendingContinue)return;pendingContinue=false;render();if(view==='gate'){cinematic(`Room ${state.current+1} · complete`);autoCopy(state.current);}});
+/* Clipboard: the async API where allowed, otherwise the old select-and-copy trick. Must run inside a click or key press. */
+function copyText(t){try{if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(t);}catch{}
+ return new Promise((ok,no)=>{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(ta);ta.select();let done=false;try{done=document.execCommand('copy');}catch{}ta.remove();done?ok():no();});}
+/* When a room is finished, its Form code goes straight to the clipboard (the Continue click counts as the user's gesture). */
+function autoCopy(i){const c=ROOMS[i].code;copyText(c).then(()=>{toast(`✓ ${c} copied. Paste it into Room ${i+1} of the Form.`);const box=document.querySelector('.room-code');if(box){box.classList.add('copied');box.dataset.copied='✓ Copied';}}).catch(()=>{});}
 function showHint(auto){const el=coachState.hint?.();if(!el)return;if(!auto&&!coachState.hints)currentCtx?.say(HINT_QUIPS[Math.floor(Math.random()*HINT_QUIPS.length)],'info','nova');document.querySelectorAll('.hint-glow').forEach(x=>x.classList.remove('hint-glow'));el.classList.add('hint-glow');el.scrollIntoView?.({block:'nearest'});if(!auto)coachState.hints++;sfx('hint');}
 function makeCtx(i,onDone){
  const career=CAREER_ROOMS.includes(i);coachState={hint:null,mistakes:0,streak:0,hints:0};
@@ -118,6 +124,35 @@ function stepDone(i,k){
 }
 /* A short in-character reaction to the stars just earned. */
 function reactLine(i,stars){const pool=REACT[CAREER_ROOMS.includes(i)?'career':'floor'][stars],[w,t]=pool[Math.floor(Math.random()*pool.length)];return `<div class="react">${portrait(w)}<p><b>${CAST[w].name}:</b> ${nameFill(t)}</p></div>`;}
+/* ---------- Cut-scenes: the same factory, truck and sky for the shift start and the ship-out. ---------- */
+const SCENE={
+ sky:()=>`<defs><linearGradient id="so-dawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7db3e8"/><stop offset=".7" stop-color="#f7c58b"/><stop offset="1" stop-color="#f29e6b"/></linearGradient><linearGradient id="so-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1526"/><stop offset="1" stop-color="#2a3555"/></linearGradient></defs>
+  <rect x="-200" width="1600" height="600" fill="url(#so-dawn)"/><circle class="so-sun" cx="900" cy="470" r="60" fill="#ffd36b"/><rect class="so-night" x="-200" width="1600" height="600" fill="url(#so-night)"/>
+  <g class="so-stars" fill="#fff">${Array.from({length:30},(_,i)=>`<circle cx="${(i*397)%1200}" cy="${(i*131)%300}" r="${1+(i%3)*.5}"/>`).join('')}</g>
+  <rect x="-200" y="430" width="1600" height="170" fill="#4b5563"/><path d="M-200 515h1600" stroke="#f2f4f7" stroke-width="5" stroke-dasharray="40 30"/><rect x="-200" y="425" width="1600" height="8" fill="#9aa6b2"/>`,
+ factory:()=>`<g><rect x="40" y="200" width="380" height="230" fill="#e8edf3" stroke="#9aa6b2"/><rect x="40" y="186" width="380" height="18" fill="#1c5fd4"/><text x="230" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="IBM Plex Sans,sans-serif">NOVA SEMICONDUCTOR</text>
+   ${[70,150,230].map(x=>`<rect class="so-window" x="${x}" y="230" width="60" height="40" fill="#ffe9a8" stroke="#6b7686"/>`).join('')}<rect x="300" y="300" width="110" height="130" fill="#3a4250" stroke="#2b3644"/><text x="355" y="292" text-anchor="middle" font-size="11" font-weight="700" fill="#14202d" font-family="IBM Plex Mono,monospace">DOCK 1</text>
+   <rect x="80" y="330" width="44" height="100" fill="#5b6573" stroke="#2b3644"/><rect class="so-doorlight" x="84" y="334" width="36" height="92" fill="#ffe9a8"/></g>`,
+ truck:()=>`<g class="so-truck"><rect x="440" y="300" width="300" height="120" rx="4" fill="#fbfcfd" stroke="#9aa6b2" stroke-width="2"/><text x="590" y="352" text-anchor="middle" font-size="22" font-weight="700" fill="#14202d" font-family="IBM Plex Sans,sans-serif">NB-7 · MEDICAL</text><text x="590" y="378" text-anchor="middle" font-size="13" fill="#5b6573" font-family="IBM Plex Mono,monospace">♥ HEART MONITOR CHIPS · FRAGILE</text>
+   <rect class="so-reardoor" x="436" y="302" width="10" height="116" fill="#d3dae2" stroke="#9aa6b2"/>
+   <path d="M740 330h70l40 40v50h-110Z" fill="#1c5fd4" stroke="#14408f" stroke-width="2"/><path d="M752 340h52l30 30h-82Z" fill="#bfe0f5" stroke="#14408f"/><rect x="740" y="405" width="112" height="16" fill="#14408f"/>
+   ${[500,690,800].map(x=>`<g class="so-wheel" style="transform-origin:${x}px 425px"><circle cx="${x}" cy="425" r="26" fill="#1f2328"/><circle cx="${x}" cy="425" r="11" fill="#9aa6b2"/><path d="M${x-11} 425h22M${x} 414v22" stroke="#5b6573" stroke-width="3"/></g>`).join('')}</g>`,
+ worker:(cls)=>`<g class="${cls}"><circle cx="102" cy="368" r="9" fill="#d9a77f"/><path d="M102 357q-10 0-10 9h20q0-9-10-9Z" fill="#3b2a20"/><path d="M92 380h20l3 32h-26Z" fill="#2f8f8a"/><path d="M95 412l-4 18M109 412l4 18" stroke="#35527d" stroke-width="7" stroke-linecap="round"/><rect x="108" y="384" width="9" height="12" rx="2" fill="#c94a3a"/></g>`,
+ box:(n)=>`<g class="so-box b${n}"><rect x="0" y="0" width="46" height="36" fill="#c9a874" stroke="#8f6c3c"/><path d="M0 12h46" stroke="#a8824e"/><text x="23" y="27" text-anchor="middle" font-size="7" font-weight="700" fill="#5c4422" font-family="IBM Plex Mono,monospace">NB-7</text><path d="M19 4h8" stroke="#c94a3a" stroke-width="3"/></g>`
+};
+/* Plays a cut-scene over the game. While it runs, story and Learn pop-ups wait (shipping=true). sounds: [[ms,fxName]]. */
+function playScene(cls,svg,card,ms,sounds,after){const el=document.createElement('div');el.className='scene '+cls;
+ el.innerHTML=`<svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${svg.replace('<!--stage-->','<g transform="translate(120 0)">')}</g></svg><div class="so-card">${card}</div><button class="btn secondary so-skip" data-action="skip-scene">Skip ⏭</button>`;
+ shipping=true;document.body.appendChild(el);const timers=sounds.map(([t,n])=>setTimeout(()=>fx(n),t));
+ const finish=()=>{timers.forEach(clearTimeout);clearTimeout(end);el.remove();shipping=false;after?.();queueStory();};const end=setTimeout(finish,ms);el._finish=finish;}
+/* Shift start: walk in at night past the waiting truck, clock in, then the power surge hits. The mission clock starts after it. */
+function shiftStart(){render();playScene('intro',SCENE.sky()+'<!--stage-->'+SCENE.factory()+SCENE.truck()+SCENE.worker('si-worker')+'<rect class="si-surge" x="-200" width="1600" height="600" fill="#c2271b"/>',
+  `<div class="so-time">🕠 05:35 · CLOCK IN</div><h2>Night shift, Nova Semiconductor</h2><p>Welcome, ${esc(who())}. The NB-7 truck leaves at 06:00.</p><p class="si-alert">⚠ POWER SURGE</p>`,
+  7000,[[4300,'alarm']],()=>{const shift=Date.now()-state.startedAt;state.startedAt+=shift;state.deadline+=shift;save();tick();});}
+/* Ship-out after the final: boxes into the truck, it drives off at sunrise, the shift clocks out. */
+function shipOut(){render();playScene('outro',SCENE.sky()+'<!--stage-->'+SCENE.factory()+SCENE.box(1)+SCENE.box(2)+SCENE.box(3)+SCENE.truck()+SCENE.worker('so-worker'),
+  `<div class="so-time">🕕 06:00 · CLOCK OUT</div><h2>Shift complete</h2><p>NB-7 is on its way to the hospital. Go get some sleep, ${esc(who())}!</p>`,
+  8600,[[900,'thud'],[1500,'thud'],[2100,'thud'],[2700,'clunk'],[3100,'horn']]);}
 function cinematic(text){const el=document.createElement('div');el.className='cinematic';el.innerHTML=`<div class="cine-text">${esc(text)}</div>`;app.appendChild(el);setTimeout(()=>el.remove(),1300);}
 
 /* ---------- Gate (Form code exchange) ---------- */
@@ -148,12 +183,15 @@ function nextRoom(i){if(!state.released[i])return;closeModal();if(i===5)view=sta
 /* ---------- Final & ending ---------- */
 function renderFinal(){
  app.innerHTML=stationScreen({eyebrow:'Last stop · dispatch dock',title:'Line control',learnTitle:'Clear the alarms',remember:FINAL.remember});
- const ctx=makeCtx(-1,()=>{if(view!=='final'||state.finalCleared)return;state.finalCleared=true;state.finishedAt=Date.now();confetti();sfx('done');if(state.finishedAt>state.deadline)state.training=true;view='ending';save();render();cinematic('Truck away · mission complete');});
+ const ctx=makeCtx(-1,()=>{if(view!=='final'||state.finalCleared)return;const stars=starsFor();
+  state.finalStars=stars;state.finalCleared=true;state.finishedAt=Date.now();if(state.finishedAt>state.deadline)state.training=true;view='ending';save();confetti();sfx('done');shipping=true;pendingShip=true;
+  showModal('Line clear!',`<div class="celebrate"><div class="big-stars" aria-label="${stars} of 3 stars">${starStr(stars)}</div><p class="small muted">${stars===3?'Perfect, no hints needed!':stars===2?'Nice work!':'You got there!'}</p>${reactLine(-1,stars)}<div class="takeaway"><div class="eyebrow">What you just did</div><p>You traced every alarm back to the station that caused it and picked the right fix. That’s what operators do on every shift.</p></div></div>`,
+   `<span></span><button class="btn" data-action="shipout">🚚 Load the truck →</button>`,'All alarms cleared');});
  ctx.say('Five alarms and one very impatient truck driver. Find the machine, then fix it. You know this!','info','sam');
  unmount=TASKS.control(document.getElementById('bench'),ctx)||(()=>{});
 }
 function renderEnding(){const elapsed=fmt(((state.finishedAt||Date.now())-state.startedAt)/1000),onTime=state.finishedAt<=state.deadline;
- app.innerHTML=header()+`<main id="main" class="screen ending" tabindex="-1"><div class="ending-top"><div><div class="eyebrow">${onTime?'Mission complete':'Training complete · overtime'}</div><h1>Batch shipped. Mystery solved.</h1><p class="lede">NB-7 made the truck, and the surge turned out to be a spilled energy drink. Not bad for a co-op student’s first shift: you gowned up, printed a circuit layer, probed and diced a wafer, and inspected every part. Here’s your real route into the trade in Ontario.</p></div><div class="end-stats"><div><strong>${elapsed}</strong><span>Shift time</span></div><div><strong>${state.stars.flat().reduce((a,b)=>a+b,0)} ★</strong><span>Stars earned</span></div><div><strong>6 / 6</strong><span>Doors</span></div></div></div>
+ app.innerHTML=header()+`<main id="main" class="screen ending" tabindex="-1"><div class="ending-top"><div><div class="eyebrow">${onTime?'Mission complete':'Training complete · overtime'}</div><h1>Batch shipped. Mystery solved.</h1><p class="lede">NB-7 made the truck, and the surge turned out to be a spilled energy drink. Not bad for a co-op student’s first shift: you gowned up, printed a circuit layer, probed and diced a wafer, and inspected every part. Here’s your real route into the trade in Ontario.</p></div><div class="end-stats"><div><strong>${elapsed}</strong><span>Shift time</span></div><div><strong>${state.stars.flat().reduce((a,b)=>a+b,0)+(state.finalStars||0)} ★</strong><span>Stars earned</span></div><div><strong>6 / 6</strong><span>Doors</span></div></div></div>
  <ol class="roadmap">${PATHWAY.map((p,k)=>`<li><span class="dot">${k+1}</span><b>${p.title}</b><small>${p.tag}</small></li>`).join('')}</ol>
  <div class="end-bottom"><div class="plan-card-final"><div class="eyebrow">My next moves</div><ul>${(state.plan.length?state.plan:['Talk to my guidance counsellor about co-op or OYAP']).map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>
  <div class="end-actions"><button class="btn" data-action="guide">Read the career guide</button><button class="btn secondary" data-action="notebook">Review notebook</button><button class="btn secondary" data-action="restart">Play again</button></div></div></main>`;}
@@ -181,7 +219,7 @@ function pickChoice(key,idx,n){const list=beat(key),b=list[idx],c=b?.choices?.[n
  storyModal(key,idx,list,c[1],`<p class="you-said"><b>You:</b> ${esc(c[0])}</p><p class="story-line">${nameFill(c[2])}</p>`,`<button class="btn" data-story="${key},${idx+1}">${last?'Let’s go':'Next'} →</button>`);
  modal.querySelector('[data-story]')?.focus();}
 function queueStory(){requestAnimationFrame(nextPopup);}
-function nextPopup(){if(modal.open)return;const k=storyKey();if(k&&!state.story.includes(k)&&STORY[k]){playStory(k);return;}const l=learnKey();if(l&&!state.learned.includes(l))learnCard();}
+function nextPopup(){if(modal.open||shipping)return;const k=storyKey();if(k&&!state.story.includes(k)&&STORY[k]){playStory(k);return;}const l=learnKey();if(l&&!state.learned.includes(l))learnCard();}
 function radioButton(){const k=storyKey(),w=beat(k)[0]?.w||'sam';return `<button class="radio-btn" data-story="${k},0" title="Replay radio message" aria-label="Replay radio message">${portrait(w)}</button>`;}
 
 /* ---------- Modals ---------- */
@@ -217,7 +255,7 @@ function openFormTab(){if(formWindow&&!formWindow.closed){formWindow.focus();ret
 /* If full screen ends (Esc, a new tab), offer a one-click way back once the game has started. */
 let wantFullscreen=false;
 document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement)wantFullscreen=true;document.getElementById('fs-return').hidden=!!document.fullscreenElement||!wantFullscreen;});
-async function copyCode(i){if(!state.solved[i])return;try{await navigator.clipboard.writeText(ROOMS[i].code);toast('Copied '+ROOMS[i].code);}catch{showModal('Copy your code',`<p>Select the code and copy it with Ctrl+C.</p><input class="input" id="manual-copy" readonly aria-label="Room code" value="${ROOMS[i].code}">`);document.getElementById('manual-copy').select();}}
+async function copyCode(i){if(!state.solved[i])return;try{await copyText(ROOMS[i].code);toast('Copied '+ROOMS[i].code);}catch{showModal('Copy your code',`<p>Select the code and copy it with Ctrl+C.</p><input class="input" id="manual-copy" readonly aria-label="Room code" value="${ROOMS[i].code}">`);document.getElementById('manual-copy').select();}}
 
 /* ---------- Fun: sound effects and confetti ---------- */
 let audioCtx=null;
@@ -320,6 +358,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
   case 'learn':learnCard();break;
   case 'hint':showHint(false);break;
   case 'continue':closeModal();break;
+  case 'shipout':closeModal();break;
+  case 'skip-scene':document.querySelector('.scene')?._finish?.();break;
   case 'sound':state.sound=!state.sound;if(!state.sound)stopLoops();save();b.textContent=state.sound?'🔊':'🔇';b.setAttribute('aria-label',state.sound?'Sound effects on':'Sound effects off');break;
   case 'music':bgm.toggle();b.classList.toggle('off',!bgm.on);b.setAttribute('aria-label',bgm.on?'Music on':'Music off');break;
   case 'howto':howto();break;

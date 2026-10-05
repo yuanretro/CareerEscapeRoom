@@ -24,28 +24,52 @@ function portrait(id){
 }
 
 /* ---------- Gowning avatar: layers appear as the player dresses ---------- */
+/* The worker in the gowning room, drawn in layers: street clothes, then each garment on top as it goes on. */
 function gownAvatar(g){
- const skin=COL.skin,white='#fbfcfd',edge='#bcc5cf';
- let s='';
- // street clothes
- s+=`<path d="M86 360v-112h68v112" fill="#2c3e5c"/><path d="M120 252v108" stroke="#22324b" stroke-width="3"/>`;
- s+=`<ellipse cx="102" cy="372" rx="20" ry="9" fill="#2b2b2b"/><ellipse cx="138" cy="372" rx="20" ry="9" fill="#2b2b2b"/>`;
- s+=`<path d="M78 128h84l8 124H70Z" fill="#3f6fa8"/><path d="M80 134l-20 104M160 134l20 104" stroke="${skin}" stroke-width="17" stroke-linecap="round"/>`;
- s+=`<path d="M80 132l-10 40M160 132l10 40" stroke="#3f6fa8" stroke-width="22" stroke-linecap="round"/><circle cx="58" cy="246" r="10" fill="${skin}"/><circle cx="182" cy="246" r="10" fill="${skin}"/>`;
- if(!g.watch)s+=`<g class="removable" data-remove="watch" role="button" tabindex="0" aria-label="Remove wristwatch"><rect x="52" y="222" width="16" height="12" rx="3" fill="#2b2b2b"/><circle cx="60" cy="228" r="4" fill="#dfe6ee"/><circle cx="60" cy="228" r="14" class="hit"/></g>`;
- if(!g.phone)s+=`<g class="removable" data-remove="phone" role="button" tabindex="0" aria-label="Remove phone"><rect x="128" y="262" width="18" height="30" rx="3" fill="#111827"/><rect x="131" y="266" width="12" height="20" fill="#5b8fd6"/><rect x="122" y="256" width="30" height="42" class="hit"/></g>`;
- if(g.coverall){s+=`<path d="M76 124h88l8 128-6 112h-34l-12-100-12 100H74l-6-112Z" fill="${white}" stroke="${edge}"/><path d="M120 128v122" stroke="${edge}" stroke-width="2"/>`;
-  s+=`<path d="M80 134l-20 104M160 134l20 104" stroke="${white}" stroke-width="22" stroke-linecap="round"/><path d="M80 134l-20 104M160 134l20 104" stroke="${edge}" stroke-width="22" stroke-linecap="round" fill="none" opacity=".25"/>`;}
- if(g.boots)s+=`<rect x="80" y="318" width="40" height="58" rx="6" fill="#eef2f6" stroke="${edge}"/><rect x="120" y="318" width="40" height="58" rx="6" fill="#eef2f6" stroke="${edge}"/><path d="M80 370h40M120 370h40" stroke="#9aa6b2" stroke-width="6"/>`;
- if(g.gloves)s+=`<circle cx="58" cy="246" r="12" fill="#6aa7d8"/><circle cx="182" cy="246" r="12" fill="#6aa7d8"/><path d="M50 234h18M174 234h18" stroke="#4d8cc0" stroke-width="5"/>`;
- // head
- s+=`<rect x="110" y="104" width="20" height="22" fill="${skin}"/>`;
- s+=`<path d="M90 76c0-32 13-50 30-50s30 18 30 50c-5-12-16-20-30-20s-25 8-30 20Z" fill="#3b2a20"/><path d="M92 70c-6 14-4 30 2 38M148 70c6 14 4 30-2 38" stroke="#3b2a20" stroke-width="8" stroke-linecap="round"/>`;
- s+=`<ellipse cx="120" cy="80" rx="27" ry="31" fill="${skin}"/>`;
- if(g.hairnet)s+=`<path d="M88 72c0-32 14-48 32-48s32 16 32 48c-8-10-19-15-32-15s-24 5-32 15Z" fill="#f4f6f8" stroke="${edge}" stroke-dasharray="3 2"/>`;
- if(g.hood)s+=`<path d="M82 84c0-38 17-62 38-62s38 24 38 62v44H82Z" fill="${white}" stroke="${edge}"/><ellipse cx="120" cy="84" rx="21" ry="25" fill="${skin}"/>`;
- s+=`<circle cx="110" cy="80" r="3" fill="#1d1410"/><circle cx="130" cy="80" r="3" fill="#1d1410"/>`;
- s+=g.mask?`<path d="M100 88h40v12c0 10-9 15-20 15s-20-5-20-15Z" fill="#dfe9f3" stroke="#a9b8c8"/><path d="M100 92l-12-6M140 92l12-6" stroke="#a9b8c8"/>`:`<path d="M112 96q8 6 16 0" stroke="#7a3e2c" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+ const skin='#d9a77f',skinEdge='#a8764f',white='#fbfcfd',edge='#b9c3ce',grid='#e3e9ef';
+ // A hanging hand with five fingers. x,y = wrist; dir = which way the thumb points (toward the body).
+ const hand=(x,y,dir,fill,stroke)=>`<g transform="translate(${x} ${y}) scale(${dir*1.2} 1.2)" fill="${fill}" stroke="${stroke}" stroke-width="1.4" stroke-linejoin="round">
+   <path d="M-3 13q-6 4-5 11q1 3 4 1l4-7"/>${[-7.5,-3.2,1.1,5.4].map((fx,i)=>`<rect x="${fx-1.9}" y="12" width="4.2" height="${[11,13,12.5,10][i]}" rx="2.1"/>`).join('')}
+   <path d="M-8 0h16v11q0 6-8 6t-8-6Z"/></g>`;
+ const arms=(fill,stroke,w)=>`<path d="M86 136q-14 40-22 96M154 136q14 40 22 96" fill="none" stroke="${stroke}" stroke-width="${w+2.5}" stroke-linecap="round"/><path d="M86 136q-14 40-22 96M154 136q14 40 22 96" fill="none" stroke="${fill}" stroke-width="${w}" stroke-linecap="round"/>`;
+ let s=`<defs><pattern id="ga-grid" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M9 0H0V9" fill="none" stroke="${grid}" stroke-width=".8"/></pattern>
+  <pattern id="ga-mesh" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r=".9" fill="#2f6fb8" fill-opacity=".45"/></pattern></defs>`;
+ s+=`<ellipse cx="120" cy="380" rx="70" ry="7" fill="#14202d" fill-opacity=".12"/>`;
+ /* --- street clothes: jeans, sneakers, T-shirt, bare forearms --- */
+ s+=`<path d="M86 236h68l-3 124h-27l-4-98-4 98H89Z" fill="#35527d" stroke="#243a5a"/><path d="M120 244v20M92 244q10 6 20 0M128 244q10 6 20 0" fill="none" stroke="#263d5e" stroke-width="1.2"/>`;
+ s+=`<path d="M86 356h30q6 0 6 8v8H82q-6 0-4-6Z" fill="#f2f4f7" stroke="#9aa6b2"/><path d="M124 356h30l4 10q2 6-4 6h-34v-8q0-8 4-8Z" fill="#f2f4f7" stroke="#9aa6b2"/><path d="M80 371h42M120 371h38" stroke="#c94a3a" stroke-width="3"/>`;
+ s+=`<path d="M84 238h72" stroke="#5b3a22" stroke-width="5"/><rect x="115" y="235" width="10" height="7" rx="1" fill="#c9a24a"/>`;
+ s+=arms(skin,skinEdge,13);
+ s+=`<path d="M82 128q38-14 76 0l6 112H76Z" fill="#2f8f8a" stroke="#1f6b67"/><path d="M106 124q14 12 28 0" fill="none" stroke="#1f6b67" stroke-width="2"/>`;
+ s+=`<path d="M84 132q-10 16-14 34M156 132q10 16 14 34" fill="none" stroke="#1f6b67" stroke-width="23" stroke-linecap="round"/><path d="M84 132q-10 16-14 34M156 132q10 16 14 34" fill="none" stroke="#2f8f8a" stroke-width="20" stroke-linecap="round"/>`;
+ s+=hand(64,232,1,skin,skinEdge)+hand(176,232,-1,skin,skinEdge);
+ if(!g.watch)s+=`<g class="removable" data-remove="watch" role="button" tabindex="0" aria-label="Remove wristwatch"><rect x="55" y="220" width="17" height="9" rx="2" fill="#2b2f36" transform="rotate(-8 63 224)"/><circle cx="63" cy="224" r="5.2" fill="#c3cad3" stroke="#6b7480"/><circle cx="63" cy="224" r="3.6" fill="#f4f7fa"/><path d="M63 224v-2.4M63 224l1.8 1" stroke="#14202d" stroke-width=".9"/><circle cx="63" cy="224" r="15" class="hit"/></g>`;
+ if(!g.phone)s+=`<g class="removable" data-remove="phone" role="button" tabindex="0" aria-label="Remove phone"><path d="M128 252h24l-2 26h-20Z" fill="#2c4569" stroke="#243a5a"/><rect x="132" y="240" width="15" height="24" rx="3" fill="#14171c" stroke="#3a4250"/><rect x="134" y="243" width="11" height="15" rx="1" fill="#4f8fe0"/><path d="M128 254h24" stroke="#243a5a" stroke-width="2"/><rect x="122" y="234" width="36" height="48" class="hit"/></g>`;
+ /* --- coverall: one-piece white suit with zipper, collar, elastic cuffs, antistatic grid --- */
+ if(g.coverall){
+  s+=arms(white,edge,24)+arms('url(#ga-grid)','none',24);
+  s+=`<path d="M84 132q-10 16-14 34M156 132q10 16 14 34" fill="none" stroke="${edge}" stroke-width="28" stroke-linecap="round"/><path d="M84 132q-10 16-14 34M156 132q10 16 14 34" fill="none" stroke="${white}" stroke-width="25.5" stroke-linecap="round"/><path d="M84 132q-10 16-14 34M156 132q10 16 14 34" fill="none" stroke="url(#ga-grid)" stroke-width="25.5" stroke-linecap="round"/>`;
+  s+=`<path d="M80 126q40-16 80 0l4 112-2 122h-38l-4-98-4 98H78l-2-122Z" fill="${white}" stroke="${edge}"/><path d="M80 126q40-16 80 0l4 112-2 122h-38l-4-98-4 98H78l-2-122Z" fill="url(#ga-grid)"/>`;
+  s+=`<path d="M120 126v134" stroke="#9aa6b2" stroke-width="2.2"/><path d="M120 126v134" stroke="#fff" stroke-width=".8" stroke-dasharray="1.5 1.5"/><rect x="117" y="128" width="6" height="8" rx="1" fill="#9aa6b2"/>`;
+  s+=`<path d="M98 122l22 14 22-14" fill="${white}" stroke="${edge}" stroke-width="1.5"/><rect x="132" y="150" width="20" height="13" rx="2" fill="#e2ebfb" stroke="#8fb0e0"/><path d="M135 155h14M135 159h9" stroke="#1c5fd4" stroke-width="1.2"/>`;
+  s+=`<path d="M78 236q42 8 86 0" fill="none" stroke="${edge}" stroke-width="1.5"/><path d="M57 222h14M169 222h14" stroke="${edge}" stroke-width="7" stroke-linecap="round"/><path d="M80 354h38M122 354h38" stroke="${edge}" stroke-width="5" stroke-linecap="round"/>`;}
+ /* --- boot covers: knee-high, over the coverall legs, grippy soles and ties --- */
+ if(g.boots){for(const x of [80,122])s+=`<path d="M${x+2} 300h36l2 58q2 14-6 14H${x}q-6 0-4-14Z" fill="#eef2f6" stroke="${edge}"/><path d="M${x+2} 300h36l2 58q2 14-6 14H${x}q-6 0-4-14Z" fill="url(#ga-grid)"/><path d="M${x+2} 307h36" stroke="#5b8fd6" stroke-width="3"/><path d="M${x-3} 370h46" stroke="#5b6573" stroke-width="5" stroke-linecap="round"/><path d="M${x+30} 307l6 10" stroke="#5b8fd6" stroke-width="2"/>`;}
+ /* --- gloves: nitrile, five fingers, long cuffs pulled over the sleeves --- */
+ if(g.gloves)s+=`<path d="M56 214l18 4-2 18H58Z" fill="#7b6fd6" stroke="#4b3fa8"/><path d="M184 214l-18 4 2 18h14Z" fill="#7b6fd6" stroke="#4b3fa8"/>`+hand(64,232,1,'#8a7fe0','#4b3fa8')+hand(176,232,-1,'#8a7fe0','#4b3fa8');
+ /* --- head --- */
+ s+=`<path d="M110 100h20v28q-10 6-20 0Z" fill="${skin}" stroke="${skinEdge}"/>`;
+ if(!g.hood){s+=`<ellipse cx="94" cy="82" rx="5" ry="8" fill="${skin}" stroke="${skinEdge}"/><ellipse cx="146" cy="82" rx="5" ry="8" fill="${skin}" stroke="${skinEdge}"/>`;
+  if(!g.hairnet)s+=`<path d="M92 84q-6-46 28-52q36-2 30 52q-2-18-12-26q-12 8-34 6q-8 6-12 20Z" fill="#3b2a20"/><path d="M96 46q10-12 26-10M118 40q14-2 22 10" fill="none" stroke="#5a4232" stroke-width="2"/>`;}
+ s+=`<ellipse cx="120" cy="80" rx="25" ry="29" fill="${skin}" stroke="${skinEdge}"/>`;
+ if(g.hairnet&&!g.hood)s+=`<path d="M88 74q-2-46 32-48q34 2 32 48q-6-14-32-16q-26 2-32 16Z" fill="#6aa7e8" stroke="#2f6fb8"/><path d="M88 74q-2-46 32-48q34 2 32 48q-6-14-32-16q-26 2-32 16Z" fill="url(#ga-mesh)"/><path d="M89 72q31-20 62 0" fill="none" stroke="#2f6fb8" stroke-width="2.4" stroke-dasharray="2 1.5"/>`;
+ if(g.hood)s+=`<path d="M78 132q-4-24 2-60q8-46 40-48q32 2 40 48q6 36 2 60q-20 8-42 8t-42-8Z" fill="${white}" stroke="${edge}"/><path d="M78 132q-4-24 2-60q8-46 40-48q32 2 40 48q6 36 2 60q-20 8-42 8t-42-8Z" fill="url(#ga-grid)"/>
+  <path d="M120 24v24M84 104q36 14 72 0" fill="none" stroke="${edge}"/><ellipse cx="120" cy="82" rx="21" ry="25" fill="${skin}" stroke="${edge}" stroke-width="2.5"/><circle cx="120" cy="114" r="2.4" fill="#9aa6b2"/>`;
+ // face
+ s+=`<path d="M106 70q5-3 9 0M125 70q5-3 9 0" fill="none" stroke="#3b2a20" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="111" cy="78" rx="4" ry="3.2" fill="#fff"/><ellipse cx="129" cy="78" rx="4" ry="3.2" fill="#fff"/><circle cx="111.5" cy="78.3" r="2.2" fill="#2b1d14"/><circle cx="129.5" cy="78.3" r="2.2" fill="#2b1d14"/>`;
+ if(g.mask)s+=`<path d="M101 84q19-6 38 0v14q-2 12-19 14q-17-2-19-14Z" fill="#e6eff8" stroke="#8fa6bd"/><path d="M103 90h34M103 96h34M104 102h32" stroke="#b5c6d6"/><path d="M120 83v1" stroke="#8fa6bd"/><path d="M101 88l-6-6M139 88l6-6M102 104l-6 4M138 104l6 4" stroke="#8fa6bd" stroke-width="1.4"/>`;
+ else s+=`<path d="M119 82q-3 6 0 9q2 1 4 0" fill="none" stroke="${skinEdge}" stroke-width="1.4" stroke-linecap="round"/><path d="M111 97q9 6 18 0" stroke="#8c3f2c" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
  return `<svg viewBox="0 0 240 390" class="avatar-svg" role="img" aria-label="Worker getting ready for the cleanroom">${s}</svg>`;
 }
 function garmentIcon(id){

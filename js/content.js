@@ -95,9 +95,9 @@ const ROOMS = [
    remember:['High school → Grade 12 → sponsor → register → train → certificate.','Avoid the traps.'],
    note:'Route: co-op or OYAP in high school → Grade 12 → find an employer sponsor → register through Employment Ontario → ≈4,000 h on the job + 304 h in class → Certificate of Apprenticeship.'},
   {task:'plan',title:'Pick your next moves',
-   learn:{points:['Every career starts with a small step you can take <b>this year</b>.','Pick at least two that you could really do.','They’ll appear on your final mission report.'],
+   learn:{points:['Every career starts with a small step you can take <b>this year</b>.','Pick at least two that you could <b>really do now</b>, in Grade 10 or 11.','Careful: some options sound good but aren’t possible yet, or don’t exist for this trade.','Your picks appear on your final mission report.'],
     fact:'Ontario colleges also offer 2- and 3-year electronics diplomas if you want another route into chipmaking.'},
-   remember:['Pick at least 2.','No wrong answers!'],
+   remember:['Pick at least 2 you can do now.','No Red Seal or C of Q for 630A.','The Certificate of Apprenticeship comes last.'],
    note:''}
  ]}
 ];
@@ -185,6 +185,7 @@ const TRAPS={
  nosponsor:{t:'Register without an employer',why:'You can’t. An apprenticeship needs a sponsoring employer.'},
  cofq:{t:'Pass a Certificate of Qualification exam',why:'There’s no C of Q exam in this trade.'}
 };
+/* Things a Grade 10 student can really do now. */
 const PLAN_OPTIONS=[
  'Ask my guidance counsellor about co-op or OYAP',
  'Take Grade 11 and 12 math, physics or chemistry',
@@ -193,6 +194,14 @@ const PLAN_OPTIONS=[
  'Read the 630A trade page on Skilled Trades Ontario',
  'Visit a college open house for Electronics Engineering Technician',
  'Join a robotics or electronics club'
+];
+/* Look like good next moves but aren't possible (yet) or don't apply to this trade. Mixed in so the choice takes thought. */
+const PLAN_TRAPS=[
+ {t:'Write the Red Seal exam for this trade',why:'Micro Electronics Manufacturer (630A) is not a Red Seal trade, so there is no Red Seal exam.'},
+ {t:'Write the Certificate of Qualification exam',why:'This trade has no Certificate of Qualification exam. You earn a Certificate of Apprenticeship instead.'},
+ {t:'Get my Certificate of Apprenticeship this year',why:'That comes at the end: about 4,000 hours of paid on-the-job training plus 304 hours in class.'},
+ {t:'Leave school now to work full-time as an apprentice',why:'Grade 12 (OSSD) is the entry requirement. Co-op and OYAP let you start while you are still in school.'},
+ {t:'Apply to university engineering this year',why:'University applications happen in Grade 12, based on Grade 12 courses. For now, take the math and science that keep that door open.'}
 ];
 
 /* ---------- Final: line control ---------- */
@@ -357,7 +366,7 @@ function makeVariant(){
  const slots=shuffle([[110,80],[290,60],[470,85],[650,60],[820,90],[130,220],[310,200],[490,230],[670,205],[840,230]]);
  const stops=ROUTE.filter(s=>!s.start&&!s.end).map(s=>s.id).concat(pickN(Object.keys(TRAPS),2));
  v.route=Object.fromEntries(stops.map((id,i)=>[id,slots[i]]));
- v.plan=pickN(PLAN_OPTIONS,5);
+ v.plan=shuffle([...pickN(PLAN_OPTIONS,4).map(t=>({t,ok:true})),...pickN(PLAN_TRAPS,3).map(x=>({...x,ok:false}))]);
  // Final: five alarms at five different stations
  const byStation={};shuffle(INCIDENTS.map((_,i)=>i)).forEach(i=>{const s=INCIDENTS[i].at;if(byStation[s]===undefined)byStation[s]=i;});
  v.incidents=shuffle(Object.values(byStation)).slice(0,5).map(i=>({i,order:shuffle([0,1,2])}));
