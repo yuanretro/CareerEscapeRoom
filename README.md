@@ -32,7 +32,7 @@ Each room is a real station, built for Grade 10 students:
 Readings, specs, layouts, offsets and alarms are randomized every game.
 
 ## Run it
-- **On a PC:** double-click `index.html`. No install or server needed.
+- **On a PC:** double-click `index.html`. No install or server needed. When the page opens it suggests full screen (one click), since the game is laid out for a 16:9 screen.
 - **On a web server:** upload `index.html`, `css/`, `js/`, `img/` and `bgm/` to any static host. `The-Last-Batch.html` redirects to `index.html`.
 
 ### Background music
