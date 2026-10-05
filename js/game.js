@@ -126,19 +126,66 @@ function stepDone(i,k){
 function reactLine(i,stars){const pool=REACT[CAREER_ROOMS.includes(i)?'career':'floor'][stars],[w,t]=pool[Math.floor(Math.random()*pool.length)];return `<div class="react">${portrait(w)}<p><b>${CAST[w].name}:</b> ${nameFill(t)}</p></div>`;}
 /* ---------- Cut-scenes: the same factory, truck and sky for the shift start and the ship-out. ---------- */
 const SCENE={
- sky:()=>`<defs><linearGradient id="so-dawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7db3e8"/><stop offset=".7" stop-color="#f7c58b"/><stop offset="1" stop-color="#f29e6b"/></linearGradient><linearGradient id="so-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1526"/><stop offset="1" stop-color="#2a3555"/></linearGradient></defs>
-  <rect x="-200" width="1600" height="600" fill="url(#so-dawn)"/><circle class="so-sun" cx="900" cy="470" r="60" fill="#ffd36b"/><rect class="so-night" x="-200" width="1600" height="600" fill="url(#so-night)"/>
-  <g class="so-stars" fill="#fff">${Array.from({length:30},(_,i)=>`<circle cx="${(i*397)%1200}" cy="${(i*131)%300}" r="${1+(i%3)*.5}"/>`).join('')}</g>
-  <rect x="-200" y="430" width="1600" height="170" fill="#4b5563"/><path d="M-200 515h1600" stroke="#f2f4f7" stroke-width="5" stroke-dasharray="40 30"/><rect x="-200" y="425" width="1600" height="8" fill="#9aa6b2"/>`,
- factory:()=>`<g><rect x="40" y="200" width="380" height="230" fill="#e8edf3" stroke="#9aa6b2"/><rect x="40" y="186" width="380" height="18" fill="#1c5fd4"/><text x="230" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="IBM Plex Sans,sans-serif">NOVA SEMICONDUCTOR</text>
-   ${[70,150,230].map(x=>`<rect class="so-window" x="${x}" y="230" width="60" height="40" fill="#ffe9a8" stroke="#6b7686"/>`).join('')}<rect x="300" y="300" width="110" height="130" fill="#3a4250" stroke="#2b3644"/><text x="355" y="292" text-anchor="middle" font-size="11" font-weight="700" fill="#14202d" font-family="IBM Plex Mono,monospace">DOCK 1</text>
-   <rect x="80" y="330" width="44" height="100" fill="#5b6573" stroke="#2b3644"/><rect class="so-doorlight" x="84" y="334" width="36" height="92" fill="#ffe9a8"/></g>`,
- truck:()=>`<g class="so-truck"><rect x="440" y="300" width="300" height="120" rx="4" fill="#fbfcfd" stroke="#9aa6b2" stroke-width="2"/><text x="590" y="352" text-anchor="middle" font-size="22" font-weight="700" fill="#14202d" font-family="IBM Plex Sans,sans-serif">NB-7 · MEDICAL</text><text x="590" y="378" text-anchor="middle" font-size="13" fill="#5b6573" font-family="IBM Plex Mono,monospace">♥ HEART MONITOR CHIPS · FRAGILE</text>
-   <rect class="so-reardoor" x="436" y="302" width="10" height="116" fill="#d3dae2" stroke="#9aa6b2"/>
-   <path d="M740 330h70l40 40v50h-110Z" fill="#1c5fd4" stroke="#14408f" stroke-width="2"/><path d="M752 340h52l30 30h-82Z" fill="#bfe0f5" stroke="#14408f"/><rect x="740" y="405" width="112" height="16" fill="#14408f"/>
-   ${[500,690,800].map(x=>`<g class="so-wheel" style="transform-origin:${x}px 425px"><circle cx="${x}" cy="425" r="26" fill="#1f2328"/><circle cx="${x}" cy="425" r="11" fill="#9aa6b2"/><path d="M${x-11} 425h22M${x} 414v22" stroke="#5b6573" stroke-width="3"/></g>`).join('')}</g>`,
- worker:(cls)=>`<g class="${cls}"><circle cx="102" cy="368" r="9" fill="#d9a77f"/><path d="M102 357q-10 0-10 9h20q0-9-10-9Z" fill="#3b2a20"/><path d="M92 380h20l3 32h-26Z" fill="#2f8f8a"/><path d="M95 412l-4 18M109 412l4 18" stroke="#35527d" stroke-width="7" stroke-linecap="round"/><rect x="108" y="384" width="9" height="12" rx="2" fill="#c94a3a"/></g>`,
- box:(n)=>`<g class="so-box b${n}"><rect x="0" y="0" width="46" height="36" fill="#c9a874" stroke="#8f6c3c"/><path d="M0 12h46" stroke="#a8824e"/><text x="23" y="27" text-anchor="middle" font-size="7" font-weight="700" fill="#5c4422" font-family="IBM Plex Mono,monospace">NB-7</text><path d="M19 4h8" stroke="#c94a3a" stroke-width="3"/></g>`
+ /* sky: night (moon, stars) over a dawn gradient; the outro fades the night away and raises the sun */
+ sky:()=>`<defs>
+   <linearGradient id="so-dawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fa6e0"/><stop offset=".65" stop-color="#f7c58b"/><stop offset="1" stop-color="#f29e6b"/></linearGradient>
+   <linearGradient id="so-night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1222"/><stop offset=".7" stop-color="#1d2a48"/><stop offset="1" stop-color="#34406a"/></linearGradient>
+   <radialGradient id="so-sunglow"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#ffd36b"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+   <linearGradient id="so-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fa"/><stop offset="1" stop-color="#d3dae2"/></linearGradient>
+   <linearGradient id="so-win" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset="1" stop-color="#f5d27a"/></linearGradient>
+   <linearGradient id="so-box" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbfcfd"/><stop offset="1" stop-color="#dfe5ec"/></linearGradient>
+   <linearGradient id="so-cab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b7be6"/><stop offset="1" stop-color="#1846a8"/></linearGradient>
+   <radialGradient id="so-rim"><stop offset="0" stop-color="#eef1f4"/><stop offset="1" stop-color="#8a95a3"/></radialGradient>
+   <radialGradient id="so-lamp"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".9"/><stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/></radialGradient></defs>
+  <rect x="-200" width="1600" height="600" fill="url(#so-dawn)"/>
+  <g class="so-clouds" fill="#fff" fill-opacity=".55"><ellipse cx="760" cy="120" rx="70" ry="16"/><ellipse cx="800" cy="108" rx="40" ry="14"/><ellipse cx="1060" cy="170" rx="60" ry="12"/></g>
+  <circle class="so-sun" cx="900" cy="470" r="90" fill="url(#so-sunglow)"/>
+  <rect class="so-night" x="-200" width="1600" height="600" fill="url(#so-night)"/>
+  <g class="so-stars" fill="#fff">${Array.from({length:40},(_,i)=>`<circle cx="${(i*397)%1400-100}" cy="${(i*131)%300}" r="${.8+(i%3)*.5}" opacity="${.5+(i%2)*.5}"/>`).join('')}
+   <g class="so-moon"><circle cx="1030" cy="100" r="30" fill="#f4f1de"/><circle cx="1044" cy="92" r="27" fill="#1a2440"/></g></g>
+  <rect x="-200" y="430" width="1600" height="18" fill="#c3cad3"/><path d="M-200 430h1600" stroke="#9aa6b2" stroke-width="2"/><path d="M-200 448h1600" stroke="#6b7686" stroke-width="3"/>
+  <rect x="-200" y="450" width="1600" height="150" fill="#454d59"/><path d="M-200 520h1600" stroke="#f2c200" stroke-width="4" stroke-dasharray="46 30"/>
+  <g class="so-streetlamp"><path d="M1010 448V300q0-18 22-18h20" fill="none" stroke="#5b6573" stroke-width="6"/><path d="M1046 280h26l-4 8h-18Z" fill="#3a4250"/><ellipse class="so-lampglow" cx="1059" cy="330" rx="70" ry="70" fill="url(#so-lamp)"/></g>`,
+ /* the factory: panelled wall, rooftop units and stacks, framed lit windows (gowned figures in one), personnel door with lamp and
+    clock-in reader, ribbed roll-up dock door (open with stacked boxes for the outro), shrubs */
+ factory:(dockOpen)=>`<g>
+   <rect x="66" y="150" width="70" height="36" rx="3" fill="#c3cad3" stroke="#6b7686"/>${[84,118].map(x=>`<circle cx="${x}" cy="168" r="12" fill="#8a95a3" stroke="#5b6573"/><path d="M${x-9} 168h18M${x} 159v18" stroke="#5b6573" stroke-width="2"/>`).join('')}
+   ${[350,382].map((x,k)=>`<rect x="${x}" y="${120+k*14}" width="18" height="${66-k*14}" fill="#9aa6b2" stroke="#5b6573"/><rect x="${x-2}" y="${116+k*14}" width="22" height="6" fill="#6b7686"/>`).join('')}
+   <path d="M250 186v-40M244 152h12" stroke="#6b7686" stroke-width="3"/>
+   <rect x="40" y="200" width="380" height="230" fill="url(#so-wall)" stroke="#6b7686" stroke-width="2"/>
+   ${[230,262,294,326,358,390].map(y=>`<path d="M42 ${y}h376" stroke="#c3cad3"/>`).join('')}${[135,230,325].map(x=>`<path d="M${x} 202v226" stroke="#c3cad3"/>`).join('')}
+   <rect x="34" y="184" width="392" height="20" rx="2" fill="#1c5fd4" stroke="#14408f" stroke-width="1.5"/><rect x="48" y="187" width="14" height="14" rx="2" fill="#fff"/><path d="M51 198v-8l8 8v-8" fill="none" stroke="#1c5fd4" stroke-width="2"/>
+   <text x="240" y="199" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="2" fill="#fff" font-family="IBM Plex Sans,sans-serif">NOVA SEMICONDUCTOR</text>
+   ${[150,215].map((x,k)=>`<rect x="${x-3}" y="217" width="56" height="42" fill="#5b6573"/><rect class="so-window" x="${x}" y="220" width="50" height="36" fill="url(#so-win)"/><path d="M${x+25} 220v36M${x} 238h50" stroke="#8a95a3" stroke-width="2"/>${k===1?`<g fill="#fbfcfd" stroke="#b9c3ce" stroke-width=".8"><path d="M${x+8} 256v-10q0-6 6-6t6 6v10Z"/><circle cx="${x+14}" cy="236" r="4"/><path d="M${x+30} 256v-10q0-6 6-6t6 6v10Z"/><circle cx="${x+36}" cy="236" r="4"/></g>`:''}<path d="M${x+4} 224l12 0-12 14Z" fill="#fff" fill-opacity=".45"/>`).join('')}
+   <rect x="76" y="326" width="52" height="104" fill="#5b6573" stroke="#2b3644"/><rect x="82" y="332" width="40" height="98" fill="#7d8896" stroke="#3a4250"/><rect x="92" y="342" width="20" height="26" fill="#1d2a48" stroke="#3a4250"/><rect x="113" y="380" width="6" height="3" rx="1" fill="#c3cad3"/>
+   <rect class="so-doorlight" x="92" y="342" width="20" height="26" fill="#ffe9a8"/>
+   <path d="M90 316h24l-4 6h-16Z" fill="#3a4250"/><ellipse class="so-window" cx="102" cy="332" rx="26" ry="16" fill="url(#so-lamp)"/>
+   <g class="si-reader"><rect x="134" y="364" width="14" height="20" rx="2" fill="#2b3644"/><rect x="137" y="368" width="8" height="5" fill="#9fe0ff"/><circle class="si-led" cx="141" cy="379" r="2" fill="#c94a3a"/></g>
+   <rect x="290" y="296" width="130" height="134" fill="#3a4250" stroke="#2b3644" stroke-width="2"/><rect x="296" y="286" width="118" height="12" rx="2" fill="#5b6573"/><text x="355" y="295.5" text-anchor="middle" font-size="8" font-weight="700" fill="#f2c200" font-family="IBM Plex Mono,monospace">DOCK 1</text>
+   ${dockOpen?`<rect x="298" y="304" width="114" height="126" fill="#1f262f"/><rect x="298" y="304" width="114" height="30" fill="#c3cad3"/>${[0,1,2].map(k=>`<path d="M298 ${308+k*9}h114" stroke="#8a95a3"/>`).join('')}<g fill="#c9a874" stroke="#8f6c3c">${[[314,392],[350,392],[332,362],[368,392]].map(([x,y])=>`<rect x="${x}" y="${y}" width="34" height="30"/><path d="M${x} ${y+9}h34" stroke="#a8824e"/>`).join('')}</g><rect x="306" y="422" width="98" height="8" fill="#8a6a3c"/>`
+     :`<rect x="298" y="304" width="114" height="126" fill="#c3cad3"/>${Array.from({length:14},(_,k)=>`<path d="M298 ${310+k*9}h114" stroke="#8a95a3"/>`).join('')}<rect x="345" y="420" width="20" height="5" rx="2" fill="#5b6573"/>`}
+   <rect x="284" y="400" width="8" height="26" rx="2" fill="#14171c"/><rect x="418" y="400" width="8" height="26" rx="2" fill="#14171c"/>
+   <g fill="#3f7d4e" stroke="#2c5a37">${[[52,424,20],[200,424,24],[236,428,16]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}"/><circle cx="${x+r*.8}" cy="${y+4}" r="${r*.7}"/>`).join('')}</g></g>`,
+ /* the delivery truck: ribbed trailer with logo, rear door, reflective strip; cab with driver, mirror, lights, grille, exhaust; detailed wheels */
+ truck:()=>`<g class="so-truck">
+   <rect x="446" y="410" width="400" height="12" fill="#2b3036"/><rect x="452" y="414" width="10" height="20" fill="#14171c"/>
+   <rect x="440" y="296" width="302" height="118" rx="5" fill="url(#so-box)" stroke="#6b7686" stroke-width="2"/>${[304,406].map(y=>`<path d="M444 ${y}h294" stroke="#c3cad3" stroke-width="2"/>`).join('')}
+   <path d="M450 398h282" stroke="#c94a3a" stroke-width="5" stroke-dasharray="14 10"/>
+   <path d="M480 340q-9-10-17-2q-8 8 17 26q25-18 17-26q-8-8-17 2Z" fill="#c94a3a"/><path d="M466 346h8l3-6 4 12 3-6h10" fill="none" stroke="#fff" stroke-width="2"/>
+   <text x="616" y="346" text-anchor="middle" font-size="24" font-weight="700" fill="#14202d" font-family="IBM Plex Sans,sans-serif">NB-7 · MEDICAL</text><text x="616" y="370" text-anchor="middle" font-size="12" fill="#5b6573" font-family="IBM Plex Mono,monospace">HEART MONITOR CHIPS · FRAGILE</text><text x="616" y="388" text-anchor="middle" font-size="10" fill="#1c5fd4" font-family="IBM Plex Sans,sans-serif" font-weight="600">Nova Semiconductor · Ontario</text>
+   <g class="so-reardoor"><rect x="434" y="298" width="12" height="114" fill="#d3dae2" stroke="#6b7686"/><path d="M436 318h8M436 392h8" stroke="#5b6573" stroke-width="3"/></g>
+   <path d="M748 316h62q10 0 16 8l26 34q4 6 4 14v42H748Z" fill="url(#so-cab)" stroke="#14408f" stroke-width="2"/>
+   <path d="M760 326h46q6 0 10 5l20 27h-76Z" fill="#bfe0f5" stroke="#14408f" stroke-width="1.5"/><path d="M768 330l16 0-14 24Z" fill="#fff" fill-opacity=".5"/>
+   <circle cx="792" cy="340" r="7" fill="#2b3644"/><path d="M780 358q12-12 24 0Z" fill="#2b3644"/>
+   <path d="M772 372h20" stroke="#14408f" stroke-width="3" stroke-linecap="round"/><rect x="752" y="330" width="6" height="22" rx="2" fill="#2b3644"/>
+   <rect x="844" y="378" width="12" height="10" rx="2" fill="#ffe9a8" stroke="#c9a24a"/><ellipse class="so-headlight" cx="880" cy="384" rx="34" ry="12" fill="url(#so-lamp)"/>
+   <path d="M836 396h20M836 402h20" stroke="#14408f" stroke-width="2"/><rect x="742" y="408" width="118" height="10" rx="3" fill="#9aa6b2" stroke="#5b6573"/>
+   <rect x="744" y="266" width="8" height="50" rx="3" fill="#8a95a3" stroke="#5b6573"/><g class="so-smoke" fill="#c3cad3"><circle cx="748" cy="258" r="6"/><circle cx="742" cy="246" r="8"/><circle cx="734" cy="232" r="10"/></g>
+   ${[500,700,800].map(x=>`<g class="so-wheel" style="transform-origin:${x}px 425px"><circle cx="${x}" cy="425" r="27" fill="#1f2328" stroke="#0c0f12" stroke-width="2"/><circle cx="${x}" cy="425" r="23" fill="none" stroke="#3a4250" stroke-width="3" stroke-dasharray="4 3"/><circle cx="${x}" cy="425" r="13" fill="url(#so-rim)" stroke="#5b6573"/>${[0,72,144,216,288].map(a=>`<circle cx="${x+7*Math.cos(a*Math.PI/180)}" cy="${425+7*Math.sin(a*Math.PI/180)}" r="1.6" fill="#5b6573"/>`).join('')}<circle cx="${x}" cy="425" r="3" fill="#3a4250"/></g>`).join('')}</g>`,
+ /* the same detailed worker as in the gowning room, in street clothes, gently bobbing as they walk */
+ worker:(cls)=>`<g class="${cls}"><g class="walker">${gownAvatar({}).replace(/<g class="removable"[\s\S]*?<\/g>/g,'').replace('<svg viewBox="0 0 240 390" class="avatar-svg" role="img" aria-label="Worker getting ready for the cleanroom">','<svg x="70" y="314" width="72" height="117" viewBox="0 0 240 390">')}</g></g>`,
+ box:(n)=>`<g class="so-box b${n}"><rect x="0" y="0" width="46" height="36" rx="1" fill="#c9a874" stroke="#8f6c3c"/><path d="M0 9h46" stroke="#a8824e"/><rect x="19" y="0" width="8" height="36" fill="#d9c7a0" fill-opacity=".8"/>
+   <rect x="4" y="14" width="14" height="12" fill="#fbfcfd" stroke="#9a8a6a" stroke-width=".6"/><path d="M11 23q-3-2-4-4q0-3 4-1q4-2 4 1q-1 2-4 4Z" fill="#c94a3a"/><path d="M32 26v-9l-3 3M32 17l3 3M39 26v-9l-3 3M39 17l3 3" fill="none" stroke="#5c4422" stroke-width="1"/></g>`
 };
 /* Plays a cut-scene over the game. While it runs, story and Learn pop-ups wait (shipping=true). sounds: [[ms,fxName]]. */
 function playScene(cls,svg,card,ms,sounds,after){const el=document.createElement('div');el.className='scene '+cls;
@@ -146,11 +193,11 @@ function playScene(cls,svg,card,ms,sounds,after){const el=document.createElement
  shipping=true;document.body.appendChild(el);const timers=sounds.map(([t,n])=>setTimeout(()=>fx(n),t));
  const finish=()=>{timers.forEach(clearTimeout);clearTimeout(end);el.remove();shipping=false;after?.();queueStory();};const end=setTimeout(finish,ms);el._finish=finish;}
 /* Shift start: walk in at night past the waiting truck, clock in, then the power surge hits. The mission clock starts after it. */
-function shiftStart(){render();playScene('intro',SCENE.sky()+'<!--stage-->'+SCENE.factory()+SCENE.truck()+SCENE.worker('si-worker')+'<rect class="si-surge" x="-200" width="1600" height="600" fill="#c2271b"/>',
+function shiftStart(){render();playScene('intro',SCENE.sky()+'<!--stage-->'+SCENE.factory(false)+SCENE.truck()+SCENE.worker('si-worker')+'<rect class="si-surge" x="-200" width="1600" height="600" fill="#c2271b"/>',
   `<div class="so-time">🕠 05:35 · CLOCK IN</div><h2>Night shift, Nova Semiconductor</h2><p>Welcome, ${esc(who())}. The NB-7 truck leaves at 06:00.</p><p class="si-alert">⚠ POWER SURGE</p>`,
   7000,[[4300,'alarm']],()=>{const shift=Date.now()-state.startedAt;state.startedAt+=shift;state.deadline+=shift;save();tick();});}
 /* Ship-out after the final: boxes into the truck, it drives off at sunrise, the shift clocks out. */
-function shipOut(){render();playScene('outro',SCENE.sky()+'<!--stage-->'+SCENE.factory()+SCENE.box(1)+SCENE.box(2)+SCENE.box(3)+SCENE.truck()+SCENE.worker('so-worker'),
+function shipOut(){render();playScene('outro',SCENE.sky()+'<!--stage-->'+SCENE.factory(true)+SCENE.box(1)+SCENE.box(2)+SCENE.box(3)+SCENE.truck()+SCENE.worker('so-worker'),
   `<div class="so-time">🕕 06:00 · CLOCK OUT</div><h2>Shift complete</h2><p>NB-7 is on its way to the hospital. Go get some sleep, ${esc(who())}!</p>`,
   8600,[[900,'thud'],[1500,'thud'],[2100,'thud'],[2700,'clunk'],[3100,'horn']]);}
 function cinematic(text){const el=document.createElement('div');el.className='cinematic';el.innerHTML=`<div class="cine-text">${esc(text)}</div>`;app.appendChild(el);setTimeout(()=>el.remove(),1300);}
