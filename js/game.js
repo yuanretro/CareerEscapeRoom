@@ -128,9 +128,19 @@ function renderGate(){const i=state.current,r=ROOMS[i],notes=state.notes[i].filt
  <section class="gate-card learned"><div class="eyebrow">What you learned here</div><ul>${notes.map(n=>`<li>${esc(n)}</li>`).join('')||'<li>Saved to your notebook.</li>'}</ul></section></div></main>`;
  document.getElementById('gate-form')?.addEventListener('submit',e=>{e.preventDefault();unlockGate(document.getElementById('return-code').value);});}
 function ensureTime(){if(expired()&&!state.training){toast('Time is up. Select Continue training at the top to finish.');return false;}return true;}
-function unlockGate(value){const i=state.current;if(view!=='gate'||!state.solved[i]||state.released[i]||Date.now()<state.gateUntil[i]||!ensureTime())return false;const answer=String(value).trim().toUpperCase();
- if(!answer){setGateError('Enter the return code shown by the Form.');return false;}
- if(answer!==RETURN_CODES[i]){state.gateUntil[i]=Date.now()+5000;save();setGateError('That doesn’t open this door. Copy the new code from the Form after Next or Submit.');return false;}
+/* Door codes are matched loosely: case, spaces, dashes and punctuation are ignored (GATE 2f8r!, gate2f8r → GATE-2F8R).
+   Every rejection says why, so a right code is never reported as simply "wrong". */
+const codeKey=v=>String(v).toUpperCase().replace(/[^A-Z0-9]/g,'');
+function unlockGate(value){const i=state.current;if(view!=='gate'||!state.solved[i]||state.released[i])return false;
+ if(expired()&&!state.training){setGateError('Time is up. Click Continue training at the top of the game first, then enter the code again.');return false;}
+ const wait=Math.ceil((state.gateUntil[i]-Date.now())/1000);if(wait>0){setGateError(`Wait ${wait} s, then try again.`);return false;}
+ const answer=codeKey(value);
+ if(!answer){setGateError('Enter the door code shown by the Form.');return false;}
+ if(answer!==codeKey(RETURN_CODES[i])){
+  const nova=ROOMS.findIndex(r=>codeKey(r.code)===answer),other=RETURN_CODES.findIndex(c=>codeKey(c)===answer);
+  if(nova>=0){setGateError(`${ROOMS[nova].code} is the code you type into the Form. Click Next in the Form: it then shows a different code (GATE-…) for this door.`);return false;}
+  if(other>=0){setGateError(`That’s the door code for ${other===5?'the dispatch dock':'Room '+(other+2)}. This door needs the code the Form shows right after the Room ${i+1} code.`);return false;}
+  state.gateUntil[i]=Date.now()+3000;save();setGateError('That doesn’t open this door. Copy the code from the Form after Next or Submit.');return false;}
  state.released[i]=true;feedback='';feedbackError=false;if(i===5)view='final';else{state.current=i+1;view='room';}save();render();cinematic(i===5?'Form verified · dock access':`Form verified · Room ${i+2} open`);return true;}
 function setGateError(text){feedback=text;feedbackError=true;const el=document.getElementById('gate-feedback');if(el){el.textContent=text;el.className='feedback error';}announce(text);tick();}
 function nextRoom(i){if(!state.released[i])return;closeModal();if(i===5)view=state.finalCleared?'ending':'final';else{state.current=i+1;view='room';}feedback='';save();render();}
@@ -200,7 +210,7 @@ function openForm(){if(!formURL){toast('Open the Google Form provided for this g
   ${showCode?`<div class="form-code"><span>Room ${i+1} code</span><b>${ROOMS[i].code}</b><button class="text-btn" data-copy="${i}">Copy</button></div>`:''}
   ${needDoor?`<form class="form-door" id="form-door"><label for="form-door-code">Door code</label><input class="input" id="form-door-code" autocomplete="off" spellcheck="false" autocapitalize="characters" maxlength="24" placeholder="GATE-…"><button class="btn" type="submit">Unlock →</button></form>`:''}
   <div class="form-actions"><button class="text-btn" data-action="form-tab" title="Open the Form in a new tab (this ends full screen)">New tab ↗</button><button class="btn" data-action="close-form">← Back to the game</button></div>`;
- document.getElementById('form-door')?.addEventListener('submit',e=>{e.preventDefault();const v=document.getElementById('form-door-code').value;if(unlockGate(v))closeForm();else toast(feedback||'That code doesn’t open this door.');});
+ document.getElementById('form-door')?.addEventListener('submit',e=>{e.preventDefault();const v=document.getElementById('form-door-code').value;if(unlockGate(v))closeForm();else toast(feedback);});
  panel.hidden=false;document.body.classList.add('form-open');panel.querySelector('[data-action="close-form"]').focus();}
 function closeForm(){const panel=document.getElementById('form-panel');if(panel.hidden)return;panel.hidden=true;document.body.classList.remove('form-open');document.getElementById('return-code')?.focus();}
 function openFormTab(){if(formWindow&&!formWindow.closed){formWindow.focus();return;}if(formOpened){showModal('Your Google Form',`<p>Use the Form tab you already opened to keep your response. If you closed it, use this link.</p><a class="btn" href="${esc(formURL)}" target="_blank" rel="noopener noreferrer">Reopen Form ↗</a>`);return;}const w=window.open('about:blank','_blank');if(w){w.opener=null;w.location.replace(formURL);formWindow=w;formOpened=true;}else showModal('Open your Form',`<p>Your browser blocked the new tab.</p><a class="btn" href="${esc(formURL)}" target="_blank" rel="noopener noreferrer">Open Google Form ↗</a>`);}
