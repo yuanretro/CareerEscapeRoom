@@ -117,18 +117,29 @@ TASKS.litho=(bench,ctx)=>{
   develop(){shell(`<h3>Developer</h3><p>The developer liquid washes away the resist where the UV light hit. That reveals the circuit pattern.</p><button class="btn" id="go">Develop</button>`);
    ctx.coach('Click <b>Develop</b>.');ctx.hint(()=>$(bench,'#go'));
    $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;fx('bubbles');setTimeout(complete,900);};},
-  etch(){const tE=v.endpoint;let t=0,raf=0,last=0,run=false,pts=[],plasma=null;
-   shell(`<h3>Plasma etcher</h3><p>Plasma carves into the wafer wherever the resist is gone. A sensor watches: when the layer is cut through, the <b>signal line drops</b>.</p>
-    <svg viewBox="0 0 400 150" class="chart" aria-label="Etch signal chart"><rect width="400" height="150" fill="#fbfcfd" stroke="${COL.line}"/><path d="M30 20v110h360" stroke="${COL.muted}" fill="none"/><text x="34" y="16" font-size="10" fill="${COL.muted}">signal</text><text x="360" y="145" font-size="10" fill="${COL.muted}">time</text><polyline id="trace" fill="none" stroke="${COL.blue}" stroke-width="2.5"/></svg>
-    <div class="bench-actions"><button class="btn secondary" id="start">Start etch</button><button class="btn" id="stop" disabled>STOP</button></div>`);
+  etch(){const tE=v.endpoint,WIN=[tE+.2,tE+1.4],X=s=>30+s/8*360;let t=0,raf=0,last=0,run=false,pts=[],plasma=null;
+   /* Side view: resist (amber) on top of the layer being etched (blue) on top of the layer below (dark).
+      Trench depth follows the etch time: it reaches the bottom of the layer at the endpoint, then digs into the layer below. */
+   const OPEN=[[18,14],[48,14],[78,14]],depth=s=>s<=tE?30*s/tE:30+Math.min(26,(s-tE)*11);
+   shell(`<h3>Plasma etcher</h3><p>When the layer is cut through, the <b>signal line drops</b>. Stop right then!</p>
+    <div class="etch-row"><svg viewBox="0 0 400 150" class="chart" aria-label="Etch signal chart"><rect width="400" height="150" fill="#fbfcfd" stroke="${COL.line}"/><rect id="win" x="${X(WIN[0])}" y="18" width="${X(WIN[1])-X(WIN[0])}" height="112" fill="${COL.ok}" fill-opacity=".14" visibility="hidden"/><path d="M30 20v110h360" stroke="${COL.muted}" fill="none"/><text x="34" y="16" font-size="10" fill="${COL.muted}">signal</text><text x="360" y="145" font-size="10" fill="${COL.muted}">time</text><polyline id="trace" fill="none" stroke="${COL.blue}" stroke-width="2.5"/><path id="mark" d="" stroke-width="2.5" stroke-dasharray="5 3"/></svg>
+    <figure class="xsec"><svg viewBox="0 0 110 100" aria-label="Side view of the wafer"><rect x="0" y="0" width="110" height="100" fill="#fbfcfd"/><rect x="4" y="22" width="102" height="9" fill="#e2b84a"/><rect x="4" y="31" width="102" height="30" fill="#7d93b0"/><rect x="4" y="61" width="102" height="34" fill="#3b4656"/>
+     ${OPEN.map(([x,w])=>`<rect x="${x}" y="22" width="${w}" height="9" fill="#fbfcfd"/><rect class="trench" x="${x}" y="31" width="${w}" height="0" fill="#fbfcfd"/>`).join('')}<path d="M4 61h102" stroke="#e8edf3" stroke-dasharray="3 2" stroke-width=".8"/>
+     <text x="106" y="29" text-anchor="end" font-size="6.5" fill="#6b4a00">resist</text><text x="106" y="48" text-anchor="end" font-size="6.5" fill="#fff">layer</text><text x="106" y="91" text-anchor="end" font-size="6.5" fill="#c3cfdc">layer below</text></svg><figcaption>Side view</figcaption></figure></div>
+    <div class="bench-actions etch-actions"><p class="etch-result" id="res" hidden></p><button class="btn secondary" id="start">Start etch</button><button class="btn" id="stop" disabled>STOP</button></div>`);
    ctx.coach('Click <b>Start etch</b>. Watch the blue line. As soon as it <b>drops down</b>, click <b>STOP</b>.');ctx.hint(()=>$(bench,run?'#stop':'#start'));
-   const trace=$(bench,'#trace'),sig=s=>s<tE?0.8+Math.sin(s*9)*.03:s<tE+.4?0.8-(s-tE)/.4*.6:0.2+Math.sin(s*7)*.02;
-   function frame(now){t+=(now-last)/1000;last=now;pts.push(`${30+t/8*360},${130-sig(t)*100}`);trace.setAttribute('points',pts.join(' '));if(t>=8){stopAt();return;}raf=requestAnimationFrame(frame);}
-   function stopAt(){run=false;cancelAnimationFrame(raf);plasma?.stop();plasma=null;fx('click');$(bench,'#stop').disabled=true;$(bench,'#start').disabled=false;
-    if(t<tE+.2)ctx.say('Too early! The line hadn’t dropped yet, so the layer isn’t cut through. Try again and wait for the drop.','bad');
-    else if(t>tE+2.5)ctx.say('Too late! You kept etching after the drop and damaged the layer underneath. Try again and stop right after the drop.','bad');
-    else complete();}
-   $(bench,'#start').onclick=()=>{t=0;pts=[];run=true;$(bench,'#start').disabled=true;$(bench,'#stop').disabled=false;ctx.coach('Watch the line… click <b>STOP</b> when it drops!');fx('click');plasma=machineLoop('plasma');last=performance.now();raf=requestAnimationFrame(frame);};
+   const trace=$(bench,'#trace'),mark=$(bench,'#mark'),win=$(bench,'#win'),res=$(bench,'#res'),trenches=bench.querySelectorAll('.trench'),
+    sig=s=>s<tE?0.8+Math.sin(s*9)*.03:s<tE+.4?0.8-(s-tE)/.4*.6:0.2+Math.sin(s*7)*.02,
+    dig=s=>trenches.forEach(r=>r.setAttribute('height',depth(s).toFixed(1)));
+   function frame(now){t+=(now-last)/1000;last=now;pts.push(`${X(t)},${130-sig(t)*100}`);trace.setAttribute('points',pts.join(' '));dig(t);if(t>=8){stopAt();return;}raf=requestAnimationFrame(frame);}
+   function show(ok,text){mark.setAttribute('d',`M${X(t)} 18v112`);mark.setAttribute('stroke',ok?COL.ok:COL.red);win.setAttribute('visibility','visible');res.hidden=false;res.className='etch-result '+(ok?'ok':'bad');res.innerHTML=text;
+    if(!ok){const pn=$(bench,'#panel');pn.classList.remove('shake');void pn.offsetWidth;pn.classList.add('shake');}}
+   function stopAt(){run=false;cancelAnimationFrame(raf);plasma?.stop();plasma=null;fx('click');$(bench,'#stop').disabled=true;const st=$(bench,'#start');
+    if(t<WIN[0]){show(false,'✗ UNDER-ETCHED: the trench stops partway, so the layer isn’t cut through.');st.disabled=false;st.textContent='Try again';ctx.coach('Too early. Click <b>Try again</b> and wait until the line has <b>dropped</b> (the green zone).');ctx.say('Too early! The line hadn’t dropped yet, so the layer isn’t cut through. Wait for the drop.','bad');}
+    else if(t>WIN[1]){show(false,'✗ OVER-ETCHED: the plasma dug into the layer below and damaged it.');st.disabled=false;st.textContent='Try again';ctx.coach('Too late. Click <b>Try again</b> and stop <b>right after</b> the line drops (the green zone).');ctx.say('Too late! You kept etching after the drop and damaged the layer underneath. Stop right after the drop.','bad');}
+    else{show(true,'✓ PERFECT ENDPOINT: cut right through the layer, and the layer below is untouched.');ctx.coach('Perfect endpoint! 🎉');ctx.say('Right on the endpoint: the layer is cut through and the layer below is safe.','good');setTimeout(complete,1400);}}
+   $(bench,'#start').onclick=()=>{t=0;pts=[];run=true;dig(0);mark.setAttribute('d','');win.setAttribute('visibility','hidden');res.hidden=true;
+    $(bench,'#start').disabled=true;$(bench,'#stop').disabled=false;ctx.coach('Watch the line… click <b>STOP</b> when it drops!');fx('click');plasma=machineLoop('plasma');last=performance.now();raf=requestAnimationFrame(frame);};
    $(bench,'#stop').onclick=()=>{if(run)stopAt();};
    cleanup=()=>{cancelAnimationFrame(raf);plasma?.stop();};},
   strip(){shell(`<h3>Resist stripper</h3><p>Etching is done, so the leftover resist comes off. What’s left is the new circuit layer.</p><button class="btn" id="go">Strip resist</button>`);
