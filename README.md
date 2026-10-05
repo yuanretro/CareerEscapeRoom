@@ -33,10 +33,10 @@ Readings, specs, layouts, offsets and alarms are randomized every game.
 
 ## Run it
 - **On a PC:** double-click `index.html`. No install or server needed.
-- **On a web server:** upload `index.html`, `css/`, `js/`, `img/` and any `bgm*.mp3` files to any static host. `The-Last-Batch.html` redirects to `index.html`.
+- **On a web server:** upload `index.html`, `css/`, `js/`, `img/` and `bgm/` to any static host. `The-Last-Batch.html` redirects to `index.html`.
 
 ### Background music
-Put music files in the game folder (next to `index.html`) named `bgm1.mp3`, `bgm2.mp3`, `bgm3.mp3`, … with no gaps in the numbers. They play in order, and after the last one the list starts again from `bgm1.mp3`. Music is on by default and starts after the player's first click or key press (browsers block autoplay). The 🎵 button in the top bar turns it off, and the choice is remembered in that browser. With no `bgm1.mp3`, the game simply plays without music.
+Put music files in the `bgm/` folder, named `bgm1.mp3`, `bgm2.mp3`, `bgm3.mp3`, … with no gaps in the numbers. They play in order, and after the last one the list starts again from `bgm1.mp3`. Music is on by default and starts after the player's first click or key press (browsers block autoplay). The 🎵 button in the top bar turns it off, and the choice is remembered in that browser. With no `bgm1.mp3`, the game simply plays without music.
 
 Fonts load from Google Fonts when online. Offline, the game falls back to system fonts.
 
@@ -46,6 +46,7 @@ Fonts load from Google Fonts when online. Offline, the game falls back to system
 - `js/game.js`: screens, story playback, notebook, Google Form code exchange
 - `js/art.js`: portraits, gowning avatar, camera frames, floor plan
 - `css/style.css`: styles
+- `bgm/`: background music (`bgm1.mp3`, `bgm2.mp3`, …)
 - `img/`: optional real photos (see `img/README.md`); missing photos fall back to drawings
 
 The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
