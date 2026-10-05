@@ -241,12 +241,12 @@ function machineLoop(kind){if(!state.sound)return {set(){},stop(){}};try{const c
  loops.add(h);return h;}catch{return {set(){},stop(){}};}}
 function stopLoops(){[...loops].forEach(h=>h.stop());airSound.stop(0.1);}
 
-/* Background music: bgm1.mp3, bgm2.mp3, … in the game folder, played in order, then the list repeats.
+/* Background music: bgm/bgm1.mp3, bgm/bgm2.mp3, … (the bgm folder next to index.html), played in order, then the list repeats.
    On by default; the 🎵 button turns it off (remembered in this browser). Browsers only allow audio after a click or key press. */
 const BGM_KEY='nova-last-batch-bgm';
 const bgm={el:null,n:1,on:readStore(BGM_KEY)!=='off',missing:false,
  start(){if(!this.on||this.missing)return;if(!this.el){this.el=new Audio();this.el.volume=.3;this.el.preload='auto';this.el.addEventListener('ended',()=>this.load(this.n+1));this.el.addEventListener('error',()=>this.fail());this.load(1);return;}this.el.play().catch(()=>{});},
- load(n){this.n=n;this.el.src=`bgm${n}.mp3`;if(this.on)this.el.play().catch(()=>{});},
+ load(n){this.n=n;this.el.src=`bgm/bgm${n}.mp3`;if(this.on)this.el.play().catch(()=>{});},
  fail(){if(this.n===1){this.missing=true;return;}this.load(1);}, // past the last file (or bgm1 missing): back to the start
  toggle(){this.on=!this.on;try{localStorage.setItem(BGM_KEY,this.on?'on':'off');}catch{}if(this.on){this.missing=false;this.start();}else this.el?.pause();}
 };
