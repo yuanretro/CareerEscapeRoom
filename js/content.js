@@ -294,12 +294,12 @@ const HINT_QUIPS=['Hint deployed. I won’t tell Sam. (I will tell Sam.)','Makin
    (author, licence, source) — it is shown in Menu → Sources. */
 const PHOTOS={
  cleanroom:{file:'cleanroom.jpg',caption:'Workers in a real cleanroom',credit:'Aileen Devlin / Jefferson Lab, public domain, via Wikimedia Commons'},
- gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns',credit:'Steve Jurvetson, CC BY 2.0, via Wikimedia Commons'},
+ gowning:{file:'gowning.jpg',caption:'Workers in full cleanroom gowns at an Intel fab',credit:'Intel Corporation (press photo)'},
  airshower:{file:'airshower.jpg',caption:'An air shower at a cleanroom entrance',credit:'NASA, public domain, via Wikimedia Commons'},
  yellowroom:{file:'yellowroom.jpg',caption:'A real cleanroom lit with yellow safe-light',credit:'NASA Glenn Research Center, public domain, via Wikimedia Commons'},
- wetbench:{file:'wetbench.jpg',caption:'A wet bench for cleaning wafers',credit:'KristianMolhave, CC BY 2.5, via Wikimedia Commons'},
+ wetbench:{file:'wetbench.jpg',caption:'A wet bench for cleaning wafers',credit:'MOT GmbH (product photo, µGALV wet bench)'},
  spincoater:{file:'spincoater.jpg',caption:'A spin coater',credit:'Junny97008, CC BY-SA 4.0, via Wikimedia Commons'},
- maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner (SÜSS MA6)',credit:'James Friend, CC BY 3.0, via Wikimedia Commons'},
+ maskaligner:{file:'maskaligner.jpg',caption:'A mask aligner (SÜSS MicroTec MA/BA6)',credit:'SÜSS MicroTec (product photo)'},
  developer:{file:'developer.jpg',caption:'A resist coater and developer',credit:'Guillaume Paumier, CC BY-SA 3.0, via Wikimedia Commons'},
  etcher:{file:'etcher.jpg',caption:'A reactive ion (plasma) etcher',credit:'AlabamaUSA, CC BY-SA 3.0, via Wikimedia Commons'},
  stripper:{file:'stripper.jpg',caption:'An oxygen plasma cleaner, used to strip resist',credit:'Maxfisch, CC0, via Wikimedia Commons'},
@@ -307,12 +307,12 @@ const PHOTOS={
  wafer:{file:'wafer.jpg',caption:'A real wafer full of chips, ready to be cut apart',credit:'Peellden, CC BY-SA 3.0, via Wikimedia Commons'},
  chiptray:{file:'chiptray.jpg',caption:'Finished chips in a tray',credit:'BrokenSphere, CC BY-SA 3.0, via Wikimedia Commons'},
  caliper:{file:'caliper.jpg',caption:'A digital caliper',credit:'Jacek Halicki, CC BY-SA 4.0, via Wikimedia Commons'},
- hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:'David Ring, CC0, via Wikimedia Commons'},
- hood:{file:'hood.jpg',caption:'Cleanroom hood and gown',credit:'Stan Zurek, CC BY-SA 3.0, via Wikimedia Commons',pos:'center 12%'},
- mask:{file:'facemask.jpg',caption:'Face mask',credit:'AlexChirkin, CC0, via Wikimedia Commons'},
- coverall:{file:'coverall.jpg',caption:'Cleanroom coveralls',credit:''},
+ hairnet:{file:'hairnet.jpg',caption:'Hair net',credit:'Online store product photo (seller not recorded)'},
+ hood:{file:'hood.jpg',caption:'Cleanroom hood and mask',credit:'Cleanroom supplier product photo (supplier not recorded)',pos:'center 12%'},
+ mask:{file:'facemask.jpg',caption:'Face mask',credit:'MagiCare (product photo)'},
+ coverall:{file:'coverall.jpg',caption:'Cleanroom coveralls',credit:'Cleanroom supplier product photo (supplier not recorded)'},
  boots:{file:'boots.jpg',caption:'Boot covers',credit:'Sergeev Pavel, CC BY-SA 3.0, via Wikimedia Commons'},
- gloves:{file:'gloves.jpg',caption:'Nitrile cleanroom glove',credit:'BlueThunderTechnologies, CC BY-SA 4.0, via Wikimedia Commons'},
+ gloves:{file:'gloves.jpg',caption:'Nitrile gloves',credit:'Comfy Package (product photo)'},
  sweater:{file:'sweater.jpg',caption:'Wool sweater',credit:'Andrew Toskin, CC BY 2.0, via Wikimedia Commons'},
  scarf:{file:'scarf.jpg',caption:'Knitted scarf',credit:'AbbieCall, CC BY-SA 4.0, via Wikimedia Commons'}
 };
