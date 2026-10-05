@@ -118,7 +118,7 @@ function floorPlan(){
   ${room(30,52,120,70,'01','Gowning','Get clean')}${room(162,52,130,70,'02','Litho bay','Print the pattern','#fff6cc')}${room(304,52,120,70,'03','Probe & dice','Test and cut')}
   ${room(304,130,120,62,'04','Inspection','Measure & sort')}
   ${room(30,236,140,72,'05','Training office','Qualifications')}${room(184,236,140,72,'06','Career planner','Your route')}
-  ${room(460,52,124,140,'⚑','Dispatch dock','Truck in 25 min','#eef2f6')}
+  ${room(460,52,124,140,'END','Dispatch dock','Truck in 25 min','#eef2f6')}
   <path d="M150 87h12M292 87h12M364 122v8M424 161h36M364 192v20H100v24M170 272h14M324 272h80V192" fill="none" stroke="${COL.accent}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 7"/>
   <circle cx="60" cy="140" r="7" fill="${COL.accent}"/><text x="72" y="144" font-size="11" fill="${COL.ink}" font-family="IBM Plex Sans,Inter,sans-serif">You start here</text>
  </svg>`;
