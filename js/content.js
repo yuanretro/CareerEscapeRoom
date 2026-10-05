@@ -221,19 +221,72 @@ const PATHWAY=[
 
 /* ---------- Storyline ---------- */
 const CAST={sam:{name:'Sam Okoro',role:'Night-shift supervisor'},mira:{name:'Mira Tran',role:'Apprenticeship training advisor'},nova:{name:'NOVA',role:'Factory control system'}};
+/* Story beats. An entry is either [speaker, line] or an object:
+   {w, t, choices:[[button label, reply speaker, reply line, tag?]]}  -> the player picks a reply (tag is saved in state.choices[key])
+   {guess:{tag:[speaker,line]}}                                       -> a line that depends on an earlier choice (skipped if none)
+   {name} becomes the player's name. */
 const STORY={
- r0:[['nova','⚠ POWER SURGE DETECTED. Line reset. Batch NB-7 lost its last circuit layer. All doors sealed.'],
-     ['sam','{name}! Perfect timing for your first shift. NB-7 is sensor chips for hospital heart monitors, and the truck leaves at dawn.'],
-     ['sam','We’ll have to rebuild the batch ourselves. Each door needs a code swapped with the Google Form, so keep it open in another tab.'],
-     ['sam','But first: you can’t go anywhere near a wafer dressed like that. Gown up.']],
- r1:[['sam','Welcome to the litho bay. That’s why everything’s yellow.'],['sam','The surge wiped NB-7’s last layer. Re-print it: pick each tool in the right order and run it.']],
- r2:[['sam','The layer is printed. Now we find out which chips actually work.'],['sam','Probe them on the wafer, ink the bad ones, then dice it and pick the good chips.']],
- r3:[['sam','Final inspection. Measure every part and check it under the microscope.'],['sam','If it’s out of spec, it doesn’t ship. No “close enough”.']],
- r4:[['sam','NB-7 is packed. Honestly? You’re a natural.'],['sam','Nova sponsors apprentices. If you want to do this for real, go see Mira in the training office.'],['mira','Hi {name}! Let’s see what it takes to get started, and what you’ve already practised tonight.']],
- r5:[['mira','Application sorted! Now let’s map your route, from where you are today to the certificate.']],
- final:[['nova','LINE ALARMS ACTIVE. Dispatch dock locked until the line is clear.'],['sam','The truck’s here and the line is throwing alarms. Find each problem, fix it, and we ship!']],
- ending:[['sam','Dock open, truck rolling. Those heart monitors will get their chips on time, because of you.'],['mira','And you’ve mapped your own route into the trade. Whenever you’re ready, Sam’s sponsorship offer stands.'],['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}.']]
+ r0:[['nova','⚠ POWER SURGE. Line crashed. Batch NB-7 lost its last circuit layer. Doors: LOCKED. Cause: unknown.'],
+     ['sam','{name}! You’re the new co-op student, right? Great timing… or terrible timing. I’m Sam, the night supervisor.'],
+     {w:'sam',t:'NB-7 is chips for hospital heart monitors. Real patients are waiting, and the truck leaves in 25 minutes.',choices:[
+      ['Let’s do this! 💪','sam','That’s the spirit. I like you already.'],
+      ['Wait… 25 MINUTES?!','sam','Yep. Breathe. The blue box on your screen will walk you through every step.'],
+      ['Do I get paid for this?','sam','Ha! Co-op is for credits. But apprentices in this trade DO get paid. Remember that for later.']]},
+     ['sam','Every door needs a code swapped with the Google Form, so keep it open in another tab.'],
+     ['sam','Rule one: nobody goes near a wafer in a hoodie. Let’s get you suited up.']],
+ r1:[['nova','Welcome to the litho bay. Yes, everything is yellow. No, your eyes are fine.'],
+     ['sam','Yellow light doesn’t affect the light-sensitive coating. Blue and UV light would ruin it.'],
+     ['nova','Surge investigation: 12% complete. Cause: still unknown. I am… concerned.'],
+     ['sam','Fun fact: the chip in your phone was made with this same process, layer after layer. Let’s rebuild NB-7’s layer.']],
+ r2:[['sam','Layer printed. Now the big question: which chips actually work?'],
+     ['nova','Starting chip test… correction: YOU are starting the chip test. I am supervising. Emotionally.'],
+     ['nova','Surge investigation: 47% complete. Found: something sticky near control panel 3.'],
+     ['sam','Sticky? Weird. Okay: test the chips, mark the duds with red ink, then cut the wafer and keep only the good ones.']],
+ r3:[['sam','Last stop on the floor: inspection. This is where we catch mistakes before a patient ever could.'],
+     ['nova','Reminder: “close enough” is not a measurement.'],
+     {w:'sam',t:'Before we start: any guess what caused that surge? Something sticky on a control panel…',choices:[
+      ['A lightning storm ⚡','sam','Could be! But lightning isn’t usually sticky. Let’s see what NOVA finds.','lightning'],
+      ['Someone broke a cleanroom rule','sam','Hmm. In a place with this many rules? Let’s see what NOVA finds.','rule'],
+      ['NOVA did it 🤖','nova','I am deeply offended. And also checking my logs. Just in case.','nova']]}],
+ r4:[['sam','NB-7 is packed. {name}, you picked this up faster than some new hires do.'],
+     {w:'sam',t:'Real talk: people get paid to do this job, and you can start training while you’re still in high school.',choices:[
+      ['Wait, really? In high school?','sam','Really. Co-op and OYAP let you start in Grade 11 or 12. Mira knows all about it.'],
+      ['Could someone like me do this?','sam','You just did it, all night. That’s the whole point.'],
+      ['How much school does it take?','sam','Less than you’d think. Most of it is paid training on the job. Ask Mira.']]},
+     ['sam','Mira in the training office can show you how. Go on, I’ll watch the line.'],
+     ['mira','Hi {name}! Sam says you’re a natural. Let’s see what it takes to do this for real, and what you’ve already practised tonight.']],
+ r5:[['mira','Application done! That’s a real head start.'],
+     ['nova','Surge investigation: 89% complete. Sticky substance identified as… sugar. And caffeine.'],
+     ['mira','Now let’s map your route, from Grade 10 all the way to a Certificate of Apprenticeship.']],
+ final:[['nova','ALARM. ALARM. Also: ALARM. Five problems on the line. Dispatch dock locked.'],
+     {w:'sam',t:'The truck’s here and the driver keeps checking the clock. You ready?',choices:[
+      ['Born ready.','sam','Then let’s ship it! Find each problem, fix it, and we’re done.'],
+      ['…Do I have a choice?','sam','Nope! But you’ve got this. Find each problem, fix it, and we ship.']]}],
+ ending:[['nova','Surge investigation complete. Cause: an energy drink spilled on control panel 3.'],
+     {guess:{rule:['sam','You called it, {name}: someone broke the no-drinks rule.'],lightning:['nova','Not lightning. Lightning does not come in a can.'],nova:['nova','As I said: not me. Apology accepted in advance.']}},
+     ['sam','…and THAT is why there are no drinks on the floor. Anyway: dock open, truck rolling. Those heart monitors will be on time because of you.'],
+     ['mira','And you’ve mapped your own route into a real career. Sam’s sponsorship offer stands, whenever you’re ready.'],
+     ['nova','ALL SYSTEMS NOMINAL. Welcome to Nova, {name}. Please leave your energy drinks in the locker.']]
 };
+/* Shown on each room's door screen: a teaser for what comes next. */
+const HOOKS=[
+ ['sam','Suited up and clean. Next stop: the litho bay. Bring sunglasses. (Kidding. Mostly.)'],
+ ['nova','Layer printed. Warning: hundreds of chips on this wafer, and I have no idea which ones work.'],
+ ['sam','Good chips in the tray. But inspection is where things get picky…'],
+ ['sam','NB-7 is ready to pack. Before you go… I have something to ask you, {name}.'],
+ ['mira','Your application is ready. One last question: where do YOU go from here?'],
+ ['nova','Career route saved. Uh-oh. The dispatch dock is throwing alarms…']
+];
+/* Step-complete reactions, picked by stars earned. Career rooms use Mira. */
+const REACT={
+ floor:{3:[['sam','Clean work. Not a single hint!'],['sam','Textbook. Are you sure this is your first shift?'],['nova','Flawless. Updating your file to “suspiciously good”.']],
+  2:[['sam','Nice! A couple of slips, but that’s how everyone learns.'],['sam','Solid work. Mistakes happen, and you fixed them.'],['nova','Acceptable. Above acceptable, even.']],
+  1:[['nova','Hints used. Filed under “learning experience”.'],['sam','You got there, and that’s what counts. It gets easier with practice.'],['sam','Every pro needed hints on day one. Keep going.']]},
+ career:{3:[['mira','Perfect! You really know your stuff.'],['mira','Wow, first try. Employers love that kind of focus.']],
+  2:[['mira','Nicely done! A few tries, and you got it.'],['mira','Good work. Asking questions is how you learn a trade.']],
+  1:[['mira','You got there. That’s what matters!'],['mira','No shame in hints. Every apprentice asks for help.']]}
+};
+const HINT_QUIPS=['Hint deployed. I won’t tell Sam. (I will tell Sam.)','Making it glow for you. You’re welcome.','Hint activated. Even pros check the manual.','Look for the glow. NOVA always delivers.'];
 
 /* ---------- Real photos ----------
    Files live in img/. Any photo that is missing falls back to the drawn illustration,

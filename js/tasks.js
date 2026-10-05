@@ -30,10 +30,10 @@ TASKS.gown=(bench,ctx)=>{
   else{ctx.coach(k===0?'Now dress the worker <b>from the top down</b>. Click the garment that goes on <b>first</b>.':`${GARMENTS[GOWN_ORDER[k-1]]} on! Which garment goes on <b>next</b>?`);ctx.hint(()=>$(bench,`[data-g="${GOWN_ORDER[k]}"]`));}
  }
  bench.onclick=e=>{
-  const r=e.target.closest('[data-remove]');if(r){g[r.dataset.remove]=true;ctx.say(`${r.dataset.remove==='watch'?'Watch':'Phone'} locked away. Personal items can’t be cleaned, so they stay out.`,'good');render();return;}
+  const r=e.target.closest('[data-remove]');if(r){g[r.dataset.remove]=true;fx('clunk');ctx.say(`${r.dataset.remove==='watch'?'Watch':'Phone'} locked away. Personal items can’t be cleaned, so they stay out.`,'good');render();return;}
   const b=e.target.closest('[data-g]');if(!b||b.disabled)return;const id=b.dataset.g;
   if(!g.watch||!g.phone){ctx.say('First lock away the watch and the phone. Click them on the worker.','bad');return;}
-  if(id===GOWN_ORDER[k]){g[id]=true;k++;render();if(k===6){ctx.coach('Fully gowned! 🎉');ctx.say('Fully gowned: top to bottom, gloves last. Perfect.','good');setTimeout(ctx.done,700);}else ctx.say(`${GARMENTS[id]} on.`,'good');}
+  if(id===GOWN_ORDER[k]){g[id]=true;k++;fx('rustle');render();if(k===6){ctx.coach('Fully gowned! 🎉');ctx.say('Fully gowned: top to bottom, gloves last. Perfect.','good');setTimeout(ctx.done,700);}else ctx.say(`${GARMENTS[id]} on.`,'good');}
   else ctx.say(GOWN_WHY[id]||'Work from the top down: hair, head, face, body, feet, then gloves.','bad');
  };
  bench.onkeydown=e=>{const r=e.target.closest('[data-remove]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();r.dispatchEvent(new MouseEvent('click',{bubbles:true}));}};
@@ -61,7 +61,7 @@ TASKS.cctv=(bench,ctx)=>{
   <div class="bench-actions"><span class="counter">${found.size} of ${bad.length} rule-breakers found</span></div></div>`;
   ctx.coach(`Look closely at each camera. Click the ones that <b>break a cleanroom rule</b>. There are <b>${bad.length}</b> to find.`);
   ctx.hint(()=>$(bench,`[data-h="${bad.find(h=>!found.has(h))}"]`));}
- bench.onclick=e=>{const c=e.target.closest('[data-h]');if(!c)return;const h=c.dataset.h;if(found.has(h)||okSeen.has(h))return;
+ bench.onclick=e=>{const c=e.target.closest('[data-h]');if(!c)return;const h=c.dataset.h;if(found.has(h)||okSeen.has(h))return;fx('click');
   if(HAZARDS[h].unsafe){found.add(h);ctx.say(`✓ ${HAZARDS[h].title}: ${HAZARDS[h].why}`,'good');}else{okSeen.add(h);ctx.say(`That one’s fine. ${HAZARDS[h].why}`,'bad');}
   render();if(found.size===bad.length){ctx.coach('All rule-breakers found! 🎉');setTimeout(ctx.done,900);}};
  render();
@@ -90,16 +90,18 @@ TASKS.litho=(bench,ctx)=>{
  const MINI={
   clean(){shell(`<h3>Wet clean bench</h3><p>Ultra-pure water rinses dust off, then the wafer spins dry.</p><button class="btn" id="go">Run clean cycle</button>`);
    ctx.coach('Click <b>Run clean cycle</b>.');ctx.hint(()=>$(bench,'#go'));
-   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;bench.querySelectorAll('.speck').forEach((s,i)=>setTimeout(()=>s.remove(),60*i));setTimeout(complete,1100);};},
+   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;fx('water');bench.querySelectorAll('.speck').forEach((s,i)=>setTimeout(()=>s.remove(),60*i));setTimeout(complete,1100);};},
   coat(){const band=[v.rpm-500,v.rpm+500];let rpm=0,raf=0,last=0;
    shell(`<h3>Spin coater</h3><p>Resist drips onto the middle of the wafer, then the wafer spins to spread it out. <b>Faster spin = thinner coat.</b></p>
     <div class="gauge"><div class="band" style="left:${band[0]/60}%;width:${1000/60}%"></div><div class="needle" id="needle"></div></div><div class="gauge-scale"><span>0</span><span>3000</span><span>6000 rpm</span></div>
     <p class="readout"><span id="rpm">0</span> rpm</p><button class="btn big" id="spin">Hold to spin</button>`);
    ctx.coach('Press and <b>hold</b> “Hold to spin”. <b>Let go</b> when the needle is inside the <b>green zone</b>.');ctx.hint(()=>$(bench,'.gauge'));
    const needle=$(bench,'#needle'),out=$(bench,'#rpm');
-   function frame(now){const dt=(now-last)/1000;last=now;rpm=Math.min(6000,rpm+1500*dt);needle.style.left=rpm/60+'%';out.textContent=Math.round(rpm);raf=requestAnimationFrame(frame);}
-   cleanup=holdControl($(bench,'#spin'),()=>{rpm=0;last=performance.now();raf=requestAnimationFrame(frame);},()=>{cancelAnimationFrame(raf);
-    if(rpm>=band[0]&&rpm<=band[1])complete();else ctx.say(rpm<band[0]?'Too slow: the coat came out thick and lumpy. Hold a bit longer this time.':'Too fast: the coat came out too thin. Let go a bit sooner.','bad');});},
+   let motor=null;
+   function frame(now){const dt=(now-last)/1000;last=now;rpm=Math.min(6000,rpm+1500*dt);needle.style.left=rpm/60+'%';out.textContent=Math.round(rpm);motor?.set(rpm);raf=requestAnimationFrame(frame);}
+   const off=holdControl($(bench,'#spin'),()=>{rpm=0;motor?.stop();motor=machineLoop('motor');last=performance.now();raf=requestAnimationFrame(frame);},()=>{cancelAnimationFrame(raf);motor?.stop();motor=null;
+    if(rpm>=band[0]&&rpm<=band[1])complete();else ctx.say(rpm<band[0]?'Too slow: the coat came out thick and lumpy. Hold a bit longer this time.':'Too fast: the coat came out too thin. Let go a bit sooner.','bad');});
+   cleanup=()=>{off();cancelAnimationFrame(raf);motor?.stop();};},
   expose(){let x=v.mask.dx,y=v.mask.dy;
    shell(`<h3>Mask aligner</h3><p>The mask is a stencil of the circuit. It must sit exactly over the wafer, or the pattern prints in the wrong place.</p>
     <svg viewBox="0 0 260 150" class="align-view" aria-hidden="true"><rect width="260" height="150" fill="#2c3440"/><g stroke="#e8edf3" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/>`).join('')}</g><g id="mask" stroke="${COL.amber}" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/><rect x="${a-8}" y="${b-8}" width="16" height="16" fill="none"/>`).join('')}</g></svg>
@@ -107,36 +109,36 @@ TASKS.litho=(bench,ctx)=>{
     <button class="btn" id="uv">Expose (UV light)</button>`);
    const mask=$(bench,'#mask'),off=$(bench,'#off'),aligned=()=>Math.abs(x)<=3&&Math.abs(y)<=3,upd=()=>{mask.setAttribute('transform',`translate(${x} ${y})`);off.textContent=aligned()?'✓ Lined up!':'Not lined up yet';off.className='readout '+(aligned()?'ok':'');
     if(aligned()){ctx.coach('Lined up! Now click <b>Expose (UV light)</b>.');ctx.hint(()=>$(bench,'#uv'));}else{ctx.coach('Use the <b>arrow buttons</b> (or arrow keys) to move the <b>yellow</b> crosses onto the <b>white</b> crosses.');ctx.hint(()=>$(bench,`[data-n="${Math.abs(x)>3?(x>0?'-3,0':'3,0'):(y>0?'0,-3':'0,3')}"]`));}};upd();
-   const nudge=(a,b)=>{x+=a;y+=b;upd();};
+   const nudge=(a,b)=>{x+=a;y+=b;fx('tick');upd();};
    $(bench,'#panel').onclick=e=>{const n=e.target.closest('[data-n]');if(n){const [a,b]=n.dataset.n.split(',').map(Number);nudge(a,b);}
-    if(e.target.closest('#uv')){if(aligned()){$(bench,'.align-view').classList.add('flash');setTimeout(complete,700);}else ctx.say('Not lined up yet: the pattern would print in the wrong place. Move the yellow crosses first.','bad');}};
+    if(e.target.closest('#uv')){if(aligned()){$(bench,'.align-view').classList.add('flash');fx('uv');setTimeout(complete,700);}else ctx.say('Not lined up yet: the pattern would print in the wrong place. Move the yellow crosses first.','bad');}};
    const kd=e=>{const m={ArrowUp:[0,-3],ArrowDown:[0,3],ArrowLeft:[-3,0],ArrowRight:[3,0]}[e.key];if(m&&!document.getElementById('modal').open){e.preventDefault();nudge(...m);}};
    document.addEventListener('keydown',kd);cleanup=()=>document.removeEventListener('keydown',kd);},
   develop(){shell(`<h3>Developer</h3><p>The developer liquid washes away the resist where the UV light hit. That reveals the circuit pattern.</p><button class="btn" id="go">Develop</button>`);
    ctx.coach('Click <b>Develop</b>.');ctx.hint(()=>$(bench,'#go'));
-   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;setTimeout(complete,900);};},
-  etch(){const tE=v.endpoint;let t=0,raf=0,last=0,run=false,pts=[];
+   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;fx('bubbles');setTimeout(complete,900);};},
+  etch(){const tE=v.endpoint;let t=0,raf=0,last=0,run=false,pts=[],plasma=null;
    shell(`<h3>Plasma etcher</h3><p>Plasma carves into the wafer wherever the resist is gone. A sensor watches: when the layer is cut through, the <b>signal line drops</b>.</p>
     <svg viewBox="0 0 400 150" class="chart" aria-label="Etch signal chart"><rect width="400" height="150" fill="#fbfcfd" stroke="${COL.line}"/><path d="M30 20v110h360" stroke="${COL.muted}" fill="none"/><text x="34" y="16" font-size="10" fill="${COL.muted}">signal</text><text x="360" y="145" font-size="10" fill="${COL.muted}">time</text><polyline id="trace" fill="none" stroke="${COL.blue}" stroke-width="2.5"/></svg>
     <div class="bench-actions"><button class="btn secondary" id="start">Start etch</button><button class="btn" id="stop" disabled>STOP</button></div>`);
    ctx.coach('Click <b>Start etch</b>. Watch the blue line. As soon as it <b>drops down</b>, click <b>STOP</b>.');ctx.hint(()=>$(bench,run?'#stop':'#start'));
    const trace=$(bench,'#trace'),sig=s=>s<tE?0.8+Math.sin(s*9)*.03:s<tE+.4?0.8-(s-tE)/.4*.6:0.2+Math.sin(s*7)*.02;
    function frame(now){t+=(now-last)/1000;last=now;pts.push(`${30+t/8*360},${130-sig(t)*100}`);trace.setAttribute('points',pts.join(' '));if(t>=8){stopAt();return;}raf=requestAnimationFrame(frame);}
-   function stopAt(){run=false;cancelAnimationFrame(raf);$(bench,'#stop').disabled=true;$(bench,'#start').disabled=false;
+   function stopAt(){run=false;cancelAnimationFrame(raf);plasma?.stop();plasma=null;fx('click');$(bench,'#stop').disabled=true;$(bench,'#start').disabled=false;
     if(t<tE+.2)ctx.say('Too early! The line hadn’t dropped yet, so the layer isn’t cut through. Try again and wait for the drop.','bad');
     else if(t>tE+2.5)ctx.say('Too late! You kept etching after the drop and damaged the layer underneath. Try again and stop right after the drop.','bad');
     else complete();}
-   $(bench,'#start').onclick=()=>{t=0;pts=[];run=true;$(bench,'#start').disabled=true;$(bench,'#stop').disabled=false;ctx.coach('Watch the line… click <b>STOP</b> when it drops!');last=performance.now();raf=requestAnimationFrame(frame);};
+   $(bench,'#start').onclick=()=>{t=0;pts=[];run=true;$(bench,'#start').disabled=true;$(bench,'#stop').disabled=false;ctx.coach('Watch the line… click <b>STOP</b> when it drops!');fx('click');plasma=machineLoop('plasma');last=performance.now();raf=requestAnimationFrame(frame);};
    $(bench,'#stop').onclick=()=>{if(run)stopAt();};
-   cleanup=()=>cancelAnimationFrame(raf);},
+   cleanup=()=>{cancelAnimationFrame(raf);plasma?.stop();};},
   strip(){shell(`<h3>Resist stripper</h3><p>Etching is done, so the leftover resist comes off. What’s left is the new circuit layer.</p><button class="btn" id="go">Strip resist</button>`);
    ctx.coach('Click <b>Strip resist</b> to finish the layer.');ctx.hint(()=>$(bench,'#go'));
-   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;setTimeout(complete,800);};}
+   $(bench,'#go').onclick=()=>{$(bench,'#go').disabled=true;fx('hiss');setTimeout(complete,800);};}
  };
  bench.onclick=e=>{const b=e.target.closest('[data-tool]');if(!b)return;const id=b.dataset.tool,s=LITHO.findIndex(x=>x.id===id);
   if(s<stage){ctx.say(`${LITHO[s].tool}: already done ✓`);return;}
   if(s>stage){ctx.say(`Not yet! ${LITHO[s].early}`,'bad');return;}
-  if(open===id)return;cleanup();cleanup=()=>{};open=id;MINI[id]();};
+  if(open===id)return;cleanup();cleanup=()=>{};open=id;fx('click');MINI[id]();};
  shell();
  return ()=>cleanup();
 };
@@ -162,9 +164,9 @@ TASKS.probe=(bench,ctx)=>{
  }
  bench.onclick=e=>{
   const c=e.target.closest('[data-c]');if(c){if(+c.dataset.c===p.hi){ctx.say(`✓ ${p.V} ÷ ${p.Rlo} = ${p.hi} mA. Higher resistance means lower current, so with up to ${p.Rhi} kΩ, good chips read ${p.lo} to ${p.hi} mA.`,'good');phase='probe';render();}else ctx.say(`Not quite. Divide: ${p.V} ÷ ${p.Rlo}.`,'bad');return;}
-  if(e.target.closest('#run')){$(bench,'#run').disabled=true;const tick=()=>{shown++;render();if(shown<ctx.v.dies.length)setTimeout(tick,45);};tick();return;}
+  if(e.target.closest('#run')){$(bench,'#run').disabled=true;const tick=()=>{shown++;if(shown%3===1)fx('tick');render();if(shown<ctx.v.dies.length)setTimeout(tick,45);};tick();return;}
   const d=e.target.closest('[data-d]');if(d&&shown){const i=+d.dataset.d,x=ctx.v.dies[i];if(ink.has(i))return;
-   if(x.bad){ink.add(i);ctx.say(x.mA===0?'✓ 0.0 mA means no current at all: a broken connection. Inked!':`✓ ${x.mA.toFixed(1)} mA is ${x.mA<p.lo?'too low':'too high'}. Inked!`,'good');render();if(ink.size===bad.length){ctx.coach('All bad chips marked! 🎉');setTimeout(ctx.done,900);}}
+   if(x.bad){ink.add(i);fx('stamp');ctx.say(x.mA===0?'✓ 0.0 mA means no current at all: a broken connection. Inked!':`✓ ${x.mA.toFixed(1)} mA is ${x.mA<p.lo?'too low':'too high'}. Inked!`,'good');render();if(ink.size===bad.length){ctx.coach('All bad chips marked! 🎉');setTimeout(ctx.done,900);}}
    else ctx.say(`${x.mA.toFixed(1)} mA is between ${p.lo} and ${p.hi}, so that chip is good. Leave it.`,'bad');}
  };
  render();
@@ -177,7 +179,7 @@ TASKS.dice=(bench,ctx)=>{
    <div class="probe-side"><div class="spec-card"><div class="eyebrow">Dicing saw</div><p class="big-num">${cut.size} / 8 cuts</p></div></div></div>`;
   ctx.coach(`Click each <b>gap between the chips</b> to run the saw along it. ${8-cut.size} cut${8-cut.size===1?'':'s'} to go: 4 up-and-down, 4 side-to-side.`);ctx.hint(()=>$(bench,`[data-s="${all.find(s=>!cut.has(s))}"]`));
  }
- bench.onclick=e=>{const s=e.target.closest('[data-s]');if(s){if(!cut.has(s.dataset.s)){cut.add(s.dataset.s);render();if(cut.size===8){ctx.coach('Wafer cut into chips! 🎉');ctx.say('✓ Every chip is now separate.','good');setTimeout(ctx.done,700);}}return;}
+ bench.onclick=e=>{const s=e.target.closest('[data-s]');if(s){if(!cut.has(s.dataset.s)){cut.add(s.dataset.s);fx('saw');render();if(cut.size===8){ctx.coach('Wafer cut into chips! 🎉');ctx.say('✓ Every chip is now separate.','good');setTimeout(ctx.done,700);}}return;}
   if(e.target.closest('[data-chip]'))ctx.say('Careful! That would cut straight through a chip and destroy it. Click the thin gaps between chips.','bad');};
  render();
 };
@@ -190,7 +192,7 @@ TASKS.pick=(bench,ctx)=>{
  }
  bench.onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const i=+b.dataset.p;
   if(ctx.v.dies[i].bad){ctx.say('That chip has a red dot: it failed the test. It stays behind.','bad');return;}
-  tray.push(i);render();if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,700);}else ctx.say('✓ Good chip picked.','good');};
+  tray.push(i);fx('vacuum');render();if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,700);}else ctx.say('✓ Good chip picked.','good');};
  render();
 };
 
@@ -214,9 +216,9 @@ TASKS.qc=(bench,ctx)=>{
    const toX=e=>{const b=svg.getBoundingClientRect();return (e.clientX-b.left)*680/b.width;};
    svg.onpointerdown=e=>{drag=true;svg.setPointerCapture(e.pointerId);setJ(toX(e)-9);};svg.onpointermove=e=>{if(drag)setJ(toX(e)-9);};svg.onpointerup=()=>drag=false;
    $(bench,'#jaw').onkeydown=e=>{if(e.key==='ArrowLeft'){e.preventDefault();setJ(jx-3);}if(e.key==='ArrowRight'){e.preventDefault();setJ(jx+3);}};
-   $(bench,'#close').onclick=()=>setJ(right);
+   $(bench,'#close').onclick=()=>{if(jx>right+0.5)fx('click');setJ(right);};
    $(bench,'#rec').onclick=()=>{if(jx>right+0.5){ctx.say('The jaw isn’t touching the part yet, so that number is too big. Close the jaw first.','bad');return;}
-    phase='scope';found=false;ctx.say(`✓ Part ${p.id} measures ${p.len.toFixed(2)} mm.`,'good');render();};
+    phase='scope';found=false;fx('beep');ctx.say(`✓ Part ${p.id} measures ${p.len.toFixed(2)} mm.`,'good');render();};
    return;}
   if(phase==='scope'){bench.innerHTML=`<div class="qc">${head()}<div class="scope-part" id="sc"><div class="surface">${p.crack?`<button class="crack" style="left:${p.cx}%;top:${p.cy}%" aria-label="Crack"><svg viewBox="0 0 60 40"><path d="M4 30l12-10 6 6 14-16 8 6 12-12" fill="none" stroke="#f2f4f7" stroke-width="3"/></svg></button>`:''}</div><div class="lens-shade"></div><div class="lens-ring"></div></div>
    <div class="bench-actions"><button class="btn secondary" id="clean">No cracks found</button></div></div>`;
@@ -234,7 +236,7 @@ TASKS.qc=(bench,ctx)=>{
   ctx.coach(`Part ${p.id} passes only if the size is in the <b>OK zone</b> <b>and</b> there are <b>no cracks</b>. Which bin does it go in?`);ctx.hint(()=>$(bench,`[data-bin="${good?'pass':'reject'}"]`));
   bench.querySelectorAll('[data-bin]').forEach(b=>b.onclick=()=>{const want=good?'pass':'reject';
    if(b.dataset.bin!==want){ctx.say(good?'This part is in the OK zone with no cracks, so it passes.':p.crack?'A cracked part always fails, even if the size is right.':'The size is outside the OK zone, so it fails. “Close enough” isn’t good enough.','bad');return;}
-   ctx.say(`✓ Part ${p.id} → ${want==='pass'?'PASS':'REJECT'}.`,'good');n++;phase='measure';jx=600;
+   fx('thud');ctx.say(`✓ Part ${p.id} → ${want==='pass'?'PASS':'REJECT'}.`,'good');n++;phase='measure';jx=600;
    if(n===v.parts.length){ctx.coach('All parts inspected! 🎉');setTimeout(ctx.done,700);bench.querySelectorAll('[data-bin]').forEach(x=>x.disabled=true);}else render();});
  }
  render();
@@ -249,7 +251,7 @@ TASKS.mentor=(bench,ctx)=>{
    <div class="chat-options">${done?'<button class="btn" id="next">Thanks, Mira →</button>':opts.map(n=>`<button class="chip-btn" data-q="${n}">${MENTOR_POOL[n].q}</button>`).join('')}</div></section></div>`;
   const log=$(bench,'#log');log.scrollTop=log.scrollHeight;
   if(done){ctx.coach('Read Mira’s answers, then click <b>Thanks, Mira</b>.');ctx.hint(()=>$(bench,'#next'));}else{ctx.coach(`Click a question at the bottom to ask Mira. <b>${3-asked.length}</b> to go.`);ctx.hint(()=>$(bench,'.chip-btn'));}}
- bench.onclick=e=>{const q=e.target.closest('[data-q]');if(q){const n=+q.dataset.q;asked.push(n);ctx.note(`Mira: ${MENTOR_POOL[n].a.replace(/<[^>]+>/g,'')}`);render();return;}if(e.target.closest('#next'))ctx.done();};
+ bench.onclick=e=>{const q=e.target.closest('[data-q]');if(q){const n=+q.dataset.q;asked.push(n);fx('click');ctx.note(`Mira: ${MENTOR_POOL[n].a.replace(/<[^>]+>/g,'')}`);render();return;}if(e.target.closest('#next'))ctx.done();};
  render();
 };
 
@@ -261,10 +263,10 @@ TASKS.folder=(bench,ctx)=>{
   <div class="folder"><div class="folder-tab">APPLICATION</div><ul>${[...inF].map(d=>`<li>${DOCS[d].title}</li>`).join('')||'<li class="muted">Empty</li>'}</ul><p class="counter">${req} of 2 must-haves</p><button class="btn" id="hand" ${req<2?'disabled':''}>Hand it to Mira →</button></div></div>`;
   if(req<2){ctx.coach(`Click the documents you need to <b>start</b> this apprenticeship. There are <b>2 must-haves</b>. Wrong ones bounce back.`);ctx.hint(()=>$(bench,`[data-doc="${['ossd','sponsor'].find(k=>!inF.has(k))}"]`));}
   else{ctx.coach(inF.has('resume')?'Folder ready! Click <b>Hand it to Mira</b>.':'You have both must-haves. Want to add anything <b>helpful</b>? Then click <b>Hand it to Mira</b>.');ctx.hint(()=>$(bench,'#hand'));}}
- bench.onclick=e=>{const d=e.target.closest('[data-doc]');if(d){const k=d.dataset.doc,D=DOCS[k];
+ bench.onclick=e=>{const d=e.target.closest('[data-doc]');if(d){const k=d.dataset.doc,D=DOCS[k];fx('paper');
    if(D.need==='no'){no.add(k);ctx.say(`Not needed: ${D.why}`,'bad');}else{inF.add(k);ctx.say(D.need==='required'?`✓ Must-have: ${k==='ossd'?'Grade 12 is the entry requirement.':'an apprenticeship is a job, so you need an employer.'}`:'✓ Helpful: a resume with real experience helps you get hired.','good');}
    render();return;}
-  if(e.target.closest('#hand')){ctx.say('That’s everything you need to get started!','good');setTimeout(ctx.done,800);}};
+  if(e.target.closest('#hand')){fx('paper');ctx.say('That’s everything you need to get started!','good');setTimeout(ctx.done,800);}};
  render();
 };
 
@@ -277,8 +279,8 @@ TASKS.logbook=(bench,ctx)=>{
   if(signed)return;
   if(ticked.size<ours.length){ctx.coach(`Tick every skill <b>you practised tonight</b> in Rooms 1–4. <b>${ours.length-ticked.size}</b> left. Skills from other trades don’t belong here.`);ctx.hint(()=>$(bench,`[data-s="${ours.find(s=>!ticked.has(s))}"]`));}
   else{ctx.coach('All your skills are ticked. Click <b>Ask Sam to sign</b>.');ctx.hint(()=>$(bench,'#sign'));}}
- bench.onclick=e=>{const t=e.target.closest('[data-s]');if(t){const s=t.dataset.s;if(SKILLS[s].ours){ticked.add(s);ctx.say(`✓ You did that tonight!`,'good');}else{no.add(s);ctx.say(`That’s a skill for a ${SKILLS[s].who}, a different trade.`,'bad');}render();return;}
-  if(e.target.closest('#sign')){render(true);ctx.coach('Signed! 🎉');ctx.say('Signed. That’s a real start on your logbook.','good','sam');setTimeout(ctx.done,1400);}};
+ bench.onclick=e=>{const t=e.target.closest('[data-s]');if(t){const s=t.dataset.s;if(SKILLS[s].ours){ticked.add(s);fx('pen');ctx.say(`✓ You did that tonight!`,'good');}else{no.add(s);ctx.say(`That’s a skill for a ${SKILLS[s].who}, a different trade.`,'bad');}render();return;}
+  if(e.target.closest('#sign')){render(true);fx('scribble');ctx.coach('Signed! 🎉');ctx.say('Signed. That’s a real start on your logbook.','good','sam');setTimeout(ctx.done,1400);}};
  render();
 };
 
@@ -300,7 +302,7 @@ TASKS.route=(bench,ctx)=>{
  function pick(id){if(id==='start'||path.includes(id))return;
   if(TRAPS[id]){ctx.say(`Trap! ${TRAPS[id].why}`,'bad');return;}
   if(id!==order[path.length]){ctx.say('That stop is on the route, but not yet. Something comes before it.','bad');return;}
-  path.push(id);render();if(id==='cert'){ctx.coach('Route complete! 🎉');ctx.say('✓ High school to certified!','good');setTimeout(ctx.done,900);}else ctx.say('✓ Next stop added.','good');}
+  path.push(id);fx('tick');render();if(id==='cert'){ctx.coach('Route complete! 🎉');ctx.say('✓ High school to certified!','good');setTimeout(ctx.done,900);}else ctx.say('✓ Next stop added.','good');}
  bench.onclick=e=>{const s=e.target.closest('[data-stop]');if(s)pick(s.dataset.stop);};
  bench.onkeydown=e=>{const s=e.target.closest('[data-stop]');if(s&&(e.key==='Enter'||e.key===' ')){e.preventDefault();pick(s.dataset.stop);}};
  render();
@@ -312,8 +314,8 @@ TASKS.plan=(bench,ctx)=>{
  function render(){bench.innerHTML=`<div class="plan"><div class="plan-grid">${ctx.v.plan.map((p,i)=>`<button class="plan-card ${sel.has(i)?'on':''}" data-i="${i}" aria-pressed="${sel.has(i)}"><span class="box">${sel.has(i)?'✓':''}</span>${p}</button>`).join('')}</div>
   <div class="bench-actions"><span class="counter">${sel.size} chosen</span><button class="btn" id="save" ${sel.size<2?'disabled':''}>Save my plan →</button></div></div>`;
   ctx.coach(sel.size<2?`Pick <b>at least 2</b> things you could really do this school year. (${sel.size} chosen)`:'Great choices! Click <b>Save my plan</b>.');ctx.hint(()=>$(bench,sel.size<2?'.plan-card:not(.on)':'#save'));}
- bench.onclick=e=>{const c=e.target.closest('[data-i]');if(c){const i=+c.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);render();return;}
-  if(e.target.closest('#save')&&sel.size>=2){ctx.setPlan([...sel].map(i=>ctx.v.plan[i]));ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
+ bench.onclick=e=>{const c=e.target.closest('[data-i]');if(c){const i=+c.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);fx('pen');render();return;}
+  if(e.target.closest('#save')&&sel.size>=2){ctx.setPlan([...sel].map(i=>ctx.v.plan[i]));fx('stamp');ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
  render();
 };
 
@@ -321,8 +323,9 @@ TASKS.plan=(bench,ctx)=>{
 TASKS.control=(bench,ctx)=>{
  const list=ctx.v.incidents,LIMIT=45;let n=0,phase='find',t=LIMIT,timer=0;
  const order=['gowning','coater','aligner','etcher','prober','saw','inspect'];
+ let alarmed=-1;
  function render(){
-  const inc=INCIDENTS[list[n].i];
+  const inc=INCIDENTS[list[n].i];if(alarmed!==n){alarmed=n;fx('alarm');}
   bench.innerHTML=`<div class="control"><div class="truck"><span>🚚 Truck</span><div class="truck-bar"><i style="width:${n/list.length*100}%"></i></div><span>${n}/${list.length} alarms fixed</span></div>
    <div class="line">${order.map((s,k)=>`<button class="station ${phase==='fix'&&s===inc.at?'hot':''}" data-st="${s}" ${phase==='fix'?'disabled':''}><small>Room ${{gowning:1,coater:2,aligner:2,etcher:2,prober:3,saw:3,inspect:4}[s]}</small>${STATIONS[s]}</button>${k<order.length-1?'<span class="conv"></span>':''}`).join('')}</div>
    <div class="alarm"><div class="alarm-head"><span class="eyebrow">🚨 Alarm ${n+1} of ${list.length}</span><span class="alarm-time" id="tm">${Math.ceil(t)} s</span></div><div class="alarm-bar"><i id="tb" style="width:${t/LIMIT*100}%"></i></div><p class="alarm-text">${inc.alarm}</p>
@@ -335,7 +338,7 @@ TASKS.control=(bench,ctx)=>{
  timer=setInterval(()=>{if(!document.getElementById('modal').open)tick();},250);
  bench.onclick=e=>{const inc=INCIDENTS[list[n].i];
   const s=e.target.closest('[data-st]');if(s&&phase==='find'){if(s.dataset.st===inc.at){phase='fix';ctx.say(`✓ Yes, it’s the ${STATIONS[inc.at]}.`,'good');render();}else ctx.say(`Not the ${STATIONS[s.dataset.st]}. Which step tonight could cause this?`,'bad');return;}
-  const f=e.target.closest('[data-f]');if(f){if(+f.dataset.f===0){n++;t=LIMIT;phase='find';if(n===list.length){clearInterval(timer);ctx.coach('Line clear! 🎉');ctx.say('✓ All alarms fixed. Dispatch dock opening!','good');bench.querySelector('.truck-bar i').style.width='100%';bench.querySelectorAll('button').forEach(b=>b.disabled=true);setTimeout(ctx.done,900);}else{ctx.say('✓ Fixed! Next alarm…','good');render();}}else ctx.say('That won’t fix it. Think about what actually causes this problem.','bad');}};
+  const f=e.target.closest('[data-f]');if(f){if(+f.dataset.f===0){n++;t=LIMIT;phase='find';if(n===list.length){clearInterval(timer);fx('horn');ctx.coach('Line clear! 🎉');ctx.say('✓ All alarms fixed. Dispatch dock opening!','good');bench.querySelector('.truck-bar i').style.width='100%';bench.querySelectorAll('button').forEach(b=>b.disabled=true);setTimeout(ctx.done,900);}else{ctx.say('✓ Fixed! Next alarm…','good');render();}}else ctx.say('That won’t fix it. Think about what actually causes this problem.','bad');}};
  render();
  return ()=>clearInterval(timer);
 };
