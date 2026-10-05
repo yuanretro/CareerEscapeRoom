@@ -213,20 +213,36 @@ TASKS.dice=(bench,ctx)=>{
   if(e.target.closest('[data-chip]'))ctx.say('Careful! That would cut straight through a chip and destroy it. Click the thin gaps between chips.','bad');};
  render();
 };
-/* A picked chip glides from the wafer into its tray pocket. */
-function flyChip(from,toEl){if(!toEl||matchMedia('(prefers-reduced-motion: reduce)').matches)return;const to=toEl.getBoundingClientRect(),f=document.createElement('div');f.className='fly-chip';
- f.style.cssText=`left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px`;document.body.appendChild(f);toEl.style.visibility='hidden';
- f.animate([{transform:'none'},{transform:`translate(${(to.left-from.left)/2}px,${(to.top-from.top)/2-60}px) scale(1.15)`},{transform:`translate(${to.left-from.left}px,${to.top-from.top}px) scale(${to.width/from.width})`}],{duration:520,easing:'ease-in-out'}).onfinish=()=>{f.remove();toEl.style.visibility='';};}
+/* The vacuum pen does the picking: it moves over the chip, dips and grabs it, carries it to the tray pocket,
+   sets it down and goes back to its holder. Returns the animation length in ms (0 when motion is reduced). */
+const VAC_PEN='<svg viewBox="0 0 40 120" aria-hidden="true"><rect x="12" y="4" width="16" height="70" rx="6" fill="#3b4656" stroke="#14202d"/><rect x="14" y="20" width="12" height="18" rx="2" fill="#c94a3a"/><path d="M20 74v34" stroke="#c3cad3" stroke-width="4"/><path d="M14 108h12l-2 6h-8Z" fill="#8a95a3"/><path d="M28 12q10 4 8 20" fill="none" stroke="#5b6573" stroke-width="3"/></svg>';
+function pickWithPen(from,toEl,penEl){if(!toEl||!penEl||matchMedia('(prefers-reduced-motion: reduce)').matches)return 0;
+ const to=toEl.getBoundingClientRect(),rest=penEl.getBoundingClientRect(),W=34,H=104,T=1150;
+ const pen=document.createElement('div');pen.className='fly-pen';pen.innerHTML=VAC_PEN;pen.style.cssText=`left:0;top:0;width:${W}px;height:${H}px`;
+ const chip=document.createElement('div');chip.className='fly-chip';chip.style.cssText=`left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px`;
+ document.body.append(chip,pen);penEl.style.visibility='hidden';toEl.style.visibility='hidden';
+ // positions of the pen tip (bottom centre of the pen)
+ const tip=(x,y)=>`translate(${x-W/2}px,${y-H}px)`,dc=[from.left+from.width/2,from.top+from.height/2],pc=[to.left+to.width/2,to.top+to.height/2],r=[rest.left+W/2,rest.top+H];
+ pen.animate([{transform:tip(...r),offset:0},{transform:tip(dc[0],dc[1]-30),offset:.25},{transform:tip(...dc),offset:.35},{transform:tip(dc[0],dc[1]-34),offset:.47},
+  {transform:tip(pc[0],pc[1]-34),offset:.75},{transform:tip(...pc),offset:.84},{transform:tip(pc[0],pc[1]-30),offset:.9},{transform:tip(...r),offset:1}],{duration:T,easing:'ease-in-out',fill:'forwards'});
+ // the chip stays put until the pen grabs it, rides along under the tip, and lands in the pocket
+ const at=(c,dy=0)=>`translate(${c[0]-dc[0]}px,${c[1]-dc[1]+dy}px)`;
+ chip.animate([{transform:'none',offset:0},{transform:'none',offset:.35},{transform:at(dc,-34),offset:.47},{transform:at(pc,-34)+` scale(${to.width/from.width})`,offset:.75},{transform:at(pc)+` scale(${to.width/from.width})`,offset:.84},{transform:at(pc)+` scale(${to.width/from.width})`,offset:1}],{duration:T,easing:'ease-in-out',fill:'forwards'});
+ setTimeout(()=>fx('vacuum'),T*.35);setTimeout(()=>{fx('click');chip.remove();toEl.style.visibility='';},T*.84);
+ setTimeout(()=>{pen.remove();penEl.style.visibility='';},T+20);return T;}
 TASKS.pick=(bench,ctx)=>{
- const tray=[];
+ const tray=[];let busy=false;
  function render(){
   bench.innerHTML=`<div class="probe">${waferMap(ctx.v.dies.map((d,i)=>{const [x,y]=diePos(d);return tray.includes(i)?'':`<button class="die diced ${d.bad?'inked':''}" data-p="${i}" style="left:${x}px;top:${y}px" aria-label="${d.bad?'Inked chip':'Good chip'}"></button>`;}).join(''),'','on-tape cut-all')}
-   <div class="probe-side"><div class="eyebrow">Packaging tray (waffle pack)</div><div class="pack-row"><svg class="vac-pen" viewBox="0 0 40 120" aria-hidden="true"><rect x="12" y="4" width="16" height="70" rx="6" fill="#3b4656" stroke="#14202d"/><rect x="14" y="20" width="12" height="18" rx="2" fill="#c94a3a"/><path d="M20 74v34" stroke="#c3cad3" stroke-width="4"/><path d="M14 108h12l-2 6h-8Z" fill="#8a95a3"/><path d="M28 12q10 4 8 20" fill="none" stroke="#5b6573" stroke-width="3"/></svg><div class="tray-wrap"><div class="tray-label">NB-7 · ESD SAFE</div><div class="tray">${Array.from({length:ctx.v.tray},(_,n)=>`<span class="${n<tray.length?'full':''}"></span>`).join('')}</div></div></div><p class="counter">${tray.length} of ${ctx.v.tray} placed</p></div></div>`;
+   <div class="probe-side"><div class="eyebrow">Packaging tray (waffle pack)</div><div class="pack-row"><div class="vac-pen">${VAC_PEN}</div><div class="tray-wrap"><div class="tray-label">NB-7 · ESD SAFE</div><div class="tray">${Array.from({length:ctx.v.tray},(_,n)=>`<span class="${n<tray.length?'full':''}"></span>`).join('')}</div></div></div><p class="counter">${tray.length} of ${ctx.v.tray} placed</p></div></div>`;
   ctx.coach(`Click <b>${ctx.v.tray-tray.length} more good chip${ctx.v.tray-tray.length===1?'':'s'}</b> (no red dot) to move them into the tray.`);ctx.hint(()=>$(bench,`[data-p="${ctx.v.dies.findIndex((d,i)=>!d.bad&&!tray.includes(i))}"]`));
  }
  bench.onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const i=+b.dataset.p;
   if(ctx.v.dies[i].bad){ctx.say('That chip has a red dot: it failed the test. It stays behind.','bad');return;}
-  const from=b.getBoundingClientRect();tray.push(i);fx('vacuum');render();flyChip(from,bench.querySelectorAll('.tray span.full')[tray.length-1]);if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,700);}else ctx.say('✓ Good chip picked.','good');};
+  if(busy)return; // the pen is still carrying the last chip
+  const from=b.getBoundingClientRect();tray.push(i);render();
+  const ms=pickWithPen(from,bench.querySelectorAll('.tray span.full')[tray.length-1],$(bench,'.vac-pen'));if(!ms)fx('vacuum');busy=ms>0;setTimeout(()=>busy=false,ms);
+  if(tray.length===ctx.v.tray){ctx.coach('Tray full! 🎉');ctx.say('✓ Only good chips in the tray.','good');setTimeout(ctx.done,ms+500);}else ctx.say('✓ Good chip picked with the vacuum pen.','good');};
  render();
 };
 
