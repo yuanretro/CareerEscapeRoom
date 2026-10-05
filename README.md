@@ -49,4 +49,4 @@ Fonts load from Google Fonts when online. Offline, the game falls back to system
 - `bgm/`: background music (`bgm1.mp3`, `bgm2.mp3`, …)
 - `img/`: optional real photos (see `img/README.md`); missing photos fall back to drawings
 
-The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
+The Google Form link is set in `DEFAULT_FORM_URL` at the top of `js/game.js`. The Form opens in a panel inside the game (so full screen stays on), using `FORM_EMBED_URL`: the Form's full `docs.google.com/forms/…/viewform` address with `?embedded=true`. If you change Forms, update both; leave `FORM_EMBED_URL` blank to open the Form in a new tab instead. Room codes (`NOVA-…`) and return codes (`GATE-…`, `BATCH-SAVED`) are unchanged.
