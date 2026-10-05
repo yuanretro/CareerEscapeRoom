@@ -396,3 +396,16 @@ kbd{font:500 12.5px var(--mono);padding:1px 6px;border:1px solid var(--line2);bo
 .etch-result.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok)}.etch-result.bad{background:var(--red-soft);color:var(--red);border:1px solid var(--red)}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .shake{animation:shake .4s ease}
+
+/* ---------- Google Form panel (inside the game, so full screen stays on) ---------- */
+.form-panel{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;background:#c9d1da;animation:fade .2s ease both}
+.form-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.form-title{display:flex;flex-direction:column}.form-title b{font-size:16px}.form-title small{color:var(--muted);font-size:12.5px}
+.form-code{display:flex;align-items:center;gap:8px;background:var(--blue-soft);border:1px dashed var(--blue);border-radius:var(--r);padding:5px 10px}
+.form-code span{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:1px;color:var(--muted)}.form-code b{font:600 18px var(--mono);letter-spacing:1px}
+.form-door{display:flex;align-items:center;gap:8px}.form-door label{font-size:13px;color:var(--ink2);max-width:90px;line-height:1.2}.form-door .input{width:150px;padding:8px 10px;font-family:var(--mono);text-transform:uppercase}
+.form-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.form-frame{flex:1;min-height:0;display:flex;justify-content:center;overflow:hidden}
+.form-frame iframe{width:100%;max-width:820px;height:100%;border:0;background:#fff;box-shadow:0 0 0 1px var(--line)}
+body.form-open #app{visibility:hidden}
+.fs-return{position:fixed;right:16px;bottom:16px;z-index:70;padding:10px 16px;border:0;border-radius:var(--r);background:var(--blue);color:#fff;font-weight:600;box-shadow:0 6px 20px #14202d40;animation:pop .3s ease both}
