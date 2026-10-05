@@ -95,9 +95,9 @@ const ROOMS = [
    remember:['High school → Grade 12 → sponsor → register → train → certificate.','Avoid the traps.'],
    note:'Route: co-op or OYAP in high school → Grade 12 → find an employer sponsor → register through Employment Ontario → ≈4,000 h on the job + 304 h in class → Certificate of Apprenticeship.'},
   {task:'plan',title:'Pick your next moves',
-   learn:{points:['Every career starts with a small step you can take <b>this year</b>.','Pick at least two that you could <b>really do now</b>, in Grade 10 or 11.','Careful: some options sound good but aren’t possible yet, or don’t exist for this trade.','Your picks appear on your final mission report.'],
+   learn:{points:['Every career starts with a small step you can take <b>this year</b>.','Pick <b>every</b> option that you could <b>really do now</b>, in Grade 10 or 11.','Careful: some options sound good but aren’t possible yet, or don’t exist for this trade.','Your picks appear on your final mission report.'],
     fact:'Ontario colleges also offer 2- and 3-year electronics diplomas if you want another route into chipmaking.'},
-   remember:['Pick at least 2 you can do now.','No Red Seal or C of Q for 630A.','The Certificate of Apprenticeship comes last.'],
+   remember:['Pick every option you can do now.','No Red Seal or C of Q for 630A.','The Certificate of Apprenticeship comes last.'],
    note:''}
  ]}
 ];

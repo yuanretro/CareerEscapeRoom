@@ -493,3 +493,22 @@ body.form-open #app{visibility:hidden}
 .star-card p{font-size:14px;color:var(--ink2);margin:0}
 .star-hint{display:flex;align-items:center;gap:8px}.star-hint svg{width:30px;height:30px;flex:none;border-radius:50%}.star-hint p{font:italic 13px var(--sans);color:var(--muted)}
 .end-bottom{grid-template-columns:1fr 1fr auto;align-items:stretch}.end-actions{align-self:end}
+
+/* ---------- Cross-platform fixes ---------- */
+/* SVG icons (replace emoji/symbol glyphs that some fonts lack) */
+.ico{width:18px;height:18px;display:inline-block;vertical-align:-3px}.text-btn.icon .ico{width:19px;height:19px}
+.text-btn.icon.music.off{text-decoration:none;position:relative}.text-btn.icon.music.off::after{content:"";position:absolute;left:8px;right:8px;top:50%;height:2px;background:currentColor;transform:rotate(-40deg)}
+.fs-icon .ico{width:56px;height:56px}.fs-return .ico,.so-skip .ico,.btn .ico{width:16px;height:16px;vertical-align:-2px}
+/* items in a machine panel never get squeezed (Safari collapsed the spin-coater gauge to 0 px, hiding its green zone) */
+.panel>*{flex-shrink:0}.gauge{flex:none;min-height:28px}
+/* litho: while a machine is open the tool cards shrink to names, giving the machine more room */
+.litho.compact .tool-ph,.litho.compact .tool small{display:none}.litho.compact .toolbar{padding:8px 12px}.litho.compact .tool{padding:6px}
+.litho.compact .litho-station{grid-template-columns:250px 1fr}
+.litho.compact .align-view{max-width:none;width:auto;max-height:200px;align-self:center}
+.litho.compact .etch-row{grid-template-columns:1fr 150px}.litho.compact .etch-row .chart{max-height:200px}.litho.compact .xsec svg{width:150px}
+/* mask aligner: big view on the left, a four-way pad and the Expose button on the right */
+.align-row{display:flex;gap:16px;align-items:center}.align-row .align-view{flex:1;min-width:0;max-height:210px}
+.align-ctl{display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
+.align-ctl .nudge{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,38px);gap:4px;justify-items:center}
+.align-ctl .nudge [data-n="0,-3"]{grid-area:1/2}.align-ctl .nudge [data-n="-3,0"]{grid-area:2/1}.align-ctl .nudge [data-n="3,0"]{grid-area:2/3}.align-ctl .nudge [data-n="0,3"]{grid-area:3/2}
+.align-ctl .nudge{grid-template-rows:repeat(3,38px) auto}.align-ctl .nudge .readout{grid-area:4/1/5/4;font-size:12.5px;text-align:center;white-space:nowrap}

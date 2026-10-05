@@ -93,7 +93,7 @@ const WAFER_STATE=['Dusty wafer','Clean wafer','Coated with resist','Pattern pri
 TASKS.litho=(bench,ctx)=>{
  const v=ctx.v;let stage=0,open=null,cleanup=()=>{};
  function shell(panel){
-  bench.innerHTML=`<div class="litho"><div class="toolbar">${v.tools.map(id=>{const s=LITHO.findIndex(x=>x.id===id),d=s<stage;return `<button class="tool ${d?'done':''} ${open===id?'open':''}" data-tool="${id}">${photoOr(TOOL_PHOTO[id],'','tool-ph')}<b>${d?'✓ ':''}${LITHO[s].tool}</b><small>${LITHO[s].desc}</small></button>`;}).join('')}</div>
+  bench.innerHTML=`<div class="litho ${open?'compact':''}"><div class="toolbar">${v.tools.map(id=>{const s=LITHO.findIndex(x=>x.id===id),d=s<stage;return `<button class="tool ${d?'done':''} ${open===id?'open':''}" data-tool="${id}">${photoOr(TOOL_PHOTO[id],'','tool-ph')}<b>${d?'✓ ':''}${LITHO[s].tool}</b><small>${LITHO[s].desc}</small></button>`;}).join('')}</div>
    <div class="litho-station"><div class="wafer-box" id="wbox">${waferView(stage)}<span class="wafer-label">${WAFER_STATE[stage]}</span><div class="mini-steps">${LITHO.map((x,n)=>`<span class="${n<stage?'on':''}">${n<stage?'✓':n+1}</span>`).join('')}</div></div><div class="panel" id="panel">${panel||''}</div></div></div>`;
   if(!open){ctx.coach(stage===0?'Which machine comes <b>first</b>? Read what each machine does, then click it.':`Step ${stage+1} of 6: which machine comes <b>next</b>? Your wafer is now: <b>${WAFER_STATE[stage].toLowerCase()}</b>.`);ctx.hint(()=>$(bench,`[data-tool="${LITHO[stage].id}"]`));}
  }
@@ -115,9 +115,9 @@ TASKS.litho=(bench,ctx)=>{
    cleanup=()=>{off();cancelAnimationFrame(raf);motor?.stop();};},
   expose(){let x=v.mask.dx,y=v.mask.dy;
    shell(`<h3>Mask aligner</h3><p>The mask is a stencil of the circuit. It must sit exactly over the wafer, or the pattern prints in the wrong place.</p>
-    <svg viewBox="0 0 260 150" class="align-view" aria-hidden="true"><rect width="260" height="150" fill="#2c3440"/><g stroke="#e8edf3" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/>`).join('')}</g><g id="mask" stroke="${COL.amber}" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/><rect x="${a-8}" y="${b-8}" width="16" height="16" fill="none"/>`).join('')}</g></svg>
-    <div class="nudge"><button class="text-btn" data-n="0,-3" aria-label="Move up">↑</button><button class="text-btn" data-n="-3,0" aria-label="Move left">←</button><button class="text-btn" data-n="3,0" aria-label="Move right">→</button><button class="text-btn" data-n="0,3" aria-label="Move down">↓</button><span class="readout" id="off"></span></div>
-    <button class="btn" id="uv">Expose (UV light)</button>`);
+    <div class="align-row"><svg viewBox="0 0 260 150" class="align-view" aria-hidden="true"><rect width="260" height="150" fill="#2c3440"/><g stroke="#e8edf3" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/>`).join('')}</g><g id="mask" stroke="${COL.amber}" stroke-width="3">${[[60,75],[200,75]].map(([a,b])=>`<path d="M${a-14} ${b}h28M${a} ${b-14}v28"/><rect x="${a-8}" y="${b-8}" width="16" height="16" fill="none"/>`).join('')}</g></svg>
+    <div class="align-ctl"><div class="nudge"><button class="text-btn" data-n="0,-3" aria-label="Move up">↑</button><button class="text-btn" data-n="-3,0" aria-label="Move left">←</button><button class="text-btn" data-n="3,0" aria-label="Move right">→</button><button class="text-btn" data-n="0,3" aria-label="Move down">↓</button><span class="readout" id="off"></span></div>
+    <button class="btn" id="uv">Expose (UV light)</button></div></div>`);
    const mask=$(bench,'#mask'),off=$(bench,'#off'),aligned=()=>Math.abs(x)<=3&&Math.abs(y)<=3,upd=()=>{mask.setAttribute('transform',`translate(${x} ${y})`);off.textContent=aligned()?'✓ Lined up!':'Not lined up yet';off.className='readout '+(aligned()?'ok':'');
     if(aligned()){ctx.coach('Lined up! Now click <b>Expose (UV light)</b>.');ctx.hint(()=>$(bench,'#uv'));}else{ctx.coach('Use the <b>arrow buttons</b> (or arrow keys) to move the <b>yellow</b> crosses onto the <b>white</b> crosses.');ctx.hint(()=>$(bench,`[data-n="${Math.abs(x)>3?(x>0?'-3,0':'3,0'):(y>0?'0,-3':'0,3')}"]`));}};upd();
    const nudge=(a,b)=>{x+=a;y+=b;fx('tick');upd();};
@@ -377,13 +377,13 @@ TASKS.route=(bench,ctx)=>{
 TASKS.plan=(bench,ctx)=>{
  const opts=ctx.v.plan.map(p=>typeof p==='string'?{t:p,ok:true}:p),sel=new Set(),no=new Set(),good=opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0);
  function render(){bench.innerHTML=`<div class="plan"><div class="plan-grid">${opts.map((p,i)=>`<button class="plan-card ${sel.has(i)?'on':''} ${no.has(i)?'nope':''}" data-i="${i}" aria-pressed="${sel.has(i)}" ${no.has(i)?'disabled':''}><span class="box">${sel.has(i)?'✓':no.has(i)?'✗':''}</span><span>${p.t}${no.has(i)?`<em>${p.why}</em>`:''}</span></button>`).join('')}</div>
-  <div class="bench-actions"><span class="counter">${sel.size} chosen</span><button class="btn" id="save" ${sel.size<2?'disabled':''}>Save my plan →</button></div></div>`;
-  ctx.coach(sel.size<2?`Pick <b>at least 2</b> things you could <b>really do now</b>, in Grade 10 or 11. Some options aren’t possible yet! (${sel.size} chosen)`:'Great choices! Pick more if you like, then click <b>Save my plan</b>.');
-  ctx.hint(()=>$(bench,sel.size<2?`[data-i="${good.find(i=>!sel.has(i))}"]`:'#save'));}
+  <div class="bench-actions"><span class="counter">${sel.size} of ${good.length} found</span><button class="btn" id="save" ${sel.size<good.length?'disabled':''}>Save my plan →</button></div></div>`;
+  ctx.coach(sel.size<good.length?`Pick <b>every</b> option you could <b>really do now</b>, in Grade 10 or 11. Some aren’t possible yet, so skip those! (${sel.size} of ${good.length} found)`:'You found them all! Click <b>Save my plan</b>.');
+  ctx.hint(()=>$(bench,sel.size<good.length?`[data-i="${good.find(i=>!sel.has(i))}"]`:'#save'));}
  bench.onclick=e=>{const c=e.target.closest('[data-i]');if(c&&!c.disabled){const i=+c.dataset.i;
    if(!opts[i].ok){no.add(i);fx('paper');ctx.say(`Not yet: ${opts[i].why}`,'bad','mira');render();return;}
    sel.has(i)?sel.delete(i):sel.add(i);fx('pen');if(sel.has(i))ctx.say('✓ You could do that this year.','good');render();return;}
-  if(e.target.closest('#save')&&sel.size>=2){ctx.setPlan([...sel].map(i=>opts[i].t));fx('stamp');ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
+  if(e.target.closest('#save')&&sel.size>=good.length){ctx.setPlan([...sel].map(i=>opts[i].t));fx('stamp');ctx.say('✓ Saved to your mission report.','good');setTimeout(ctx.done,700);}};
  render();
 };
 
