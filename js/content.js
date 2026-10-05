@@ -35,9 +35,9 @@ const ROOMS = [
    remember:['Hold the button for the <b>whole</b> countdown.','Letting go early restarts the cycle.'],
    note:'Air showers blow particles off the gown. Always stay for the full cycle.'},
   {task:'cctv',title:'Spot the rule-breakers',photo:'cleanroom',
-   learn:{points:['Cleanroom rules keep dirt away from the chips.','<b>Not allowed:</b> food, drinks, uncovered hair, a mask below the nose, bare hands on wafers, cardboard, pencils and normal paper.','<b>Allowed:</b> full gowns, gloves with tweezers, closed wafer carriers, special lint-free paper.'],
+   learn:{points:['Cleanroom rules keep dirt away from the chips.','<b>Not allowed:</b> food, drinks, uncovered hair, a mask below the nose, bare hands on wafers, cardboard, pencils and normal paper.','<b>Allowed:</b> full gowns, gloves with tweezers, closed wafer carriers, white lint-free <b>cleanroom paper</b> (it has a CLEANROOM label) with a <b>pen</b>.'],
     fact:'Cleanroom air can have thousands of times fewer particles than the air in your classroom.'},
-   remember:['No food or drink.','Hair covered, mask over the nose.','No bare hands on wafers.','No cardboard, pencils or normal paper.'],
+   remember:['No food or drink.','Hair covered, mask over the nose.','No bare hands on wafers.','No cardboard, pencils or normal paper. (Labelled cleanroom paper + pen is OK.)'],
    note:'Cleanroom rules: no food or drink, all hair covered, masks up, no bare hands on wafers, no cardboard or ordinary paper.'}
  ]},
  {name:'Litho bay',short:'PHOTOLITHOGRAPHY',code:'NOVA-2R8T',steps:[
@@ -124,12 +124,12 @@ const HAZARDS={
  cardboard:{unsafe:true,title:'Cardboard box',where:'Delivery area',why:'Cardboard sheds tiny fibres and dust.'},
  hand:{unsafe:true,title:'Bare hand on wafer',where:'Wafer hand-off',why:'Skin oils and flakes ruin wafers. Always wear gloves.'},
  snack:{unsafe:true,title:'Snack on bench',where:'Tool bench A',why:'Food leaves crumbs and grease.'},
- pencil:{unsafe:true,title:'Pencil & notebook',where:'Note-taking station',why:'Pencils and normal paper shed dust. Use cleanroom paper and pens.'},
+ pencil:{unsafe:true,title:'Pencil & spiral notebook',where:'Note-taking station',why:'Pencils and erasers leave graphite dust and crumbs, and normal paper sheds fibres from its torn edges. Use lint-free cleanroom paper and a pen.'},
  mask:{unsafe:true,title:'Mask below nose',where:'Operator, bay entrance',why:'Breath carries droplets. The mask must cover the nose.'},
  carrier:{unsafe:false,title:'Closed wafer carrier',where:'Wafer transport',why:'A closed carrier keeps wafers clean while they move.'},
  gown:{unsafe:false,title:'Fully gowned worker',where:'Operator, hood station',why:'Fully covered with gloves on: exactly right.'},
  tweezers:{unsafe:false,title:'Gloved hand with tweezers',where:'Wafer hand-off',why:'Gloves plus tweezers means no skin touches the wafer.'},
- cleanpaper:{unsafe:false,title:'Lint-free paper and cleanroom pen',where:'Note-taking station',why:'Special lint-free paper and pens are allowed.'}
+ cleanpaper:{unsafe:false,title:'Cleanroom paper and pen',where:'Note-taking station',why:'See the CLEANROOM · LINT-FREE label? That paper doesn’t shed fibres, and a ballpoint pen makes no dust. Allowed.'}
 };
 
 /* ---------- Room 2 ---------- */
