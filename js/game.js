@@ -186,7 +186,7 @@ async function copyCode(i){if(!state.solved[i])return;try{await navigator.clipbo
 /* ---------- Fun: sound effects and confetti ---------- */
 let audioCtx=null;
 function sfx(kind){if(!state.sound)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const notes={good:[660,880],bad:[220,180],done:[523,659,784,1047],hint:[880]}[kind]||[];
- notes.forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+i*.09;o.type=kind==='bad'?'square':'sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='bad'?.04:.07,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+.2);});}catch{}}
+ notes.forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime+i*.09;o.type=kind==='bad'?'square':'sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='bad'?.04:.07,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g).connect(fxOut());o.start(t);o.stop(t+.2);});duck(500);}catch{}}
 /* Air-shower whoosh: looping filtered noise with a fast flutter, like air jets. Plays while the button is held. */
 const airSound={node:null,
  start(){if(!state.sound||this.node)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume?.()?.catch?.(()=>{});
@@ -196,19 +196,21 @@ const airSound={node:null,
   const bp=audioCtx.createBiquadFilter();bp.type='bandpass';bp.Q.value=0.7;const t=audioCtx.currentTime;bp.frequency.setValueAtTime(500,t);bp.frequency.linearRampToValueAtTime(1300,t+0.5);
   const lfo=audioCtx.createOscillator(),depth=audioCtx.createGain();lfo.frequency.value=7;depth.gain.value=220;lfo.connect(depth).connect(bp.frequency);
   const g=audioCtx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.16,t+0.4);
-  src.connect(hp).connect(bp).connect(g).connect(audioCtx.destination);src.start();lfo.start();this.node={src,lfo,g};}catch{}},
- stop(fade=0.25){const n=this.node;if(!n)return;this.node=null;try{const t=audioCtx.currentTime;n.g.gain.cancelScheduledValues(t);n.g.gain.setValueAtTime(Math.max(n.g.gain.value,0.0001),t);n.g.gain.exponentialRampToValueAtTime(0.0001,t+fade);n.src.stop(t+fade+0.05);n.lfo.stop(t+fade+0.05);}catch{}}
+  src.connect(hp).connect(bp).connect(g).connect(fxOut());src.start();lfo.start();this.node={src,lfo,g};bgm.level();}catch{}},
+ stop(fade=0.25){const n=this.node;if(!n)return;this.node=null;duck(fade*1000+300);try{const t=audioCtx.currentTime;n.g.gain.cancelScheduledValues(t);n.g.gain.setValueAtTime(Math.max(n.g.gain.value,0.0001),t);n.g.gain.exponentialRampToValueAtTime(0.0001,t+fade);n.src.stop(t+fade+0.05);n.lfo.stop(t+fade+0.05);}catch{}}
 };
 /* Machine and tool sounds, all synthesized (no audio files). fx(name) plays a one-shot; machineLoop() a held hum. */
 function ac(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();audioCtx.resume?.()?.catch?.(()=>{});return audioCtx;}
+let fxBus=null;
+function fxOut(){const c=ac();if(!fxBus){const comp=c.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;fxBus=c.createGain();fxBus.gain.value=1.6;fxBus.connect(comp).connect(c.destination);}return fxBus;}
 let noiseBuf=null;
 function noise(){const c=ac();if(!noiseBuf){noiseBuf=c.createBuffer(1,c.sampleRate*2,c.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}const s=c.createBufferSource();s.buffer=noiseBuf;s.loop=true;return s;}
 function env(g,t,peak,att,dur){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+dur);}
 /* Filtered noise burst. type: lowpass/highpass/bandpass; f may be [from,to] for a sweep. */
 function noiseHit({type='bandpass',f=1000,q=1,peak=.15,att=.01,dur=.3,at=0}){const c=ac(),t=c.currentTime+at,s=noise(),fl=c.createBiquadFilter(),g=c.createGain();fl.type=type;fl.Q.value=q;
  if(Array.isArray(f)){fl.frequency.setValueAtTime(f[0],t);fl.frequency.exponentialRampToValueAtTime(f[1],t+dur);}else fl.frequency.value=f;
- env(g,t,peak,att,dur);s.connect(fl).connect(g).connect(c.destination);s.start(t,Math.random());s.stop(t+dur+.05);}
-function tone({f=440,to,type='sine',peak=.08,att=.005,dur=.15,at=0}){const c=ac(),t=c.currentTime+at,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);env(g,t,peak,att,dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.05);}
+ env(g,t,peak,att,dur);s.connect(fl).connect(g).connect(fxOut());s.start(t,Math.random());s.stop(t+dur+.05);}
+function tone({f=440,to,type='sine',peak=.08,att=.005,dur=.15,at=0}){const c=ac(),t=c.currentTime+at,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);env(g,t,peak,att,dur);o.connect(g).connect(fxOut());o.start(t);o.stop(t+dur+.05);}
 const FX={
  rustle(){for(let k=0;k<3;k++)noiseHit({type:'highpass',f:2500,peak:.06,dur:.12,at:k*.07});},          // cleanroom fabric
  clunk(){tone({f:140,to:60,type:'triangle',peak:.18,dur:.18});noiseHit({type:'lowpass',f:500,peak:.08,dur:.08});}, // into the locker / bin
@@ -229,23 +231,31 @@ const FX={
  alarm(){for(let k=0;k<3;k++){tone({f:880,type:'square',peak:.03,dur:.12,at:k*.26});tone({f:660,type:'square',peak:.03,dur:.12,at:k*.26+.13});}},
  horn(){tone({f:233,type:'sawtooth',peak:.05,att:.03,dur:.5});tone({f:294,type:'sawtooth',peak:.04,att:.03,dur:.5});tone({f:233,type:'sawtooth',peak:.05,att:.03,dur:.7,at:.6});tone({f:294,type:'sawtooth',peak:.04,att:.03,dur:.7,at:.6});}
 };
-function fx(name){if(!state.sound||!FX[name])return;try{FX[name]();}catch{}}
+const FX_MS={water:1300,uv:1000,hiss:1000,alarm:900,horn:1500,bubbles:900,saw:700};
+function fx(name){if(!state.sound||!FX[name])return;try{FX[name]();duck((FX_MS[name]||400)+300);}catch{}}
 /* Held machine hum: 'motor' (spin coater, follows set(rpm)) or 'plasma' (etcher buzz). */
 const loops=new Set();
 function machineLoop(kind){if(!state.sound)return {set(){},stop(){}};try{const c=ac(),t=c.currentTime,g=c.createGain(),o=c.createOscillator(),n=noise(),fl=c.createBiquadFilter();
  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='plasma'?.06:.05,t+.3);
  if(kind==='plasma'){o.type='sawtooth';o.frequency.value=60;fl.type='bandpass';fl.frequency.value=2200;fl.Q.value=4;}else{o.type='triangle';o.frequency.value=80;fl.type='bandpass';fl.frequency.value=800;fl.Q.value=1.5;}
- const og=c.createGain();og.gain.value=.6;o.connect(og).connect(g);n.connect(fl).connect(g);g.connect(c.destination);o.start();n.start();
+ const og=c.createGain();og.gain.value=.6;o.connect(og).connect(g);n.connect(fl).connect(g);g.connect(fxOut());o.start();n.start();
  const h={set(rpm){if(kind!=='motor')return;const x=Math.min(1,rpm/6000),now=c.currentTime;o.frequency.setTargetAtTime(80+x*420,now,.05);fl.frequency.setTargetAtTime(600+x*2400,now,.05);},
-  stop(){if(!loops.delete(h))return;try{const now=c.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(Math.max(g.gain.value,.0001),now);g.gain.exponentialRampToValueAtTime(.0001,now+.3);o.stop(now+.35);n.stop(now+.35);}catch{}}};
- loops.add(h);return h;}catch{return {set(){},stop(){}};}}
+  stop(){if(!loops.delete(h))return;duck(600);try{const now=c.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(Math.max(g.gain.value,.0001),now);g.gain.exponentialRampToValueAtTime(.0001,now+.3);o.stop(now+.35);n.stop(now+.35);}catch{}}};
+ loops.add(h);bgm.level();return h;}catch{return {set(){},stop(){}};}}
 function stopLoops(){[...loops].forEach(h=>h.stop());airSound.stop(0.1);}
 
 /* Background music: bgm/bgm1.mp3, bgm/bgm2.mp3, … (the bgm folder next to index.html), played in order, then the list repeats.
    On by default; the 🎵 button turns it off (remembered in this browser). Browsers only allow audio after a click or key press. */
 const BGM_KEY='nova-last-batch-bgm';
-const bgm={el:null,n:1,on:readStore(BGM_KEY)!=='off',missing:false,
- start(){if(!this.on||this.missing)return;if(!this.el){this.el=new Audio();this.el.volume=.3;this.el.preload='auto';this.el.addEventListener('ended',()=>this.load(this.n+1));this.el.addEventListener('error',()=>this.fail());this.load(1);return;}this.el.play().catch(()=>{});},
+/* Ducking: while a sound effect plays (or a machine runs) the music drops to DUCK, then fades back to BASE. */
+const BGM_BASE=.22,BGM_DUCK=.04;let duckUntil=0;
+function duck(ms){duckUntil=Math.max(duckUntil,performance.now()+ms);bgm.level();}
+const bgm={el:null,n:1,on:readStore(BGM_KEY)!=='off',missing:false,vol:BGM_BASE,timer:0,
+ target(){return loops.size||airSound.node||performance.now()<duckUntil?BGM_DUCK:BGM_BASE;},
+ level(){if(!this.el||this.timer)return;this.timer=setInterval(()=>{const t=this.target(),d=t-this.vol;
+  this.vol=Math.abs(d)<.005?t:this.vol+(d<0?Math.max(d,-.06):Math.min(d,.012)); // fast down (~0.1 s), slow back up (~0.8 s)
+  this.el.volume=this.vol;if(this.vol===t&&t===BGM_BASE){clearInterval(this.timer);this.timer=0;}},50);},
+ start(){if(!this.on||this.missing)return;if(!this.el){this.el=new Audio();this.el.volume=this.vol;this.el.preload='auto';this.el.addEventListener('ended',()=>this.load(this.n+1));this.el.addEventListener('error',()=>this.fail());this.load(1);return;}this.el.play().catch(()=>{});},
  load(n){this.n=n;this.el.src=`bgm/bgm${n}.mp3`;if(this.on)this.el.play().catch(()=>{});},
  fail(){if(this.n===1){this.missing=true;return;}this.load(1);}, // past the last file (or bgm1 missing): back to the start
  toggle(){this.on=!this.on;try{localStorage.setItem(BGM_KEY,this.on?'on':'off');}catch{}if(this.on){this.missing=false;this.start();}else this.el?.pause();}

@@ -36,7 +36,7 @@ Readings, specs, layouts, offsets and alarms are randomized every game.
 - **On a web server:** upload `index.html`, `css/`, `js/`, `img/` and `bgm/` to any static host. `The-Last-Batch.html` redirects to `index.html`.
 
 ### Background music
-Put music files in the `bgm/` folder, named `bgm1.mp3`, `bgm2.mp3`, `bgm3.mp3`, … with no gaps in the numbers. They play in order, and after the last one the list starts again from `bgm1.mp3`. Music is on by default and starts after the player's first click or key press (browsers block autoplay). The 🎵 button in the top bar turns it off, and the choice is remembered in that browser. With no `bgm1.mp3`, the game simply plays without music.
+Put music files in the `bgm/` folder, named `bgm1.mp3`, `bgm2.mp3`, `bgm3.mp3`, … with no gaps in the numbers. They play in order, and after the last one the list starts again from `bgm1.mp3`. Music is on by default and starts after the player's first click or key press (browsers block autoplay). The 🎵 button in the top bar turns it off, and the choice is remembered in that browser. While a sound effect plays or a machine is running, the music drops to a low volume so the machine sounds come through, then fades back up. With no `bgm1.mp3`, the game simply plays without music.
 
 Fonts load from Google Fonts when online. Offline, the game falls back to system fonts.
 
