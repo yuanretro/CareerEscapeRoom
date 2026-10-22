@@ -288,9 +288,9 @@ function pickChoice(key,idx,n){const list=beat(key),b=list[idx],c=b?.choices?.[n
  modal.querySelector('[data-story]')?.focus();}
 function queueStory(){requestAnimationFrame(nextPopup);}
 function nextPopup(){if(modal.open||shipping)return;const k=storyKey();if(k&&!state.story.includes(k)&&STORY[k]){playStory(k);return;}const l=learnKey();if(l&&!state.learned.includes(l)){learnCard();return;}if(view==='ending'&&!state.snack)snackPrompt();}
-/* Once the ending story has played: players raise a hand for a real snack from the teacher. */
+/* Once the ending story has played: players raise a hand for a real snack from a group member. */
 function snackPrompt(){state.snack=true;save();sfx('done');
- showModal('Snack time!',`<div class="snack"><div class="snack-hand" aria-hidden="true">✋</div><div><p><strong>You finished the shift. Raise your hand!</strong></p><p>Keep your hand up until your teacher comes over with your snack reward.</p><p class="small muted">Then paste your star total into the Form and submit it.</p></div></div>`,'<span></span><button class="btn" data-action="close-modal">Got my snack →</button>','Reward');}
+ showModal('Snack time!',`<div class="snack"><div class="snack-hand" aria-hidden="true">✋</div><div><p><strong>You finished the shift. Raise your hand!</strong></p><p>Keep your hand up until a group member comes over with your snack reward.</p><p class="small muted">Then paste your star total into the Form and submit it.</p></div></div>`,'<span></span><button class="btn" data-action="close-modal">Got my snack →</button>','Reward');}
 function radioButton(){const k=storyKey(),w=beat(k)[0]?.w||'sam';return `<button class="radio-btn" data-story="${k},0" title="Replay radio message" aria-label="Replay radio message">${portrait(w)}</button>`;}
 
 /* ---------- Modals ---------- */
