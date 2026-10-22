@@ -31,6 +31,8 @@ Each room is a real station, built for Grade 10 students:
 
 Short, skippable cut-scenes open and close the shift: you clock in at 05:35 just before the power surge hits (the 25-minute clock starts after it), and at the end the NB-7 boxes are loaded, the truck drives off at sunrise and you clock out at 06:00.
 
+Before the shift starts, Sam reminds players that accuracy beats speed: stars come from careful work, not from finishing fast. When the shift is over, a pop-up tells players to raise their hand for a snack reward from a group member.
+
 When a room is finished, its Form code is copied to the clipboard automatically.
 
 Readings, specs, layouts, offsets and alarms are randomized every game.

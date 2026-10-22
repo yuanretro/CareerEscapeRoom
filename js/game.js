@@ -11,7 +11,7 @@ const MISSION_MS=25*60*1000;
 const app=document.getElementById('app'),modal=document.getElementById('modal');
 let view='landing',feedback='',feedbackError=false,returnFocus=null,toastTimer=null,formWindow=null,formOpened=false,lastView=null,unmount=()=>{};
 
-function freshState(){return {version:VERSION,names:[],startedAt:null,deadline:null,finishedAt:null,finalCleared:false,current:0,progress:Array(6).fill(0),solved:Array(6).fill(false),released:Array(6).fill(false),gateUntil:Array(6).fill(0),training:false,variant:null,story:[],notes:Array.from({length:6},()=>[]),plan:[],stars:Array.from({length:6},()=>[]),learned:[],sound:true,choices:{}};}
+function freshState(){return {version:VERSION,names:[],startedAt:null,deadline:null,finishedAt:null,finalCleared:false,current:0,progress:Array(6).fill(0),solved:Array(6).fill(false),released:Array(6).fill(false),gateUntil:Array(6).fill(0),training:false,variant:null,story:[],notes:Array.from({length:6},()=>[]),plan:[],stars:Array.from({length:6},()=>[]),learned:[],sound:true,choices:{},snack:false};}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function safeFormURL(v){try{const u=new URL(String(v).trim());return u.protocol==='https:'&&((u.hostname==='docs.google.com'&&/^\/forms\/d\/(?:e\/)?[^/]+\/viewform\/?$/.test(u.pathname))||u.hostname==='forms.gle')?u.href:'';}catch{return '';}}
 function readStore(k){try{return localStorage.getItem(k);}catch{return null;}}
@@ -21,7 +21,7 @@ function loadState(){try{
  for(const k of ['progress','solved','released','gateUntil','notes'])if(!Array.isArray(s[k])||s[k].length!==6)return freshState();
  if(!Number.isFinite(s.startedAt)||s.deadline!==s.startedAt+MISSION_MS||!Number.isInteger(s.current)||s.current<0||s.current>5)return freshState();
  if(s.current>0&&!s.released[s.current-1])return freshState();
- s.story=Array.isArray(s.story)?s.story:[];s.learned=Array.isArray(s.learned)?s.learned:[];if(!Array.isArray(s.stars)||s.stars.length!==6)s.stars=Array.from({length:6},()=>[]);s.plan=Array.isArray(s.plan)?s.plan:[];s.choices=s.choices&&typeof s.choices==='object'?s.choices:{};return s;
+ s.story=Array.isArray(s.story)?s.story:[];s.learned=Array.isArray(s.learned)?s.learned:[];if(!Array.isArray(s.stars)||s.stars.length!==6)s.stars=Array.from({length:6},()=>[]);s.plan=Array.isArray(s.plan)?s.plan:[];s.choices=s.choices&&typeof s.choices==='object'?s.choices:{};s.snack=!!s.snack;return s;
  }catch{return freshState();}}
 let state=loadState();
 const formURL=safeFormURL(DEFAULT_FORM_URL||readStore(FORM_KEY)||'');
@@ -64,18 +64,23 @@ new MutationObserver(()=>{const m=document.getElementById('main');if(!m)return;c
 
 /* ---------- Landing ---------- */
 function renderLanding(){
- const facts=[['Grade 12','Entry requirement (OSSD or equivalent)'],['≈ 4,000 h','Paid on-the-job training'],['304 h','In-class technical training'],['630A','Ontario trade code']];
+ const saved=state.startedAt,lot=[['Product','Heart-monitor chips'],['Problem','Power surge wiped the last circuit layer'],['Ship','Truck leaves in 25 min'],['Route','Gowning · Litho · Probe &amp; dice · Inspection, then the training office']];
  app.innerHTML=header(false)+`<main id="main" class="screen landing" tabindex="-1">
- <div class="landing-copy"><div class="eyebrow">Ontario career escape room · Micro Electronics Manufacturer</div><h1>The Last Batch</h1>
- <p class="lede">You’re the new co-op student on the night shift at a chip factory. A mysterious power surge just wiped a batch of heart-monitor chips, and the truck leaves in 25 minutes. Gown up, print the circuit, test and cut the wafer, inspect every part, and find out what caused the surge. Then, in the training office, map your real route into the trade.</p>
- <div class="fact-row">${facts.map(([a,b])=>`<div class="fact"><strong>${a}</strong><span>${b}</span></div>`).join('')}</div>
- <div class="cast">${['sam','mira','nova'].map(k=>`<div class="cast-member">${portrait(k)}<span><b>${CAST[k].name}</b>${CAST[k].role}</span></div>`).join('')}</div></div>
- <figure class="hero-plan">${photoOr('cleanroom',floorPlan(),'hero-ph')}<figcaption>Rooms 1–4 are the factory floor. Rooms 5–6 are the training office.</figcaption></figure>
- <div class="landing-bottom">${state.startedAt?`<div class="resume-card"><b>Your mission is saved.</b><p>${esc(state.names.join(', '))} · ${state.released.filter(Boolean).length}/6 doors unlocked</p><div class="gate-actions"><button class="btn" data-action="resume">${state.finishedAt?'View result':'Resume mission'} →</button><button class="btn secondary" data-action="restart">Start fresh</button></div></div>`:`<form id="start-form" class="signup"><label for="names">Player name(s)</label><div class="input-row"><input class="input" id="names" maxlength="600" autocomplete="off" placeholder="Your name, or names separated by commas" aria-describedby="name-error"><button class="btn" type="submit">Start shift →</button></div><p id="name-error" class="inline-error" role="alert"></p></form>`}
- <div class="instructions-strip"><div><b>Hands-on</b>Work real fab stations: gowning, lithography, probing, dicing, inspection.</div><div><b>Your story</b>Pick your replies, earn stars and solve the surge mystery.</div><div><b>Unlock</b>Swap codes with the Google Form to open each door.</div></div></div></main>`;
+ <div class="landing-copy"><p class="kicker">Night shift, 05:35 · Nova Semiconductor, Ontario</p><h1>The Last<br>Batch</h1>
+ <p class="lede">You’re the new co-op student at a chip factory. Batch NB-7 has to be rebuilt by hand, one station at a time, before the truck goes. Afterwards, in the training office, you’ll map your own route into the trade.</p>
+ <div class="traveler" aria-label="Lot traveler"><div class="traveler-head"><b>Lot traveler</b><span>No. NB-7</span></div><table>${lot.map(([a,b])=>`<tr><th scope="row">${a}</th><td>${b}</td></tr>`).join('')}</table><span class="stamp" aria-hidden="true">Rush</span></div>
+ <p class="trade-line"><b>The real job:</b> Micro Electronics Manufacturer, Ontario trade 630A. Grade 12 to start, about 4,000 paid hours on the job and 304 hours in class.</p></div>
+ <div class="landing-side"><figure class="pinned-photo">${photoOr('cleanroom',floorPlan(),'hero-ph')}<figcaption>Rooms 1–4 are out on this floor.</figcaption></figure>
+ <aside class="note-card" aria-label="Note from Sam"><p>Slow down in there. Getting it <u>right</u> counts more than getting it done fast. Mistakes cost stars, the clock doesn’t.</p><span>— Sam</span></aside>
+ <ul class="crew" aria-label="On shift tonight">${['sam','mira','nova'].map(k=>`<li>${portrait(k)}<span><b>${CAST[k].name}</b>${CAST[k].role}</span></li>`).join('')}</ul></div>
+ <div class="landing-bottom">${saved?`<div class="resume-card"><div><b>Shift in progress</b><p>${esc(state.names.join(', '))} · ${state.released.filter(Boolean).length} of 6 doors unlocked</p></div><div class="gate-actions"><button class="btn secondary" data-action="restart">Start fresh</button><button class="btn" data-action="resume">${state.finishedAt?'View result':'Resume shift'} →</button></div></div>`:`<form id="start-form" class="signup"><label for="names">Sign the shift log</label><div class="input-row"><input class="input" id="names" maxlength="600" autocomplete="off" placeholder="Your name, or names separated by commas" aria-describedby="name-error"><button class="btn" type="submit">Clock in →</button></div><p id="name-error" class="inline-error" role="alert"></p></form>`}</div></main>`;
  document.getElementById('start-form')?.addEventListener('submit',startMission);
 }
+let pendingNames=null;
+/* Signing in first shows the accuracy-over-speed briefing; the clock only starts on "Clock in". */
 function startMission(e){e.preventDefault();if(state.startedAt)return;const names=document.getElementById('names').value.split(/[,\n]/).map(x=>x.trim()).filter(Boolean);if(!names.length||names.some(n=>n.length>40)){document.getElementById('name-error').textContent='Enter at least one name. Keep each name under 41 characters.';return;}
+ pendingNames=names;showModal('Accuracy beats speed',`<div class="briefing">${portrait('sam')}<div><p><strong>Before you go in: take your time and get each step right.</strong></p><p>In a real fab, one rushed move can scrap a whole batch. Here, stars come from careful work: every mistake and every hint costs you, but going slower doesn’t.</p><p>Read each Learn card, check the blue instruction box, and think before you click. The 25-minute clock is there to finish in, not to race.</p></div></div>`,`<button class="btn secondary" data-action="close-modal">Back</button><button class="btn" data-action="clock-in">Got it, clock in →</button>`,'From Sam, shift supervisor');}
+function clockIn(){const names=pendingNames;if(!names||state.startedAt)return;pendingNames=null;closeModal();
  const sound=state.sound;state=freshState();state.sound=sound;state.names=names;state.startedAt=Date.now();state.deadline=state.startedAt+MISSION_MS;state.variant=makeVariant();view='room';save();shiftStart();}
 
 /* ---------- Room: procedure card + bench ---------- */
@@ -282,7 +287,10 @@ function pickChoice(key,idx,n){const list=beat(key),b=list[idx],c=b?.choices?.[n
  storyModal(key,idx,list,c[1],`<p class="you-said"><b>You:</b> ${esc(c[0])}</p><p class="story-line">${nameFill(c[2])}</p>`,`<button class="btn" data-story="${key},${idx+1}">${last?'Let’s go':'Next'} →</button>`);
  modal.querySelector('[data-story]')?.focus();}
 function queueStory(){requestAnimationFrame(nextPopup);}
-function nextPopup(){if(modal.open||shipping)return;const k=storyKey();if(k&&!state.story.includes(k)&&STORY[k]){playStory(k);return;}const l=learnKey();if(l&&!state.learned.includes(l))learnCard();}
+function nextPopup(){if(modal.open||shipping)return;const k=storyKey();if(k&&!state.story.includes(k)&&STORY[k]){playStory(k);return;}const l=learnKey();if(l&&!state.learned.includes(l)){learnCard();return;}if(view==='ending'&&!state.snack)snackPrompt();}
+/* Once the ending story has played: players raise a hand for a real snack from a group member. */
+function snackPrompt(){state.snack=true;save();sfx('done');
+ showModal('Snack time!',`<div class="snack"><div class="snack-hand" aria-hidden="true">✋</div><div><p><strong>You finished the shift. Raise your hand!</strong></p><p>Keep your hand up until a group member comes over with your snack reward.</p><p class="small muted">Then paste your star total into the Form and submit it.</p></div></div>`,'<span></span><button class="btn" data-action="close-modal">Got my snack →</button>','Reward');}
 function radioButton(){const k=storyKey(),w=beat(k)[0]?.w||'sam';return `<button class="radio-btn" data-story="${k},0" title="Replay radio message" aria-label="Replay radio message">${portrait(w)}</button>`;}
 
 /* ---------- Modals ---------- */
@@ -417,6 +425,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
  if(b.dataset.choice){const [k,i,n]=b.dataset.choice.split(',');pickChoice(k,Number(i),Number(n));return;}
  if(b.dataset.story){const [k,n]=b.dataset.story.split(',');playStory(k,Number(n));return;}
  switch(b.dataset.action){
+  case 'clock-in':clockIn();break;
   case 'resume':view=state.finishedAt?'ending':state.released.every(Boolean)?'final':state.solved[state.current]?'gate':'room';render();break;
   case 'notebook':notebook();break;
   case 'guide':guide();break;
