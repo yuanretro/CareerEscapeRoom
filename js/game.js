@@ -49,9 +49,9 @@ const ICON={
 function header(playing=true){
  const nav=playing?`<nav class="room-nav" aria-label="Rooms">${ROOMS.map((r,i)=>`<button data-room="${i}" class="${state.current===i&&(view==='room'||view==='gate')?'active ':''}${state.released[i]?'done':''}" title="Room ${i+1}: ${r.name}" aria-label="Room ${i+1}: ${r.name}${!canVisit(i)?', locked':''}" ${canVisit(i)?'':'disabled'}>${state.released[i]?'✓':i+1}</button>${i<5?`<i class="${state.released[i]?'lit':''} ${i===3?'gap':''}"></i>`:''}`).join('')}</nav>`:'';
  const actions=playing?`<button class="text-btn" data-action="notebook">Notebook</button><button class="text-btn" data-action="guide">Career guide</button>${formURL?'<button class="text-btn" data-action="open-form">📝 Form</button>':''}<button class="text-btn" data-action="menu">Menu</button><button class="text-btn warn" id="training-btn" data-action="training" ${expired()&&!state.training?'':'hidden'}>Continue training</button><span id="clock" class="clock">${clockText()}</span>`:'<button class="text-btn" data-action="guide">Career guide</button><button class="text-btn" data-action="howto">How to play</button>';
- return `<header class="topbar"><div class="brand"><div class="brand-mark" aria-hidden="true">N</div><div><b>The Last Batch</b><small>Nova Semiconductor · Ontario</small></div></div>${nav}<div class="top-actions">${actions}<button class="text-btn icon" data-action="sound" title="Sound effects" aria-label="${state.sound?'Sound effects on':'Sound effects off'}">${state.sound?ICON.sound:ICON.mute}</button><button class="text-btn icon music ${bgm.on?'':'off'}" data-action="music" title="Background music" aria-label="${bgm.on?'Music on':'Music off'}">${ICON.music}</button><button class="text-btn icon" data-action="fullscreen" title="Full screen" aria-label="Toggle fullscreen">${ICON.fullscreen}</button></div></header><small class="creator-credit">Made by Haolun, William, and Gordan</small>`;
+ return `<header class="topbar"><div class="brand"><div class="brand-mark" aria-hidden="true">N</div><div><b>The Last Batch</b><small>Nova Semiconductor · Ontario</small></div></div>${nav}<div class="top-actions">${actions}<button class="text-btn icon" data-action="sound" title="Sound effects" aria-label="${state.sound?'Sound effects on':'Sound effects off'}">${state.sound?ICON.sound:ICON.mute}</button><button class="text-btn icon music ${bgm.on?'':'off'}" data-action="music" title="Background music" aria-label="${bgm.on?'Music on':'Music off'}">${ICON.music}</button><button class="text-btn icon" data-action="fullscreen" title="Full screen" aria-label="Toggle fullscreen">${ICON.fullscreen}</button></div></header><small class="creator-credit">Made by Haolun, William, and Gordon</small>`;
 }
-function render(){unmount();unmount=()=>{};stopLoops();
+function render(){unmount();unmount=()=>{};stopLoops();app.classList.toggle('is-landing',view==='landing'||!state.startedAt);
  if(view==='landing'){renderLanding();return;}
  if(!state.startedAt){view='landing';renderLanding();return;}
  if(view==='ending'){if(state.finalCleared)renderEnding();else{view='final';render();return;}}
@@ -64,17 +64,25 @@ new MutationObserver(()=>{const m=document.getElementById('main');if(!m)return;c
 
 /* ---------- Landing ---------- */
 function renderLanding(){
- const saved=state.startedAt,lot=[['Product','Heart-monitor chips'],['Problem','Power surge wiped the last circuit layer'],['Ship','Truck leaves in 25 min'],['Route','Gowning · Litho · Probe &amp; dice · Inspection, then the training office']];
- app.innerHTML=header(false)+`<main id="main" class="screen landing" tabindex="-1">
- <div class="landing-copy"><p class="kicker">Night shift, 05:35 · Nova Semiconductor, Ontario</p><h1>The Last<br>Batch</h1>
- <p class="lede">You’re the new co-op student at a chip factory. Batch NB-7 has to be rebuilt by hand, one station at a time, before the truck goes. Afterwards, in the training office, you’ll map your own route into the trade.</p>
- <div class="traveler" aria-label="Lot traveler"><div class="traveler-head"><b>Lot traveler</b><span>No. NB-7</span></div><table>${lot.map(([a,b])=>`<tr><th scope="row">${a}</th><td>${b}</td></tr>`).join('')}</table><span class="stamp" aria-hidden="true">Rush</span></div>
- <p class="trade-line"><b>The real job:</b> Micro Electronics Manufacturer, Ontario trade 630A. Grade 12 to start, about 4,000 paid hours on the job and 304 hours in class.</p></div>
- <div class="landing-side"><figure class="pinned-photo">${photoOr('cleanroom',floorPlan(),'hero-ph')}<figcaption>Rooms 1–4 are out on this floor.</figcaption></figure>
- <aside class="note-card" aria-label="Note from Sam"><p>Slow down in there. Getting it <u>right</u> counts more than getting it done fast. Mistakes cost stars, the clock doesn’t.</p><span>— Sam</span></aside>
- <ul class="crew" aria-label="On shift tonight">${['sam','mira','nova'].map(k=>`<li>${portrait(k)}<span><b>${CAST[k].name}</b>${CAST[k].role}</span></li>`).join('')}</ul></div>
- <div class="landing-bottom">${saved?`<div class="resume-card"><div><b>Shift in progress</b><p>${esc(state.names.join(', '))} · ${state.released.filter(Boolean).length} of 6 doors unlocked</p></div><div class="gate-actions"><button class="btn secondary" data-action="restart">Start fresh</button><button class="btn" data-action="resume">${state.finishedAt?'View result':'Resume shift'} →</button></div></div>`:`<form id="start-form" class="signup"><label for="names">Sign the shift log</label><div class="input-row"><input class="input" id="names" maxlength="600" autocomplete="off" placeholder="Your name, or names separated by commas" aria-describedby="name-error"><button class="btn" type="submit">Clock in →</button></div><p id="name-error" class="inline-error" role="alert"></p></form>`}</div></main>`;
- document.getElementById('start-form')?.addEventListener('submit',startMission);
+ const saved=state.startedAt,names=saved?esc(state.names.join(', ')):'',bg=PHOTOS.cleanroom?`<img class="landing-bg" src="img/${PHOTOS.cleanroom.file}" alt="" onerror="this.remove()">`:'';
+ app.innerHTML=header(false)+`<main id="main" class="screen landing" tabindex="-1">${bg}
+ <div class="landing-copy"><p class="kicker"><span>05:35</span>Fab 2 · Nova Semiconductor · Ontario</p>
+ <h1>The Last Batch</h1>
+ <p class="lede">A power surge just wiped the last circuit layer of batch NB-7: heart-monitor chips. You’re the co-op student on nights, and the truck leaves at 06:00.</p>
+ <ol class="shift-route">${ROOMS.map((r,i)=>`<li${i===4?' class="office"':''}><span>${String(i+1).padStart(2,'0')}</span>${r.name}</li>`).join('')}<li class="dock"><span>→</span>Dispatch dock</li></ol>
+ <div class="crew">${['sam','mira','nova'].map(k=>`<div>${portrait(k)}<span><b>${CAST[k].name}</b>${CAST[k].role}</span></div>`).join('')}</div>
+ <p class="trade-line">Based on a real Ontario trade: Micro Electronics Manufacturer (630A).</p></div>
+ <div class="timecard-wrap"><form id="start-form" class="timecard" novalidate>
+  <div class="tc-holes" aria-hidden="true"><i></i><i></i></div>
+  <div class="tc-head"><b>Time card</b><span>Nova Semiconductor</span></div>
+  <div class="tc-row tc-name"><label for="names">Name</label>${saved?`<span class="tc-filled">${names}</span>`:`<input id="names" maxlength="600" autocomplete="off" spellcheck="false" placeholder="your name(s), comma separated" aria-describedby="name-error">`}</div>
+  <div class="tc-grid"><div><small>Dept</small>Fab 2</div><div><small>Shift</small>Night</div><div><small>Status</small>Co-op</div></div>
+  <div class="tc-grid tc-times"><div><small>In</small>${saved?'<em class="tc-stamp">05:35</em>':'<span class="tc-blank">__:__</span>'}</div><div><small>Out</small><span class="tc-blank">${state.finishedAt?'06:00':'__:__'}</span></div><div><small>Doors</small>${state.released.filter(Boolean).length} / 6</div></div>
+  <div class="tc-rule"><b>Shift rule</b>Get it right, not fast. Mistakes and hints cost stars. Taking your time doesn’t.</div>
+  <p id="name-error" class="inline-error" role="alert"></p>
+  ${saved?`<div class="tc-actions"><button class="btn" type="button" data-action="resume">${state.finishedAt?'View result':'Resume shift'} →</button><button class="tc-link" type="button" data-action="restart">Start a new shift</button></div>`:`<button class="btn tc-punch" type="submit">Punch in →</button>`}
+ </form></div></main>`;
+ document.getElementById('start-form')?.addEventListener('submit',e=>{e.preventDefault();if(!state.startedAt)startMission(e);});
 }
 let pendingNames=null;
 /* Signing in first shows the accuracy-over-speed briefing; the clock only starts on "Clock in". */
